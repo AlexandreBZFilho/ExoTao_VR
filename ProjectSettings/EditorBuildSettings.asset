@@ -4,5 +4,13 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
-  m_configObjects: {}
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Menu_Principal.unity
+    guid: 210a0502876a0524f84dc8d32e388763
+  - enabled: 1
+    path: Assets/Scenes/Floresta.unity
+    guid: 006c749a9de82ee4b9b83b34cd63f7e4
+  m_configObjects:
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: e215bbf5f14e24a489157ab4abff8d7e, type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 6e1d7b10bb0f5b44a9338d2127d1c173, type: 2}

@@ -30,3 +30,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 .venv/
+ExoTao_Build_VR/
+.tmp.driveupload/
+Assets/Proxy Games/Stylized Nature Kit Lite/Misc/HDRI.hdr

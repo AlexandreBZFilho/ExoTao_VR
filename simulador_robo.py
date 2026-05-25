@@ -2,32 +2,28 @@ import socket
 import time
 import math
 
-# Configurações da rede (Localhost e a mesma porta do C#)
 UDP_IP = "127.0.0.1"
 UDP_PORT = 5005
 
-print(f"Simulador do ExoTao iniciado. Enviando dados para {UDP_IP}:{UDP_PORT}...")
-print("Pressione Ctrl+C para parar.")
-
-# Cria o socket UDP
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
 t = 0.0
+
+print(f"Simulador do ExoTao iniciado na porta {UDP_PORT}...")
+print("Para parar a simulação, pressione Ctrl+C no terminal")
+
 try:
     while True:
-        # Simula o ângulo do joelho (movimento pendular de -45 a 45 graus)
-        angulo = 45 * math.sin(t)
+        quadril_D = 25 * math.sin(t)
+        joelho_D = - (30 * math.sin(t - 1.5) + 30)
         
-        # Converte o número para texto e codifica em bytes
-        mensagem = f"{angulo:.2f}".encode('utf-8')
+        quadril_E = 25 * math.sin(t + math.pi)
+        joelho_E = - (30 * math.sin(t + math.pi - 1.5) + 30)
         
-        # Dispara o pacote UDP para a Unity
+        mensagem = f"{joelho_D:.2f},{quadril_D:.2f},{joelho_E:.2f},{quadril_E:.2f}".encode('utf-8')
         sock.sendto(mensagem, (UDP_IP, UDP_PORT))
         
-        print(f"Enviando ângulo: {angulo:.2f}°")
-        
-        t += 0.05 # Incrementa o tempo
-        time.sleep(0.02) # Aguarda 20ms (simula uma taxa de atualização de 50Hz do robô)
+        t += 0.05
+        time.sleep(0.02)
 
 except KeyboardInterrupt:
     print("\nSimulação encerrada.")
