@@ -6986,6 +6986,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5142751981154599255, guid: c71c6394ab239044582fb9b8e98784e2, type: 3}
   m_PrefabInstance: {fileID: 898420932}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &909135851
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 909135852}
+  m_Layer: 0
+  m_Name: GerenciadorPause
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &909135852
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 909135851}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 8.213274, y: 2.0262527, z: 14.10362}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &921756880 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1046911266188861219, guid: c541574d69e7bba408f1113737ed2ee1, type: 3}
@@ -22625,3 +22656,4 @@ SceneRoots:
   - {fileID: 145902654}
   - {fileID: 6598815579261173666}
   - {fileID: 992384670}
+  - {fileID: 909135852}
