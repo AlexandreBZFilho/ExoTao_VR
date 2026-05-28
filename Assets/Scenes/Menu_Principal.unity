@@ -1345,37 +1345,31 @@ MonoBehaviour:
     imagem: {fileID: 2800000, guid: fb392392c261678469f2bd531b78b062, type: 3}
   - titulo: Centro Metropolitano
     nomeDaCena: Centro Metropolitano
-    descricao: "Foco na reabilita\xE7\xE3o funcional para o dia a dia. Inclui simula\xE7\xE3o
-      de cal\xE7adas irregulares, subida de guias e rampas com inclina\xE7\xE3o vari\xE1vel.
-      O exoesqueleto simula o impacto seco do asfalto e a eleva\xE7\xE3o de degraus,
-      essencial para treinar a marcha padr\xE3o, coordena\xE7\xE3o motora e devolver
-      a confian\xE7a para o paciente caminhar na rua."
+    descricao: "Cen\xE1rio urbano simulando o dia a dia. Cal\xE7adas irregulares
+      e rampas exigem adapta\xE7\xE3o da marcha. O exoesqueleto recria o impacto
+      do asfalto e guias, treinando a coordena\xE7\xE3o motora para devolver a autonomia
+      do paciente."
     imagem: {fileID: 2800000, guid: 157633bc9d34d2d40a95b8861df83c7d, type: 3}
   - titulo: Templo Zen
     nomeDaCena: Templo Zen
-    descricao: "Cen\xE1rio de baixo est\xEDmulo visual e auditivo, ideal para fases
-      iniciais de recupera\xE7\xE3o ou para pacientes que precisam evitar sobrecarga
-      sensorial. O piso perfeitamente liso de madeira polida e \xE1reas com areia
-      fina oferecem uma resist\xEAncia mec\xE2nica muito leve e previs\xEDvel. O
-      foco \xE9 a concentra\xE7\xE3o absoluta no pr\xF3prio corpo e na fluidez do
-      movimento."
+    descricao: "Ambiente com baixo est\xEDmulo sensorial. O piso liso de madeira
+      cria uma resist\xEAncia mec\xE2nica leve e previs\xEDvel. Ideal para fases
+      iniciais, direcionando o foco absoluto do paciente para a consci\xEAncia corporal
+      e fluidez do movimento."
     imagem: {fileID: 0}
   - titulo: "Esta\xE7\xE3o Gravidade Zero"
     nomeDaCena: "Esta\xE7\xE3o Gravidade Zero"
-    descricao: "Corredores de uma base espacial abandonada. Aqui o exoesqueleto brinca
-      com a f\xEDsica: altera\xE7\xF5es bruscas no controle do motor simulam mudan\xE7as
-      de gravidade. Pisos magn\xE9ticos exigem que o paciente fa\xE7a mais for\xE7a
-      para \"desgrudar\" o p\xE9 (treino de eleva\xE7\xE3o de quadril), intercalados
-      com zonas de gravidade lunar que exigem controle de descida para n\xE3o perder
-      o equil\xEDbrio."
+    descricao: "Cen\xE1rio espacial com gravidade alterada. Pisos magn\xE9ticos exigem
+      for\xE7a extra no quadril para erguer o p\xE9, focando em pot\xEAncia. Zonas
+      de baixa gravidade demandam controle suave na descida, treinando a precis\xE3o
+      motora e a manuten\xE7\xE3o do equil\xEDbrio."
     imagem: {fileID: 0}
   - titulo: Trilha Alpina
     nomeDaCena: Trilha Alpina
-    descricao: "Terreno agressivo com pedras soltas e trechos de neve espessa. A
-      neve for\xE7a os motores do exo a exigirem torque cont\xEDnuo de arraste (resist\xEAncia
-      viscosa), enquanto pisar em falsas pedras gera solavancos e perturba\xE7\xF5es
-      assim\xE9tricas instant\xE2neas em apenas uma das pernas. Foco total em reatividade
-      r\xE1pida, for\xE7a bruta e equil\xEDbrio din\xE2mico."
+    descricao: "Terreno agressivo com neve espessa. O arraste cont\xEDnuo cria resist\xEAncia
+      viscosa nos motores, ideal para for\xE7a. Pedras falsas geram solavancos e
+      perturba\xE7\xF5es assim\xE9tricas em apenas uma das pernas, treinando a reatividade
+      r\xE1pida e o equil\xEDbrio."
     imagem: {fileID: 0}
 --- !u!4 &145902654
 Transform:
@@ -9232,8 +9226,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 368, y: -609}
-  m_SizeDelta: {x: 443.1, y: 150.5}
+  m_AnchoredPosition: {x: 368, y: -610}
+  m_SizeDelta: {x: 443.1, y: 156.9}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1065313007
 MonoBehaviour:
@@ -9292,7 +9286,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 512
+  m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -10905,7 +10899,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1285001360}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.000080809}
   m_LocalScale: {x: 2.6066897, y: 2.6066895, z: 2.6066897}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -10913,8 +10907,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -238, y: 16}
-  m_SizeDelta: {x: -561.6, y: 24.1}
+  m_AnchoredPosition: {x: -45, y: 41}
+  m_SizeDelta: {x: -487, y: 26.8}
   m_Pivot: {x: 1, y: 1}
 --- !u!222 &1285001362
 CanvasRenderer:
@@ -20827,13 +20821,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2400188798833780879}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.304, y: 0.65, z: -0.27}
+  m_LocalRotation: {x: -0, y: 0.23790559, z: -0, w: 0.9712883}
+  m_LocalPosition: {x: -0.3039998, y: 0.65, z: -0.27000004}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6851216347675433931}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 27.526, z: 0}
 --- !u!1 &2400188798833780879
 GameObject:
   m_ObjectHideFlags: 0
