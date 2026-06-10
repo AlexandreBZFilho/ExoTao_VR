@@ -9,8 +9,11 @@ EditorBuildSettings:
     path: Assets/Scenes/Menu_Principal.unity
     guid: 210a0502876a0524f84dc8d32e388763
   - enabled: 1
-    path: Assets/Scenes/Floresta.unity
-    guid: 006c749a9de82ee4b9b83b34cd63f7e4
+    path: Assets/Scenes/Floresta_e_Rio.unity
+    guid: d84a8d4b5d49ca4448d0da07d8ceff91
+  - enabled: 1
+    path: Assets/Scenes/Centro_Metropolitano.unity
+    guid: a7bec9c29efafd94c90ea55fb1b947eb
   m_configObjects:
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: e215bbf5f14e24a489157ab4abff8d7e, type: 2}
     com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 6e1d7b10bb0f5b44a9338d2127d1c173, type: 2}
