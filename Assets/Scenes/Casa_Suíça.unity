@@ -294,6 +294,10 @@ PrefabInstance:
       propertyPath: painelMenu
       value: 
       objectReference: {fileID: 691686975}
+    - target: {fileID: 2812408110473993674, guid: 307a2683058e7aa459b5735fb3679034, type: 3}
+      propertyPath: botaoMenuVR
+      value: 
+      objectReference: {fileID: 1038984598247549592, guid: c348712bda248c246b8c49b3db54643f, type: 3}
     - target: {fileID: 3572671485763819780, guid: 307a2683058e7aa459b5735fb3679034, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -483,7 +487,12 @@ PrefabInstance:
       propertyPath: m_Name
       value: Pessoa_Virtual
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 9041163411128568482, guid: 192101f77613a7740827be39dce145f7, type: 3}
+      propertyPath: controlePaciente
+      value: 
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 9203861753153551800, guid: 192101f77613a7740827be39dce145f7, type: 3}
     m_RemovedGameObjects:
     - {fileID: 3718725933988528858, guid: 192101f77613a7740827be39dce145f7, type: 3}
     - {fileID: 3475018309949365705, guid: 192101f77613a7740827be39dce145f7, type: 3}
