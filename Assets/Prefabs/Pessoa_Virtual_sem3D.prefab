@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2547698144055577486}
   - component: {fileID: 1885090591223965783}
   - component: {fileID: 5268023293280809808}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Left Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -367,7 +367,7 @@ MonoBehaviour:
   m_LiveConeCastDebugVisuals: 0
   m_RaycastMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 119
   m_RaycastTriggerInteraction: 1
   m_RaycastSnapVolumeInteraction: 1
   m_HitClosestOnly: 0
@@ -434,7 +434,7 @@ LineRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 32767
   m_Positions:
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 1}
@@ -670,7 +670,7 @@ GameObject:
   - component: {fileID: 3003929097002836620}
   - component: {fileID: 2485865331059840578}
   - component: {fileID: 4076453800170236094}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: XR Interaction Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -729,7 +729,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4643332393385523364}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Camera Offset
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -765,7 +765,9 @@ GameObject:
   - component: {fileID: 4931867398717007532}
   - component: {fileID: 5163265510412103807}
   - component: {fileID: 7890443148276435238}
-  m_Layer: 0
+  - component: {fileID: 8580916171109510972}
+  - component: {fileID: 6549465654067125168}
+  m_Layer: 3
   m_Name: XR Origin (XR Rig)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -818,6 +820,38 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ActionAssets: []
+--- !u!114 &8580916171109510972
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4673477955295493359}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f52cd695eaded074596a6a092866a336, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  controlePaciente: {fileID: 4403183965296990897}
+  velocidadeMovimento: 1.2
+  xrOrigin: {fileID: 4931867398717007532}
+  maoDoControle: 4
+--- !u!114 &6549465654067125168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4673477955295493359}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e0bceef4e17a95488b9e162e66acb3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xrOrigin: {fileID: 4931867398717007532}
+  cameraDoJogador: {fileID: 7330808941243894831}
+  anguloSnap: 45
+  maoDoControle: 5
 --- !u!1 &6377098041407358696
 GameObject:
   m_ObjectHideFlags: 0
@@ -828,7 +862,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8991063830960591677}
   - component: {fileID: 4403183965296990897}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Pessoa_Virtual_sem3D
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -844,7 +878,7 @@ Transform:
   m_GameObject: {fileID: 6377098041407358696}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.7, z: 0}
+  m_LocalPosition: {x: 4.5, y: 0.15, z: 2.9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -890,7 +924,7 @@ GameObject:
   - component: {fileID: 3688060799924085052}
   - component: {fileID: 7359019828719381908}
   - component: {fileID: 2758638363933240909}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -1094,7 +1128,7 @@ GameObject:
   - component: {fileID: 3083280094247756844}
   - component: {fileID: 1718316769390511639}
   - component: {fileID: 1277286022044358657}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Right Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1447,7 +1481,7 @@ MonoBehaviour:
   m_LiveConeCastDebugVisuals: 0
   m_RaycastMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 119
   m_RaycastTriggerInteraction: 1
   m_RaycastSnapVolumeInteraction: 1
   m_HitClosestOnly: 0

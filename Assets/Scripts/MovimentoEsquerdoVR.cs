@@ -5,7 +5,7 @@ public class MovimentoEsquerdoVR : MonoBehaviour
 {
     [Header("Configuração de Movimento")]
     public CharacterController controlePaciente;
-    public float velocidadeMovimento = 1.2f; // Velocidade de caminhada segura
+    public float velocidadeMovimento = 4f; // Velocidade de caminhada segura
     
     [Header("Referências")]
     public Transform xrOrigin; // <-- MUDANÇA AQUI: Agora usamos o corpo, não a cabeça!
