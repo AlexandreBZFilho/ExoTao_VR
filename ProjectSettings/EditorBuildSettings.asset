@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Montanhas_Nevadas.unity
     guid: 69d90fd370837cf4cb43939907a5a172
+  - enabled: 1
+    path: Assets/Scenes/CenaDeLoading.unity
+    guid: a05c99a922f282440800cc8b33afa642
   m_configObjects:
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: e215bbf5f14e24a489157ab4abff8d7e, type: 2}
     com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 6e1d7b10bb0f5b44a9338d2127d1c173, type: 2}

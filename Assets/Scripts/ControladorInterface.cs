@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class ControladorInterface : MonoBehaviour
 {
@@ -36,6 +37,10 @@ public class ControladorInterface : MonoBehaviour
     [Header("Bancos de Dados")]
     public DadosDoMapa[] mapasEstaticos;
     public DadosDoMapa[] mapasExploraveis;
+
+    [Header("Efeito de Transição (Menu)")]
+    public GameObject canvasFundoPretoMenu; // Crie um Canvas Preto/Esfera Preta no seu Menu e arraste aqui
+
 
     void Start()
     {
@@ -153,17 +158,38 @@ public class ControladorInterface : MonoBehaviour
         pnl_Grade_Exp.SetActive(false);
     }
 
+    // --- VARIÁVEL GLOBAL PARA A TELA DE LOADING ---
+    public static string mapaFuturo = "";
+
+    // --- START DA REABILITAÇÃO ---
     public void IniciarSessao() 
     {
-        if(string.IsNullOrEmpty(mapaSelecionado))
+        if (string.IsNullOrEmpty(mapaSelecionado))
         {
             Debug.LogWarning("Travado: Selecione um mapa primeiro!");
-            return;
+            return; 
         }
 
-        string modo = dropdownModo.options[dropdownModo.value].text;
-        Debug.Log("Iniciando reabilitação: " + modo + " | Cena: " + mapaSelecionado);
-        SceneManager.LoadScene(mapaSelecionado);
+        // 1. Salva o mapa escolhido na memória global
+        mapaFuturo = mapaSelecionado;
+
+        // 2. Inicia o truque de piscar a tela antes de mudar
+        StartCoroutine(TransacaoSuaveParaLoading());
+    }
+
+    private IEnumerator TransacaoSuaveParaLoading()
+    {
+        // 3. Liga o fundo preto AINDA NO MENU (o paciente fica no escuro)
+        if (canvasFundoPretoMenu != null)
+        {
+            canvasFundoPretoMenu.SetActive(true);
+        }
+
+        // 4. Espera uma fração de segundo para os olhos se acostumarem com a quebra de luz
+        yield return new WaitForSeconds(0.3f);
+
+        // 5. Agora sim, chama a cena de Loading. A engasgada vai acontecer no escuro!
+        SceneManager.LoadScene("CenaDeLoading");
     }
 }
 
