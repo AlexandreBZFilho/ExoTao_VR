@@ -60,8 +60,8 @@ public class ControladorInterface : MonoBehaviour
     {
         // Abre o MenuMapa Estático
         pnl_Capa_Est.SetActive(false);
-        pnl_MenuMapa_Est.SetActive(true);
-        pnl_Grade_Est.SetActive(false);
+        pnl_MenuMapa_Est.SetActive(false);
+        pnl_Grade_Est.SetActive(true);
 
         // Reseta o lado Explorável para a Capa
         pnl_Capa_Exp.SetActive(true);
@@ -73,8 +73,8 @@ public class ControladorInterface : MonoBehaviour
     {
         // Abre o MenuMapa Explorável
         pnl_Capa_Exp.SetActive(false);
-        pnl_MenuMapa_Exp.SetActive(true);
-        pnl_Grade_Exp.SetActive(false);
+        pnl_MenuMapa_Exp.SetActive(false);
+        pnl_Grade_Exp.SetActive(true);
 
         // Reseta o lado Estático para a Capa
         pnl_Capa_Est.SetActive(true);
