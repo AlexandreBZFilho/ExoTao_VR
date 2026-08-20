@@ -23,6 +23,7 @@ public class ReceptorUDP : MonoBehaviour
 
     // Rede
     private UdpClient udpClient;
+    private TcpListener tcpListener;
     private Thread receiveThread;
     private bool aExecutar = true;
 
@@ -31,17 +32,32 @@ public class ReceptorUDP : MonoBehaviour
     private float anguloJoelhoDir = 0f, anguloQuadrilDir = 0f;
     private float anguloJoelhoEsq = 0f, anguloQuadrilEsq = 0f;
 
+    enum ServerType { SIMULADOR, REROBAPP };
+    private ServerType serverType = ServerType.REROBAPP;
+    private int portaUDP_SIMULADOR = 5005;
+    private int portaTCP_REROBAPP = 1515;
+
     void Start()
     {
-        receiveThread = new Thread(new ThreadStart(ReceiveData));
+        if (serverType == ServerType.SIMULADOR)
+        {
+            receiveThread = new Thread(new ThreadStart(ReceiveDataUDP));
+        }
+        else if (serverType == ServerType.REROBAPP)
+        {
+            receiveThread = new Thread(new ThreadStart(ReceiveDataTCP));
+        }
+        
         receiveThread.IsBackground = true;
         receiveThread.Start();
-        Debug.Log("Ouvindo Exoesqueleto na porta: " + portaUDP);
+        
+        int portaAtual = (serverType == ServerType.SIMULADOR) ? portaUDP_SIMULADOR : portaTCP_REROBAPP;
+        Debug.Log("Ouvindo Exoesqueleto na porta: " + portaAtual + " (" + serverType + ")");
     }
 
-    private void ReceiveData()
+    private void ReceiveDataUDP()
     {
-        udpClient = new UdpClient(portaUDP);
+        udpClient = new UdpClient(portaUDP_SIMULADOR);
         IPEndPoint anyIP = new IPEndPoint(IPAddress.Any, 0);
 
         while (aExecutar)
@@ -49,12 +65,12 @@ public class ReceptorUDP : MonoBehaviour
             try
             {
                 byte[] data = udpClient.Receive(ref anyIP);
+
                 string text = Encoding.UTF8.GetString(data);
                 string[] valores = text.Split(',');
 
                 if (valores.Length >= 4)
                 {
-                    // InvariantCulture salva vidas aqui!
                     float.TryParse(valores[0], NumberStyles.Float, CultureInfo.InvariantCulture, out anguloJoelhoDir);
                     float.TryParse(valores[1], NumberStyles.Float, CultureInfo.InvariantCulture, out anguloQuadrilDir);
                     float.TryParse(valores[2], NumberStyles.Float, CultureInfo.InvariantCulture, out anguloJoelhoEsq);
@@ -64,6 +80,75 @@ public class ReceptorUDP : MonoBehaviour
             catch (Exception err)
             {
                 if (aExecutar) Debug.LogWarning("Erro UDP: " + err.ToString());
+            }
+        }
+    }
+
+    private void ReceiveDataTCP()
+    {
+        try
+        {
+            tcpListener = new TcpListener(IPAddress.Any, portaTCP_REROBAPP);
+            tcpListener.Start();
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning("Não foi possível iniciar o servidor TCP: " + e.Message);
+            return;
+        }
+
+        while (aExecutar)
+        {
+            try
+            {
+                if (!tcpListener.Pending())
+                {
+                    Thread.Sleep(100);
+                    continue;
+                }
+
+                using (TcpClient client = tcpListener.AcceptTcpClient())
+                using (NetworkStream stream = client.GetStream())
+                {
+                    byte[] buffer = new byte[1024];
+                    while (aExecutar && client.Connected)
+                    {
+                        if (stream.DataAvailable)
+                        {
+                            int bytesRead = stream.Read(buffer, 0, buffer.Length);
+                            if (bytesRead > 0)
+                            {
+                                string text = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                                
+                                string[] linhas = text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                                string ultimaMensagem = linhas.Length > 0 ? linhas[linhas.Length - 1] : text;
+                                
+                                string[] valores = ultimaMensagem.Split(',');
+
+                                if (valores.Length == 3)
+                                {
+                                    float.TryParse(valores[1], NumberStyles.Float, CultureInfo.InvariantCulture, out anguloJoelhoDir);
+                                    anguloQuadrilDir = 0;
+                                    anguloJoelhoEsq = 0;
+                                    anguloQuadrilEsq = 0;
+                                }
+
+                                // logs
+                                Debug.Log("Ângulo Quadril: " + anguloQuadrilDir);
+                                Debug.Log("Ângulo Joelho: " + anguloJoelhoDir);
+                        
+                            }
+                        }
+                        else
+                        {
+                            Thread.Sleep(10);
+                        }
+                    }
+                }
+            }
+            catch (Exception err)
+            {
+                if (aExecutar) Debug.LogWarning("Erro TCP: " + err.ToString());
             }
         }
     }
@@ -117,5 +202,6 @@ public class ReceptorUDP : MonoBehaviour
         aExecutar = false;
         if (receiveThread != null) receiveThread.Abort();
         if (udpClient != null) udpClient.Close();
+        if (tcpListener != null) tcpListener.Stop();
     }
 }
