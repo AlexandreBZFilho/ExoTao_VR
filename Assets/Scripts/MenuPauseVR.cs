@@ -83,11 +83,24 @@ public class MenuPauseVR : MonoBehaviour
 
     public void VoltarAoMenuPrincipal()
     {
+        if (TelemetriaClinica.Instancia != null)
+        {
+            TelemetriaClinica.Instancia.SalvarRelatorioFinal();
+        }
         SceneManager.LoadScene("Menu_Principal"); 
     }
 
     public void BotaoPausarExo()
     {
-        Debug.Log("Pausando Exoesqueleto.");
+        ReceptorUDP receptor = FindFirstObjectByType<ReceptorUDP>();
+        if (receptor != null)
+        {
+            receptor.Pausado = !receptor.Pausado;
+            Debug.Log("[MenuPauseVR] Exoesqueleto " + (receptor.Pausado ? "PAUSADO" : "RETOMADO"));
+        }
+        else
+        {
+            Debug.Log("Pausando Exoesqueleto.");
+        }
     }
 }

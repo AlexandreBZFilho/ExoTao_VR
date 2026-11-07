@@ -327,6 +327,7 @@ MonoBehaviour:
   - {fileID: -170442357554883133}
   - {fileID: -4461106824575732794}
   - {fileID: -6237735530066976875}
+  - {fileID: 9163715233478918446}
   - {fileID: 5586570744510552240}
   - {fileID: -1833503649572837568}
   - {fileID: -3292732781307721101}
@@ -486,10 +487,12 @@ MonoBehaviour:
   m_Name: FoveatedRenderingFeature Standalone
   m_EditorClassIdentifier: 
   m_enabled: 0
-  nameUi: 
-  version: 
-  featureIdInternal: 
-  openxrExtensionStrings: 
-  company: 
+  nameUi: Foveated Rendering
+  version: 1
+  featureIdInternal: com.unity.openxr.feature.foveatedrendering
+  openxrExtensionStrings: XR_UNITY_foveation XR_FB_foveation XR_FB_foveation_configuration
+    XR_FB_swapchain_update_state XR_FB_foveation_vulkan XR_META_foveation_eye_tracked
+    XR_META_vulkan_swapchain_create_info
+  company: Unity
   priority: 0
   required: 0
