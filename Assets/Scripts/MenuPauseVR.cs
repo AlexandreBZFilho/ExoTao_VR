@@ -73,7 +73,7 @@ public class MenuPauseVR : MonoBehaviour
     public void RecentralizarVR()
     {
         var inputSubsystems = new System.Collections.Generic.List<XRInputSubsystem>();
-        SubsystemManager.GetInstances<XRInputSubsystem>(inputSubsystems);
+        SubsystemManager.GetSubsystems<XRInputSubsystem>(inputSubsystems);
         foreach (var subsystem in inputSubsystems)
         {
             subsystem.TryRecenter();

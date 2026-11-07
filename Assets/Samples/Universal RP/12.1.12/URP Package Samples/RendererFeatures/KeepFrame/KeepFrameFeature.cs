@@ -3,6 +3,24 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
+#if UNITY_2023_1_OR_NEWER
+// In Unity 6 / URP 17+, RenderTargetHandle was removed in favor of RTHandle and RenderGraph.
+// This sample feature from URP 12.1.12 is stubbed out for Unity 6 compatibility.
+public class KeepFrameFeature : ScriptableRendererFeature
+{
+    [Serializable]
+    public class Settings
+    {
+        public Material displayMaterial;
+        public string textureName;
+    }
+
+    public Settings settings = new Settings();
+
+    public override void Create() { }
+    public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData) { }
+}
+#else
 //This renderer feature will replicate a "don't clear" behaviour by injecting two passes into the pipeline:
 //One pass that copies color at the end of a frame
 //Another pass that draws the content of the copied texture at the beginning of a new frame
@@ -119,3 +137,4 @@ public class KeepFrameFeature : ScriptableRendererFeature
         renderer.EnqueuePass(m_DrawOldFame);
     }
 }
+#endif
