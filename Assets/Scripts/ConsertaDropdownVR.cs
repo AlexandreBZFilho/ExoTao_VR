@@ -35,9 +35,12 @@ public class ConsertarDropdownVR : MonoBehaviour
 
             // 3. O FIX DO LASER: Troca o leitor de mouse do Blocker pelo leitor de VR
             GraphicRaycaster raycasterMouse = blocker.GetComponent<GraphicRaycaster>();
-            if (raycasterMouse != null && !(raycasterMouse is TrackedDeviceGraphicRaycaster))
+            if (raycasterMouse != null)
             {
                 Destroy(raycasterMouse);
+            }
+            if (blocker.GetComponent<TrackedDeviceGraphicRaycaster>() == null)
+            {
                 blocker.AddComponent<TrackedDeviceGraphicRaycaster>();
             }
         }

@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.XR.Interaction.Toolkit.UI;
 
 /// <summary>
 /// Inicializador automático para garantir que todas as cenas de reabilitação do ExoTao VR Rehab
-/// tenham a Telemetria Clínica (CSV/Métricas) e o Drone Guia IA funcionando automaticamente sem precisar
-/// configurar manualmente objeto por objeto em cada mapa.
+/// tenham a Telemetria Clínica (CSV/Métricas), o Drone Guia IA e a configuração correta de Canvases VR.
 /// </summary>
 public static class InicializadorSistemasIC
 {
@@ -32,7 +32,11 @@ public static class InicializadorSistemasIC
         if (!cena.IsValid()) return;
 
         string nomeCena = cena.name;
-        // Ignora o Menu Principal e a Tela de Loading
+
+        // 0. Em QUALQUER cena (inclusive Menu Principal), configura Canvases WorldSpace para VR
+        ConfigurarCanvasesVR();
+
+        // Ignora o Menu Principal e a Tela de Loading para injeção de drone/telemetria
         if (nomeCena == "Menu_Principal" || nomeCena == "CenaDeLoading")
             return;
 
@@ -63,6 +67,38 @@ public static class InicializadorSistemasIC
             drone.receptorExo = receptor;
             drone.telemetria = telemetria;
             Debug.Log($"[ExoTao IC] Drone Guia IA (EXO-BOT) injetado automaticamente na cena '{nomeCena}'.");
+        }
+    }
+
+    private static void ConfigurarCanvasesVR()
+    {
+        Camera mainCam = Camera.main;
+        if (mainCam == null)
+        {
+            mainCam = Object.FindFirstObjectByType<Camera>();
+        }
+
+        Canvas[] canvases = Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (Canvas c in canvases)
+        {
+            if (c == null) continue;
+
+            if (c.renderMode == RenderMode.WorldSpace)
+            {
+                c.vertexColorAlwaysGammaSpace = true;
+
+                if (c.worldCamera == null && mainCam != null)
+                {
+                    c.worldCamera = mainCam;
+                }
+
+                // Garante suporte a laser de controles VR
+                TrackedDeviceGraphicRaycaster raycaster = c.GetComponent<TrackedDeviceGraphicRaycaster>();
+                if (raycaster == null)
+                {
+                    c.gameObject.AddComponent<TrackedDeviceGraphicRaycaster>();
+                }
+            }
         }
     }
 }

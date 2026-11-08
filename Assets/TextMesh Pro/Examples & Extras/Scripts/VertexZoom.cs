@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -71,7 +71,7 @@ namespace TMPro.Examples
 
             while (true)
             {
-                // Allocate new vertices 
+                // Allocate new vertices
                 if (hasTextChanged)
                 {
                     // Get updated vertex data
@@ -130,7 +130,7 @@ namespace TMPro.Examples
 
                     // Determine the random scale change for each character.
                     float randomScale = Random.Range(1f, 1.5f);
-                    
+
                     // Add modified scale and index
                     modifiedCharScale.Add(randomScale);
                     scaleSortingOrder.Add(modifiedCharScale.Count - 1);
@@ -150,8 +150,8 @@ namespace TMPro.Examples
                     destinationVertices[vertexIndex + 3] += offset;
 
                     // Restore Source UVS which have been modified by the sorting
-                    var sourceUVs0 = cachedMeshInfoVertexData[materialIndex].uvs0;
-                    var destinationUVs0 = textInfo.meshInfo[materialIndex].uvs0;
+                    Vector4[] sourceUVs0 = cachedMeshInfoVertexData[materialIndex].uvs0;
+                    Vector4[] destinationUVs0 = textInfo.meshInfo[materialIndex].uvs0;
 
                     destinationUVs0[vertexIndex + 0] = sourceUVs0[vertexIndex + 0];
                     destinationUVs0[vertexIndex + 1] = sourceUVs0[vertexIndex + 1];

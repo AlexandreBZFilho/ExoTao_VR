@@ -4,12 +4,87 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.UI;
 
 /// <summary>
 /// Menu de ferramentas no topo da Unity ("ExoTao IC") para facilitar a operação no laboratório ReRobLab.
+/// Executa correções automáticas de VR UI e Canvases no carregamento do Editor.
 /// </summary>
+[InitializeOnLoad]
 public static class PainelControleICEditor
 {
+    static PainelControleICEditor()
+    {
+        EditorApplication.delayCall += AutoCorrigirAvisosCanvas;
+    }
+
+    [MenuItem("ExoTao IC/0. Corrigir Avisos do Canvas e VR UI", false, 0)]
+    public static void AutoCorrigirAvisosCanvas()
+    {
+        bool alterou = false;
+
+        Canvas[] canvases = Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        Camera mainCam = Camera.main;
+        if (mainCam == null)
+        {
+            mainCam = Object.FindFirstObjectByType<Camera>(FindObjectsInactive.Exclude);
+        }
+
+        foreach (Canvas c in canvases)
+        {
+            if (c == null) continue;
+
+            // 1. Ativa Gamma Space no Unity 6 URP para corrigir gradientes de cores
+            if (!c.vertexColorAlwaysGammaSpace)
+            {
+                c.vertexColorAlwaysGammaSpace = true;
+                alterou = true;
+                UnityEngine.Debug.Log($"[ExoTao IC] 'vertexColorAlwaysGammaSpace' ativado no Canvas '{c.gameObject.name}'.");
+            }
+
+            // 2. Associa a Event Camera se estiver em World Space e vazia
+            if (c.renderMode == RenderMode.WorldSpace && c.worldCamera == null && mainCam != null)
+            {
+                c.worldCamera = mainCam;
+                alterou = true;
+                UnityEngine.Debug.Log($"[ExoTao IC] Event Camera associada à '{mainCam.name}' no Canvas '{c.gameObject.name}'.");
+            }
+
+            // 3. Remove XRRayInteractor indevido no Canvas (ele pertence somente aos controles das mãos)
+            var rayInteractor = c.GetComponent<XRRayInteractor>();
+            if (rayInteractor != null)
+            {
+                Object.DestroyImmediate(rayInteractor, true);
+                alterou = true;
+                UnityEngine.Debug.Log($"[ExoTao IC] Removido XRRayInteractor indevido do GameObject '{c.gameObject.name}'.");
+            }
+
+            // 4. Garante TrackedDeviceGraphicRaycaster no Canvas para compatibilidade com o laser VR
+            if (c.renderMode == RenderMode.WorldSpace)
+            {
+                var trackedRaycaster = c.GetComponent<TrackedDeviceGraphicRaycaster>();
+                if (trackedRaycaster == null)
+                {
+                    c.gameObject.AddComponent<TrackedDeviceGraphicRaycaster>();
+                    alterou = true;
+                    UnityEngine.Debug.Log($"[ExoTao IC] TrackedDeviceGraphicRaycaster adicionado ao Canvas '{c.gameObject.name}'.");
+                }
+            }
+        }
+
+        if (alterou)
+        {
+            var activeScene = EditorSceneManager.GetActiveScene();
+            if (activeScene.IsValid())
+            {
+                EditorSceneManager.MarkSceneDirty(activeScene);
+                EditorSceneManager.SaveScene(activeScene);
+                UnityEngine.Debug.Log($"[ExoTao IC] Cena '{activeScene.name}' salva com sucesso após correção dos Canvases!");
+            }
+        }
+    }
+
     [MenuItem("ExoTao IC/1. Fixar Drone Guia IA e Telemetria na Cena Atual", false, 10)]
     public static void InserirSistemasNaCenaAtual()
     {
