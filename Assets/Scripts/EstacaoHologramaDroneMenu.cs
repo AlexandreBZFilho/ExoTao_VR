@@ -135,24 +135,11 @@ public class EstacaoHologramaDroneMenu : MonoBehaviour
         CriarPrimitiva(consoleRaiz, "Joystick_Dir", PrimitiveType.Cylinder,
             new Vector3(0.36f, 0.86f, -0.44f), new Vector3(-28f, 0f, 0f), new Vector3(0.03f, 0.06f, 0.03f), matAmber);
 
-        // Emissor Circular de Holograma no Topo da Mesa (y = 0.82m)
+        // Emissor Circular de Holograma no Topo da Mesa (y = 0.82m) - Limpo e estático (sem cubos girando)
         CriarPrimitiva(consoleRaiz, "Base_Projetor_Holograma", PrimitiveType.Cylinder,
             new Vector3(0f, 0.82f, -0.04f), Vector3.zero, new Vector3(0.68f, 0.03f, 0.68f), matAco);
         CriarPrimitiva(consoleRaiz, "Lente_Emissora_Central", PrimitiveType.Cylinder,
             new Vector3(0f, 0.852f, -0.04f), Vector3.zero, new Vector3(0.52f, 0.008f, 0.52f), matCyan);
-
-        // Anel Projetor Giratório com Nodos Luminosos
-        anelProjetorBase = new GameObject("Anel_Projetor_Giratorio").transform;
-        anelProjetorBase.SetParent(consoleRaiz, false);
-        anelProjetorBase.localPosition = new Vector3(0f, 0.86f, -0.04f);
-
-        for (int i = 0; i < 8; i++)
-        {
-            float ang = i * Mathf.PI * 2f / 8f;
-            Vector3 p = new Vector3(Mathf.Cos(ang) * 0.30f, 0f, Mathf.Sin(ang) * 0.30f);
-            CriarPrimitiva(anelProjetorBase, $"Nodo_Holograma_{i}", PrimitiveType.Cube,
-                p, new Vector3(0f, -ang * Mathf.Rad2Deg, 0f), new Vector3(0.04f, 0.02f, 0.08f), matCyan);
-        }
 
         // Pilares Traseiros de Sustentação do Display Wall (estilo terminal Sierra Division)
         CriarPrimitiva(consoleRaiz, "Pilar_Traseiro_Esq", PrimitiveType.Cube,
@@ -177,15 +164,30 @@ public class EstacaoHologramaDroneMenu : MonoBehaviour
 
     private void ConstruirDroneShowcase3D(Material matBranco, Material matEscuro, Material matGlow)
     {
-        droneHologramaRaiz = transform.Find("Drone_ExoBot_Holograma_3D");
-        if (droneHologramaRaiz != null && droneHologramaRaiz.childCount > 0)
+        // Remove antigo Anel_Projetor_Giratorio se existia no console
+        Transform consoleRaiz = transform.Find("Console_Pedestal_3D");
+        if (consoleRaiz != null)
         {
-            anelExternoDrone = droneHologramaRaiz.Find("Anel_Giroscopico_Externo");
-            anelInternoDrone = droneHologramaRaiz.Find("Anel_Giroscopico_Interno");
-            return;
+            Transform antigoAnelProj = consoleRaiz.Find("Anel_Projetor_Giratorio");
+            if (antigoAnelProj != null)
+            {
+                if (Application.isPlaying) Destroy(antigoAnelProj.gameObject);
+                else DestroyImmediate(antigoAnelProj.gameObject);
+            }
         }
 
-        if (droneHologramaRaiz == null)
+        droneHologramaRaiz = transform.Find("Drone_ExoBot_Holograma_3D");
+        if (droneHologramaRaiz != null)
+        {
+            // Se ainda tinha filhos antigos (cilindros/anéis segmentados), limpa todos para usar a malha única do Blueprint
+            for (int i = droneHologramaRaiz.childCount - 1; i >= 0; i--)
+            {
+                GameObject filho = droneHologramaRaiz.GetChild(i).gameObject;
+                if (Application.isPlaying) Destroy(filho);
+                else DestroyImmediate(filho);
+            }
+        }
+        else
         {
             droneHologramaRaiz = new GameObject("Drone_ExoBot_Holograma_3D").transform;
             droneHologramaRaiz.SetParent(transform, false);
@@ -194,74 +196,39 @@ public class EstacaoHologramaDroneMenu : MonoBehaviour
         // Flutua acima do emissor circular (y = 1.18m, z = -0.06m, olhando para -Z que é a direção do jogador)
         droneHologramaRaiz.localPosition = new Vector3(0f, 1.18f, -0.06f);
         droneHologramaRaiz.localRotation = Quaternion.Euler(0f, 180f, 0f);
-        droneHologramaRaiz.localScale = Vector3.one * 0.92f;
+        droneHologramaRaiz.localScale = Vector3.one * 1.05f;
 
-        // 1. Chassis Esférico Biomédico Principal
-        CriarPrimitiva(droneHologramaRaiz, "Chassis_Esferico", PrimitiveType.Sphere,
-            Vector3.zero, Vector3.zero, new Vector3(0.38f, 0.34f, 0.38f), matBranco);
-
-        // Calota Superior e Inferior Blindada
-        CriarPrimitiva(droneHologramaRaiz, "Calota_Superior_Sensor", PrimitiveType.Cylinder,
-            new Vector3(0f, 0.155f, 0f), Vector3.zero, new Vector3(0.22f, 0.025f, 0.22f), matEscuro);
-        CriarPrimitiva(droneHologramaRaiz, "Calota_Inferior_Thruster", PrimitiveType.Cylinder,
-            new Vector3(0f, -0.155f, 0f), Vector3.zero, new Vector3(0.20f, 0.025f, 0.20f), matGlow);
-
-        // 2. Visor Frontal Óptico + Lente Biomédica Emissiva
-        CriarPrimitiva(droneHologramaRaiz, "Visor_Frontal_Escuro", PrimitiveType.Sphere,
-            new Vector3(0f, 0.02f, 0.13f), Vector3.zero, new Vector3(0.27f, 0.17f, 0.18f), matEscuro);
-        CriarPrimitiva(droneHologramaRaiz, "Olho_Biomedico_Emissivo", PrimitiveType.Sphere,
-            new Vector3(0f, 0.02f, 0.18f), Vector3.zero, new Vector3(0.14f, 0.09f, 0.10f), matGlow);
-        CriarPrimitiva(droneHologramaRaiz, "Anel_Lente_Frontal", PrimitiveType.Cylinder,
-            new Vector3(0f, 0.02f, 0.195f), new Vector3(90f, 0f, 0f), new Vector3(0.11f, 0.01f, 0.11f), matEscuro);
-
-        // 3. Anel Giroscópico Orbital Externo
-        anelExternoDrone = new GameObject("Anel_Giroscopico_Externo").transform;
-        anelExternoDrone.SetParent(droneHologramaRaiz, false);
-        anelExternoDrone.localRotation = Quaternion.Euler(16f, 0f, 16f);
-
-        int numSeg = 12;
-        float raioExt = 0.33f;
-        for (int i = 0; i < numSeg; i++)
+        // Carrega a malha 3D unificada gerada no Blender 5.1 (fiel ao Blueprint CAD com dois aros toroidais laterais contínuos)
+        Mesh malhaBlueprint = null;
+        GameObject fbxDrone = Resources.Load<GameObject>("Models/ExoBot_Blueprint_Drone");
+#if UNITY_EDITOR
+        if (fbxDrone == null)
         {
-            float ang = i * Mathf.PI * 2f / numSeg;
-            Vector3 pos = new Vector3(Mathf.Cos(ang) * raioExt, 0f, Mathf.Sin(ang) * raioExt);
-            GameObject seg = CriarPrimitiva(anelExternoDrone, $"Seg_Ext_{i}", PrimitiveType.Cube,
-                pos, Vector3.zero, new Vector3(0.11f, 0.026f, 0.036f), (i % 2 == 0) ? matGlow : matEscuro);
-            seg.transform.LookAt(anelExternoDrone.position);
+            fbxDrone = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/Models/ExoBot_Blueprint_Drone.fbx");
+        }
+#endif
+        if (fbxDrone != null)
+        {
+            MeshFilter mfFbx = fbxDrone.GetComponentInChildren<MeshFilter>();
+            if (mfFbx != null) malhaBlueprint = mfFbx.sharedMesh;
+        }
+        if (malhaBlueprint == null)
+        {
+            malhaBlueprint = GeradorMalhaDroneBlueprint.ConstruirMalhaDroneCAD();
         }
 
-        // 4. Anel Giroscópico Orbital Interno (Contra-Rotativo)
-        anelInternoDrone = new GameObject("Anel_Giroscopico_Interno").transform;
-        anelInternoDrone.SetParent(droneHologramaRaiz, false);
-        anelInternoDrone.localRotation = Quaternion.Euler(-22f, 0f, -18f);
+        Shader shaderAtivo = ObterShaderCompativel();
+        // Material de blindagem azul-ciano holográfico escuro igual à imagem do blueprint
+        Material matHologramaChassis = ObterOuCriarMaterial(shaderAtivo, "SciFi_Drone_Hologram_Armor",
+            new Color(0.07f, 0.25f, 0.38f), 0.78f, 0.86f, false);
 
-        float raioInt = 0.25f;
-        for (int i = 0; i < 8; i++)
-        {
-            float ang = i * Mathf.PI * 2f / 8f;
-            Vector3 pos = new Vector3(Mathf.Cos(ang) * raioInt, 0f, Mathf.Sin(ang) * raioInt);
-            GameObject seg = CriarPrimitiva(anelInternoDrone, $"Seg_Int_{i}", PrimitiveType.Cube,
-                pos, Vector3.zero, new Vector3(0.09f, 0.018f, 0.024f), matGlow);
-            seg.transform.LookAt(anelInternoDrone.position);
-        }
+        MeshFilter mf = droneHologramaRaiz.GetComponent<MeshFilter>();
+        if (mf == null) mf = droneHologramaRaiz.gameObject.AddComponent<MeshFilter>();
+        mf.sharedMesh = malhaBlueprint;
 
-        // 5. Propulsores Laterais de Levitação Magnética + Antena Superior
-        for (int lado = -1; lado <= 1; lado += 2)
-        {
-            string sufixo = lado < 0 ? "Esq" : "Dir";
-            CriarPrimitiva(droneHologramaRaiz, $"Braco_Propulsor_{sufixo}", PrimitiveType.Cube,
-                new Vector3(lado * 0.22f, 0f, 0f), Vector3.zero, new Vector3(0.12f, 0.035f, 0.05f), matEscuro);
-            CriarPrimitiva(droneHologramaRaiz, $"Turbina_Lateral_{sufixo}", PrimitiveType.Cylinder,
-                new Vector3(lado * 0.29f, -0.02f, 0f), new Vector3(0f, 0f, lado * -10f), new Vector3(0.11f, 0.09f, 0.11f), matBranco);
-            CriarPrimitiva(droneHologramaRaiz, $"Jato_Plasma_{sufixo}", PrimitiveType.Sphere,
-                new Vector3(lado * 0.305f, -0.11f, 0f), Vector3.zero, new Vector3(0.075f, 0.06f, 0.075f), matGlow);
-        }
-
-        // Antena de Telemetria no Topo
-        CriarPrimitiva(droneHologramaRaiz, "Antena_Haste", PrimitiveType.Cylinder,
-            new Vector3(0.06f, 0.22f, -0.03f), Vector3.zero, new Vector3(0.015f, 0.06f, 0.015f), matEscuro);
-        CriarPrimitiva(droneHologramaRaiz, "Antena_Transmissor", PrimitiveType.Sphere,
-            new Vector3(0.06f, 0.29f, -0.03f), Vector3.zero, new Vector3(0.04f, 0.04f, 0.04f), matGlow);
+        MeshRenderer mr = droneHologramaRaiz.GetComponent<MeshRenderer>();
+        if (mr == null) mr = droneHologramaRaiz.gameObject.AddComponent<MeshRenderer>();
+        mr.sharedMaterials = new Material[] { matHologramaChassis, matEscuro, matGlow };
     }
 
     private void ConstruirDisplayWallSciFi()
@@ -306,16 +273,16 @@ public class EstacaoHologramaDroneMenu : MonoBehaviour
         // Cabeçalho Sci-Fi (dentro da janela interna segura y: 0.17 .. 0.80)
         CriarTextoTMP(painelCentral, "Txt_Subtitulo_Lab",
             "REROBLAB • SISTEMA DE ASSISTÊNCIA ROBÓTICA & BIOFEEDBACK",
-            new Vector2(0.12f, 0.75f), new Vector2(0.88f, 0.80f), 15.5f, new Color(0.0f, 0.92f, 1.0f), FontStyles.Bold, TextAlignmentOptions.Center);
+            new Vector2(0.12f, 0.755f), new Vector2(0.88f, 0.80f), 15.0f, new Color(0.0f, 0.92f, 1.0f), FontStyles.Bold, TextAlignmentOptions.Center);
 
         CriarTextoTMP(painelCentral, "Txt_Titulo_Drone",
             "DRONE COMPANHEIRO IA — EXO-BOT",
-            new Vector2(0.11f, 0.67f), new Vector2(0.89f, 0.75f), 29f, Color.white, FontStyles.Bold, TextAlignmentOptions.Center);
+            new Vector2(0.11f, 0.675f), new Vector2(0.89f, 0.755f), 28.5f, Color.white, FontStyles.Bold, TextAlignmentOptions.Center);
 
         // Barra divisória luminosa
-        CriarBarraCor(painelCentral, "Divisoria_Topo", new Vector2(0.13f, 0.655f), new Vector2(0.87f, 0.662f), new Color(0.0f, 0.88f, 1.0f, 0.85f));
+        CriarBarraCor(painelCentral, "Divisoria_Topo", new Vector2(0.13f, 0.660f), new Vector2(0.87f, 0.667f), new Color(0.0f, 0.88f, 1.0f, 0.85f));
 
-        // Descrição das Funções do Mascote
+        // Descrição das Funções do Mascote (Ajustado com folga vertical para nunca sobrepor a Caixa_Status_Demo abaixo!)
         string textoFuncoes =
             "<b><color=#00F0FF>1. GUIA DINÂMICO DE MARCHA (PACING ADAPTATIVO)</color></b>\n" +
             "Voa automaticamente a <b>2.7m</b> à frente do paciente em todos os mapas, ajustando sua velocidade e altura ao ritmo real da caminhada no exoesqueleto.\n\n" +
@@ -324,13 +291,14 @@ public class EstacaoHologramaDroneMenu : MonoBehaviour
             "<b><color=#00F0FF>3. GAMIFICAÇÃO & TELEMETRIA CLÍNICA (CSV)</color></b>\n" +
             "Exibe um HUD holográfico com Passos, Distância e Cadência (SPM), celebrando metas a cada <b>15 passos</b> e gravando o relatório clínico completo.";
 
-        CriarTextoTMP(painelCentral, "Txt_Corpo_Funcoes",
+        TextMeshProUGUI tmpCorpo = CriarTextoTMP(painelCentral, "Txt_Corpo_Funcoes",
             textoFuncoes,
-            new Vector2(0.12f, 0.30f), new Vector2(0.88f, 0.64f), 18.5f, new Color(0.92f, 0.97f, 1.0f), FontStyles.Normal, TextAlignmentOptions.TopLeft);
+            new Vector2(0.12f, 0.305f), new Vector2(0.88f, 0.648f), 15.6f, new Color(0.92f, 0.97f, 1.0f), FontStyles.Normal, TextAlignmentOptions.TopLeft);
+        tmpCorpo.overflowMode = TextOverflowModes.Truncate;
 
         // Barra Inferior de Status ao Vivo da Demonstração
         GameObject goCaixaStatus = CriarBarraCor(painelCentral, "Caixa_Status_Demo",
-            new Vector2(0.12f, 0.175f), new Vector2(0.88f, 0.285f), new Color(0.02f, 0.14f, 0.24f, 0.95f));
+            new Vector2(0.12f, 0.175f), new Vector2(0.88f, 0.280f), new Color(0.02f, 0.14f, 0.24f, 0.95f));
 
         GameObject goIndicador = CriarBarraCor(goCaixaStatus.transform, "Indicador_Cor_Estado",
             new Vector2(0.015f, 0.15f), new Vector2(0.042f, 0.85f), coresEstados[0]);
@@ -338,11 +306,11 @@ public class EstacaoHologramaDroneMenu : MonoBehaviour
 
         txtEstadoDemonstracao = CriarTextoTMP(goCaixaStatus.transform, "Txt_Estado_Demo",
             nomesEstados[0],
-            new Vector2(0.06f, 0.52f), new Vector2(0.98f, 0.92f), 16.5f, new Color(0.4f, 1.0f, 0.95f), FontStyles.Bold, TextAlignmentOptions.Left);
+            new Vector2(0.06f, 0.52f), new Vector2(0.98f, 0.92f), 16.0f, new Color(0.4f, 1.0f, 0.95f), FontStyles.Bold, TextAlignmentOptions.Left);
 
         txtTelemetriaAoVivo = CriarTextoTMP(goCaixaStatus.transform, "Txt_Telemetria_Live",
             "TELEMETRIA EXOTAO (PORTA 5005): Aguardando pacotes UDP/TCP ou Simulador [Tecla F9]",
-            new Vector2(0.06f, 0.08f), new Vector2(0.98f, 0.48f), 14.5f, new Color(0.80f, 0.92f, 1.0f), FontStyles.Normal, TextAlignmentOptions.Left);
+            new Vector2(0.06f, 0.08f), new Vector2(0.98f, 0.48f), 14.2f, new Color(0.80f, 0.92f, 1.0f), FontStyles.Normal, TextAlignmentOptions.Left);
 
         // =====================================================================
         // PAINEL LATERAL ESQUERDO (Esquemático CAD / Blueprint Holográfico)
@@ -416,7 +384,6 @@ public class EstacaoHologramaDroneMenu : MonoBehaviour
 
     void Update()
     {
-        float dt = Application.isPlaying ? Time.deltaTime : 0.016f;
         float tempo = Application.isPlaying ? Time.time : (float)
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.timeSinceStartup;
@@ -424,31 +391,13 @@ public class EstacaoHologramaDroneMenu : MonoBehaviour
             0f;
 #endif
 
-        // 1. Animação de Flutuação e Giro do Drone Holográfico 3D
+        // 1. Animação Leve e Otimizada de Flutuação (1 único Transform, zero peças soltas)
         if (droneHologramaRaiz != null)
         {
-            float bobY = Mathf.Sin(tempo * 2.2f) * 0.045f;
+            float bobY = Mathf.Sin(tempo * 1.6f) * 0.032f;
             droneHologramaRaiz.localPosition = new Vector3(0f, 1.18f + bobY, -0.06f);
-            float yawOscilacao = 180f + Mathf.Sin(tempo * 0.85f) * 28f;
-            float rollOscilacao = Mathf.Cos(tempo * 1.4f) * 5f;
-            droneHologramaRaiz.localRotation = Quaternion.Euler(0f, yawOscilacao, rollOscilacao);
-        }
-
-        if (anelExternoDrone != null)
-        {
-            anelExternoDrone.Rotate(Vector3.up, 95f * dt, Space.Self);
-            anelExternoDrone.Rotate(Vector3.right, 35f * dt, Space.Self);
-        }
-
-        if (anelInternoDrone != null)
-        {
-            anelInternoDrone.Rotate(Vector3.up, -140f * dt, Space.Self);
-            anelInternoDrone.Rotate(Vector3.forward, 50f * dt, Space.Self);
-        }
-
-        if (anelProjetorBase != null)
-        {
-            anelProjetorBase.Rotate(Vector3.up, -45f * dt, Space.Self);
+            float yawSuave = 180f + Mathf.Sin(tempo * 0.55f) * 14f;
+            droneHologramaRaiz.localRotation = Quaternion.Euler(0f, yawSuave, 0f);
         }
 
         // 2. Atualização de Biofeedback e Telemetria ao Vivo em Play Mode

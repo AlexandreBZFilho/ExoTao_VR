@@ -332,13 +332,7 @@ public class DroneGuiaIA : MonoBehaviour
 
     private void AtualizarAnimacoesGiroscopicas(bool caminhando)
     {
-        if (anelGiroscopico != null)
-        {
-            float velGiro = caminhando ? 140f : 55f;
-            if (estadoAtual == EstadoDrone.CelebrandoMeta) velGiro = 320f;
-            anelGiroscopico.Rotate(Vector3.up, velGiro * Time.deltaTime, Space.Self);
-            anelGiroscopico.Rotate(Vector3.right, (velGiro * 0.35f) * Time.deltaTime, Space.Self);
-        }
+        // Mantido vazio intencionalmente para máxima leveza de CPU/GPU (flutuação ocorre apenas na raiz)
     }
 
     private void AtualizarPainelHolografico()
@@ -419,8 +413,8 @@ public class DroneGuiaIA : MonoBehaviour
             ? (Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"))
             : (Shader.Find("Standard") ?? Shader.Find("Universal Render Pipeline/Lit"));
 
-        Material matCorpoBranco = ObterOuCriarMaterialDrone(shaderAtivo, "ExoBot_Body_Mat", new Color(0.92f, 0.95f, 0.98f), 0.25f, 0.85f, false);
-        Material matMetalEscuro = ObterOuCriarMaterialDrone(shaderAtivo, "ExoBot_DarkMetal_Mat", new Color(0.15f, 0.18f, 0.22f), 0.70f, 0.75f, false);
+        Material matHologramaChassis = ObterOuCriarMaterialDrone(shaderAtivo, "SciFi_Drone_Hologram_Armor", new Color(0.07f, 0.25f, 0.38f), 0.78f, 0.86f, false);
+        Material matMetalEscuro = ObterOuCriarMaterialDrone(shaderAtivo, "ExoBot_DarkMetal_Mat", new Color(0.12f, 0.16f, 0.22f), 0.75f, 0.78f, false);
         Material matGlowBase = ObterOuCriarMaterialDrone(shaderAtivo, "ExoBot_Glow_Mat", corGuiandoNormal, 0.20f, 0.90f, true);
 
         materialEmissivoDinamico = Application.isPlaying ? new Material(matGlowBase) : matGlowBase;
@@ -428,90 +422,69 @@ public class DroneGuiaIA : MonoBehaviour
         if (modeloRaiz == null)
             modeloRaiz = transform.Find("Modelo_3D_ExoBot");
 
-        if (modeloRaiz != null && modeloRaiz.childCount > 0)
+        if (modeloRaiz != null)
         {
-            anelGiroscopico = modeloRaiz.Find("Anel_Giroscopico_Orbital");
-            olhoVisor = modeloRaiz.Find("Olho_Biomedico_Emissivo");
-            Transform tLuz = modeloRaiz.Find("Luz_Biofeedback");
-            if (tLuz != null) luzNucleo = tLuz.GetComponent<Light>();
-            return;
+            // Remove filhos antigos de cilindros/anéis segmentados se existirem
+            for (int i = modeloRaiz.childCount - 1; i >= 0; i--)
+            {
+                GameObject f = modeloRaiz.GetChild(i).gameObject;
+                if (f.name != "Luz_Biofeedback")
+                {
+                    if (Application.isPlaying) Destroy(f);
+                    else DestroyImmediate(f);
+                }
+            }
         }
-
-        if (modeloRaiz == null)
+        else
         {
             modeloRaiz = new GameObject("Modelo_3D_ExoBot").transform;
             modeloRaiz.SetParent(transform, false);
         }
 
-        // 1. Esfera Central do Drone Médico
-        GameObject esferaCentral = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        esferaCentral.name = "Chassis_Central";
-        esferaCentral.transform.SetParent(modeloRaiz, false);
-        esferaCentral.transform.localScale = new Vector3(0.38f, 0.34f, 0.38f);
-        RemoverCollider(esferaCentral);
-        esferaCentral.GetComponent<Renderer>().sharedMaterial = matCorpoBranco;
-
-        // 2. Visor Frontal Escuro + Olho Biomédico Emissivo
-        GameObject molduraVisor = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        molduraVisor.name = "Moldura_Visor";
-        molduraVisor.transform.SetParent(modeloRaiz, false);
-        molduraVisor.transform.localPosition = new Vector3(0f, 0.02f, 0.12f);
-        molduraVisor.transform.localScale = new Vector3(0.26f, 0.16f, 0.18f);
-        RemoverCollider(molduraVisor);
-        molduraVisor.GetComponent<Renderer>().sharedMaterial = matMetalEscuro;
-
-        GameObject olho = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        olho.name = "Olho_Biomedico_Emissivo";
-        olho.transform.SetParent(modeloRaiz, false);
-        olho.transform.localPosition = new Vector3(0f, 0.02f, 0.17f);
-        olho.transform.localScale = new Vector3(0.14f, 0.08f, 0.10f);
-        RemoverCollider(olho);
-        olho.GetComponent<Renderer>().sharedMaterial = materialEmissivoDinamico;
-        olhoVisor = olho.transform;
-
-        // 3. Anel Giroscópico Orbital
-        anelGiroscopico = new GameObject("Anel_Giroscopico_Orbital").transform;
-        anelGiroscopico.SetParent(modeloRaiz, false);
-        anelGiroscopico.localRotation = Quaternion.Euler(18f, 0f, 18f);
-
-        int numSegmentos = 12;
-        float raioAnel = 0.32f;
-        for (int i = 0; i < numSegmentos; i++)
+        // Malha única 3D gerada no Blender 5.1 (fiel ao Blueprint CAD com dois aros toroidais laterais contínuos)
+        Mesh malhaBlueprint = null;
+        GameObject fbxDrone = Resources.Load<GameObject>("Models/ExoBot_Blueprint_Drone");
+#if UNITY_EDITOR
+        if (fbxDrone == null)
         {
-            float angulo = i * Mathf.PI * 2f / numSegmentos;
-            Vector3 posSeg = new Vector3(Mathf.Cos(angulo) * raioAnel, 0f, Mathf.Sin(angulo) * raioAnel);
-
-            GameObject seg = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            seg.name = $"Seg_Orbital_{i}";
-            seg.transform.SetParent(anelGiroscopico, false);
-            seg.transform.localPosition = posSeg;
-            seg.transform.LookAt(anelGiroscopico.position);
-            seg.transform.localScale = new Vector3(0.12f, 0.025f, 0.035f);
-            RemoverCollider(seg);
-            seg.GetComponent<Renderer>().sharedMaterial = (i % 2 == 0) ? materialEmissivoDinamico : matMetalEscuro;
+            fbxDrone = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/Models/ExoBot_Blueprint_Drone.fbx");
+        }
+#endif
+        if (fbxDrone != null)
+        {
+            MeshFilter mfFbx = fbxDrone.GetComponentInChildren<MeshFilter>();
+            if (mfFbx != null) malhaBlueprint = mfFbx.sharedMesh;
+        }
+        if (malhaBlueprint == null)
+        {
+            malhaBlueprint = GeradorMalhaDroneBlueprint.ConstruirMalhaDroneCAD();
         }
 
-        // 4. Propulsores Laterais Flutuantes
-        for (int lado = -1; lado <= 1; lado += 2)
-        {
-            GameObject asa = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            asa.name = lado < 0 ? "Propulsor_Esq" : "Propulsor_Dir";
-            asa.transform.SetParent(modeloRaiz, false);
-            asa.transform.localPosition = new Vector3(lado * 0.28f, -0.04f, 0f);
-            asa.transform.localScale = new Vector3(0.08f, 0.12f, 0.08f);
-            RemoverCollider(asa);
-            asa.GetComponent<Renderer>().sharedMaterial = matCorpoBranco;
-        }
+        MeshFilter mf = modeloRaiz.GetComponent<MeshFilter>();
+        if (mf == null) mf = modeloRaiz.gameObject.AddComponent<MeshFilter>();
+        mf.sharedMesh = malhaBlueprint;
 
-        // 5. Luz Pontual de Biofeedback
-        GameObject objLuz = new GameObject("Luz_Biofeedback");
-        objLuz.transform.SetParent(modeloRaiz, false);
-        objLuz.transform.localPosition = new Vector3(0f, -0.1f, 0.2f);
-        luzNucleo = objLuz.AddComponent<Light>();
-        luzNucleo.type = LightType.Point;
-        luzNucleo.range = 4.5f;
-        luzNucleo.intensity = 1.6f;
-        luzNucleo.color = corGuiandoNormal;
+        MeshRenderer mr = modeloRaiz.GetComponent<MeshRenderer>();
+        if (mr == null) mr = modeloRaiz.gameObject.AddComponent<MeshRenderer>();
+        mr.sharedMaterials = new Material[] { matHologramaChassis, matMetalEscuro, materialEmissivoDinamico };
+
+        // Luz Pontual de Biofeedback
+        Transform tLuz = modeloRaiz.Find("Luz_Biofeedback");
+        if (tLuz != null)
+        {
+            luzNucleo = tLuz.GetComponent<Light>();
+        }
+        else
+        {
+            GameObject objLuz = new GameObject("Luz_Biofeedback");
+            objLuz.transform.SetParent(modeloRaiz, false);
+            objLuz.transform.localPosition = new Vector3(0f, -0.1f, 0.2f);
+            luzNucleo = objLuz.AddComponent<Light>();
+            luzNucleo.type = LightType.Point;
+            luzNucleo.range = 4.5f;
+            luzNucleo.intensity = 1.6f;
+            luzNucleo.color = corGuiandoNormal;
+        }
     }
 
     public void ConstruirHUDHolografico()
