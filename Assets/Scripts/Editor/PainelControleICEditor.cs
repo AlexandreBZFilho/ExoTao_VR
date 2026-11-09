@@ -23,7 +23,18 @@ public static class PainelControleICEditor
     {
         if (Application.isPlaying) return;
         AutoCorrigirAvisosCanvas();
-        VerificarEConfigurarAvatar3DAutomatico(forcarRebuildPrefabs: false);
+
+        bool precisaCorrigirShader = false;
+        Material matTeste = Resources.Load<Material>("Materials/YBot_Surface_URP");
+        if (matTeste != null && UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline == null)
+        {
+            if (matTeste.shader != null && matTeste.shader.name.Contains("Universal"))
+            {
+                precisaCorrigirShader = true;
+            }
+        }
+
+        VerificarEConfigurarAvatar3DAutomatico(forcarRebuildPrefabs: precisaCorrigirShader);
     }
 
     [MenuItem("ExoTao IC/0. Corrigir Avisos do Canvas e VR UI", false, 0)]

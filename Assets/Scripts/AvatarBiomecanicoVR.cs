@@ -256,12 +256,21 @@ public class AvatarBiomecanicoVR : MonoBehaviour
         poseInicialCapturada = true;
     }
 
+    private Shader ObterShaderCompativelPipeline()
+    {
+        bool usandoSRP = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline != null;
+        if (usandoSRP)
+        {
+            Shader urp = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Universal Render Pipeline/Simple Lit");
+            if (urp != null) return urp;
+        }
+        return Shader.Find("Standard") ?? Shader.Find("Legacy Shaders/Diffuse");
+    }
+
     private void AtualizarMateriaisURP(Transform raiz)
     {
-        Shader urpShader = Shader.Find("Universal Render Pipeline/Lit");
-        if (urpShader == null) urpShader = Shader.Find("Universal Render Pipeline/Simple Lit");
-        if (urpShader == null) urpShader = Shader.Find("Standard");
-        if (urpShader == null) return;
+        Shader shaderAtivo = ObterShaderCompativelPipeline();
+        if (shaderAtivo == null) return;
 
         SkinnedMeshRenderer[] renderers = raiz.GetComponentsInChildren<SkinnedMeshRenderer>(true);
         foreach (SkinnedMeshRenderer smr in renderers)
@@ -269,21 +278,13 @@ public class AvatarBiomecanicoVR : MonoBehaviour
             // Permite que a malha continue visível mesmo quando o jogador olha para baixo de perto em VR
             smr.updateWhenOffscreen = true;
 
-            bool precisaTrocar = smr.sharedMaterial == null ||
-                                 smr.sharedMaterial.shader == null ||
-                                 smr.sharedMaterial.shader.name == "Standard" ||
-                                 smr.sharedMaterial.shader.name.Contains("Error");
-
-            if (precisaTrocar)
+            if (smr.name.Contains("Joints"))
             {
-                if (smr.name.Contains("Joints"))
-                {
-                    smr.sharedMaterial = CriarMaterial(urpShader, "YBot_Joints_URP", new Color(0.14f, 0.18f, 0.22f, 1f), 0.6f, 0.5f);
-                }
-                else
-                {
-                    smr.sharedMaterial = CriarMaterial(urpShader, "YBot_Surface_URP", new Color(0.24f, 0.36f, 0.48f, 1f), 0.35f, 0.65f);
-                }
+                smr.sharedMaterial = CriarMaterial(shaderAtivo, "YBot_Joints_URP", new Color(0.14f, 0.18f, 0.22f, 1f), 0.6f, 0.5f);
+            }
+            else
+            {
+                smr.sharedMaterial = CriarMaterial(shaderAtivo, "YBot_Surface_URP", new Color(0.24f, 0.36f, 0.48f, 1f), 0.35f, 0.65f);
             }
         }
     }
@@ -294,7 +295,7 @@ public class AvatarBiomecanicoVR : MonoBehaviour
             ossoQuadrilEsq == null || ossoJoelhoEsq == null)
             return;
 
-        Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+        Shader shader = ObterShaderCompativelPipeline();
         Material matEstrutura = CriarMaterial(shader, "ExoTao_Titanium", new Color(0.16f, 0.19f, 0.23f), 0.75f, 0.7f);
         Material matCinta = CriarMaterial(shader, "ExoTao_Straps", new Color(0.08f, 0.10f, 0.12f), 0.2f, 0.3f);
         Material matAtuador = CriarMaterial(shader, "ExoTao_Motor", new Color(0.85f, 0.38f, 0.08f), 0.8f, 0.75f);
@@ -311,6 +312,12 @@ public class AvatarBiomecanicoVR : MonoBehaviour
                 new Vector3(0f, 0.04f, -0.10f), Vector3.zero, new Vector3(0.14f, 0.11f, 0.05f), matEstrutura);
             CriarPeca(cintoPelvico, "LED_Unidade_Traseira", PrimitiveType.Cube,
                 new Vector3(0f, 0.04f, -0.128f), Vector3.zero, new Vector3(0.09f, 0.02f, 0.01f), matLedRepouso);
+        }
+        else
+        {
+            AtualizarMaterialFilho(cintoPelvico, "Arco_Pelvico", matEstrutura);
+            AtualizarMaterialFilho(cintoPelvico, "Unidade_Controle_Traseira", matEstrutura);
+            AtualizarMaterialFilho(cintoPelvico, "LED_Unidade_Traseira", matLedRepouso);
         }
 
         // 2. Exoesqueleto da Perna Direita (Lado Lateral = +X no espaço da coxa/canela)
@@ -363,6 +370,11 @@ public class AvatarBiomecanicoVR : MonoBehaviour
         }
         else
         {
+            AtualizarMaterialFilho(grupoCoxa, $"Motor_Quadril_{sufixo}", matAtuador);
+            AtualizarMaterialFilho(grupoCoxa, $"LED_Quadril_{sufixo}", matLedRepouso);
+            AtualizarMaterialFilho(grupoCoxa, $"Haste_Femoral_{sufixo}", matEstrutura);
+            AtualizarMaterialFilho(grupoCoxa, $"Cinta_Coxa_Sup_{sufixo}", matCinta);
+            AtualizarMaterialFilho(grupoCoxa, $"Cinta_Coxa_Inf_{sufixo}", matCinta);
             Transform lq = grupoCoxa.Find($"LED_Quadril_{sufixo}");
             if (lq != null) ledQuadril = lq.GetComponent<Renderer>();
         }
@@ -389,6 +401,10 @@ public class AvatarBiomecanicoVR : MonoBehaviour
         }
         else
         {
+            AtualizarMaterialFilho(grupoCanela, $"Motor_Joelho_{sufixo}", matAtuador);
+            AtualizarMaterialFilho(grupoCanela, $"LED_Joelho_{sufixo}", matLedRepouso);
+            AtualizarMaterialFilho(grupoCanela, $"Haste_Tibial_{sufixo}", matEstrutura);
+            AtualizarMaterialFilho(grupoCanela, $"Cinta_Canela_{sufixo}", matCinta);
             Transform lj = grupoCanela.Find($"LED_Joelho_{sufixo}");
             if (lj != null) ledJoelho = lj.GetComponent<Renderer>();
         }
@@ -401,6 +417,10 @@ public class AvatarBiomecanicoVR : MonoBehaviour
             {
                 CriarPeca(grupoPe, $"Articulacao_Tornozelo_{sufixo}", PrimitiveType.Sphere,
                     new Vector3(ladoLateralX * 0.82f, 0f, 0f), Vector3.zero, new Vector3(0.04f, 0.04f, 0.04f), matAtuador);
+            }
+            else
+            {
+                AtualizarMaterialFilho(grupoPe, $"Articulacao_Tornozelo_{sufixo}", matAtuador);
             }
         }
     }
@@ -614,10 +634,30 @@ public class AvatarBiomecanicoVR : MonoBehaviour
         return peca;
     }
 
+    private void AtualizarMaterialFilho(Transform pai, string nomeFilho, Material mat)
+    {
+        if (pai == null || mat == null) return;
+        Transform f = pai.Find(nomeFilho);
+        if (f == null) return;
+        Renderer r = f.GetComponent<Renderer>();
+        if (r != null) r.sharedMaterial = mat;
+    }
+
     private Material CriarMaterial(Shader shader, string nome, Color cor, float metallic, float smoothness)
     {
         Material existente = Resources.Load<Material>("Materials/" + nome);
-        if (existente != null) return existente;
+        if (existente != null)
+        {
+            if (shader != null && existente.shader != shader)
+            {
+                existente.shader = shader;
+                DefinirCorMaterial(existente, cor, metallic, smoothness);
+#if UNITY_EDITOR
+                UnityEditor.EditorUtility.SetDirty(existente);
+#endif
+            }
+            return existente;
+        }
 
         Material m = new Material(shader);
         m.name = nome;
@@ -641,7 +681,21 @@ public class AvatarBiomecanicoVR : MonoBehaviour
     private Material CriarMaterialEmissivo(Shader shader, string nome, Color corEmissao)
     {
         Material existente = Resources.Load<Material>("Materials/" + nome);
-        if (existente != null) return existente;
+        if (existente != null)
+        {
+            if (shader != null && existente.shader != shader)
+            {
+                existente.shader = shader;
+                DefinirCorMaterial(existente, corEmissao, 0.2f, 0.9f);
+                existente.EnableKeyword("_EMISSION");
+                if (existente.HasProperty("_EmissionColor"))
+                    existente.SetColor("_EmissionColor", corEmissao * 2.2f);
+#if UNITY_EDITOR
+                UnityEditor.EditorUtility.SetDirty(existente);
+#endif
+            }
+            return existente;
+        }
 
         Material m = new Material(shader);
         m.name = nome;
