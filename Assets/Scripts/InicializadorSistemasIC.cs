@@ -37,8 +37,9 @@ public static class InicializadorSistemasIC
 
         string nomeCena = cena.name;
 
-        // 0. Em QUALQUER cena (inclusive Menu Principal), configura Canvases WorldSpace para VR
+        // 0. Em QUALQUER cena (inclusive Menu Principal), configura Canvases WorldSpace para VR e Sistema de Áudio
         ConfigurarCanvasesVR();
+        GarantirSistemaDeAudio(nomeCena);
 
         // Ignora o Menu Principal e a Tela de Loading para injeção de locomoção/drone/telemetria
         if (nomeCena == "Menu_Principal" || nomeCena == "CenaDeLoading")
@@ -99,6 +100,24 @@ public static class InicializadorSistemasIC
         }
         drone.receptorExo = receptor;
         drone.telemetria = telemetria;
+
+        // Reconecta todos os botões UI da cena (incluindo os botões da Barra Espacial do Drone) aos efeitos sonoros
+        if (GerenciadorAudioRehab.Instancia != null)
+        {
+            GerenciadorAudioRehab.Instancia.ConectarTodosBotoesUIDaCena();
+        }
+    }
+
+    private static void GarantirSistemaDeAudio(string nomeCena)
+    {
+        GerenciadorAudioRehab audio = Object.FindFirstObjectByType<GerenciadorAudioRehab>();
+        if (audio == null)
+        {
+            GameObject goAudio = new GameObject("[IC] Audio_Ambiente_E_SFX_ReRobLab");
+            audio = goAudio.AddComponent<GerenciadorAudioRehab>();
+        }
+        audio.ConfigurarAudioParaCenaAtual(nomeCena);
+        audio.ConectarTodosBotoesUIDaCena();
     }
 
     private static void ConfigurarCanvasesVR()

@@ -64,10 +64,13 @@ public class DroneGuiaIA : MonoBehaviour
     public Color corAlertaSimetria = new Color(1.0f, 0.68f, 0.0f);    // Âmbar / Alerta Clínico
     public Color corCelebracao = new Color(0.4f, 1.0f, 0.3f);         // Verde Energia
 
-    // Componentes Visuais Internos do Drone
+    // Componentes Visuais e Sonoros Internos do Drone
     private Transform modeloRaiz;
     private Light luzNucleo;
     private Material materialEmissivoDinamico;
+    private AudioSource fonteHover3D;
+    private AudioSource fonteVozPet3D;
+    private float timerChirpEspontaneo = 0f;
 
     // HUD Holográfico Acoplado ao Drone
     private Canvas canvasHolograma;
@@ -444,6 +447,11 @@ public class DroneGuiaIA : MonoBehaviour
         if (offsetPontoPegadaMundo.magnitude > 0.85f)
             offsetPontoPegadaMundo = offsetPontoPegadaMundo.normalized * 0.85f;
 
+        if (GerenciadorAudioRehab.Instancia != null)
+        {
+            GerenciadorAudioRehab.Instancia.TocarSomDronePetCarinhoPinch(fonteVozPet3D);
+        }
+
         AtualizarDestaqueVisualBarraArraste();
     }
 
@@ -725,6 +733,24 @@ public class DroneGuiaIA : MonoBehaviour
 
         AplicarCorBiofeedback(corAlvo);
         if (txtFalaIA != null) txtFalaIA.text = mensagem;
+
+        if (Application.isPlaying && GerenciadorAudioRehab.Instancia != null)
+        {
+            switch (novoEstado)
+            {
+                case EstadoDrone.SaudacaoInicial:
+                case EstadoDrone.GuiandoMarcha:
+                    GerenciadorAudioRehab.Instancia.TocarSomDronePetSaudacao(fonteVozPet3D);
+                    break;
+                case EstadoDrone.CelebrandoMeta:
+                    GerenciadorAudioRehab.Instancia.TocarSomDronePetFeliz(fonteVozPet3D);
+                    break;
+                case EstadoDrone.AlertaSimetria:
+                case EstadoDrone.AguardandoPaciente:
+                    GerenciadorAudioRehab.Instancia.TocarSomDronePetCurioso(fonteVozPet3D);
+                    break;
+            }
+        }
     }
 
     private void AtualizarLocomocaoEFlutuacao(bool caminhando)
@@ -928,6 +954,31 @@ public class DroneGuiaIA : MonoBehaviour
             luzNucleo.intensity = 1.6f;
             luzNucleo.color = corGuiandoNormal;
         }
+
+        // Fontes de Áudio 3D do Drone (Hover Sci-Fi Suave + Voz de Mascote Pet)
+        AudioSource[] fontes = modeloRaiz.GetComponents<AudioSource>();
+        fonteHover3D  = fontes.Length > 0 ? fontes[0] : modeloRaiz.gameObject.AddComponent<AudioSource>();
+        fonteVozPet3D = fontes.Length > 1 ? fontes[1] : modeloRaiz.gameObject.AddComponent<AudioSource>();
+
+        AudioClip clipHover = Resources.Load<AudioClip>("Audio/SFX_Drone_Hover_Loop");
+        fonteHover3D.clip = clipHover;
+        fonteHover3D.loop = true;
+        fonteHover3D.playOnAwake = true;
+        fonteHover3D.spatialBlend = 1.0f;
+        fonteHover3D.minDistance = 0.8f;
+        fonteHover3D.maxDistance = 8.0f;
+        fonteHover3D.volume = 0.16f;
+        if (Application.isPlaying && clipHover != null && !fonteHover3D.isPlaying)
+        {
+            fonteHover3D.Play();
+        }
+
+        fonteVozPet3D.loop = false;
+        fonteVozPet3D.playOnAwake = false;
+        fonteVozPet3D.spatialBlend = 0.65f;
+        fonteVozPet3D.minDistance = 1.0f;
+        fonteVozPet3D.maxDistance = 10.0f;
+        fonteVozPet3D.volume = 0.72f;
     }
 
     public void ConstruirHUDHolografico(bool forcarRecriacao = false)

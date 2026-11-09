@@ -312,8 +312,9 @@ public static class PainelControleICEditor
     [MenuItem("ExoTao IC/2. Configurar TODAS as Cenas (Y Bot + Drone Sci-Fi + Corrigir Rosa)", false, 8)]
     public static void ConfigurarTodasAsCenasEArrumarMateriais()
     {
-        // 1. Configura os Sprites UI gerados (SciFi_HUD_Frame e Drone_Holo_Blueprint)
+        // 1. Configura os Sprites UI gerados (SciFi_HUD_Frame e Drone_Holo_Blueprint) e Importers de Áudio 3D
         ConfigurarSpritesUISciFi();
+        ConfigurarImportersDeAudio3D();
 
         // 2. Corrige materiais globais e o prefab do HTC Vive Controller
         Material matVive = ObterOuCriarMaterialViveController();
@@ -372,6 +373,9 @@ public static class PainelControleICEditor
                 InserirSistemasNaCenaAtualSilencioso(receptor, cc);
             }
 
+            // f) Em TODAS as cenas: garante o Sistema Central de Áudio (Ambientação + SFX UI + Voz Pet do Drone)
+            InserirGerenciadorAudioNaCenaAtual(cena.name);
+
             EditorSceneManager.MarkSceneDirty(cena);
             EditorSceneManager.SaveScene(cena);
             cenasProcessadas++;
@@ -409,6 +413,40 @@ public static class PainelControleICEditor
                 ti.SaveAndReimport();
             }
         }
+    }
+
+    private static void ConfigurarImportersDeAudio3D()
+    {
+        string[] clipes3DMono = {
+            "Assets/Resources/Audio/SFX_Drone_Hover_Loop.wav",
+            "Assets/Resources/Audio/SFX_Drone_Pet_Greeting.wav",
+            "Assets/Resources/Audio/SFX_Drone_Pet_Happy.wav",
+            "Assets/Resources/Audio/SFX_Drone_Pet_Curious.wav",
+            "Assets/Resources/Audio/SFX_Drone_Pet_Purr.wav"
+        };
+
+        foreach (string p in clipes3DMono)
+        {
+            if (!File.Exists(p)) continue;
+            AudioImporter ai = AssetImporter.GetAtPath(p) as AudioImporter;
+            if (ai != null && !ai.forceToMono)
+            {
+                ai.forceToMono = true;
+                ai.SaveAndReimport();
+            }
+        }
+    }
+
+    private static void InserirGerenciadorAudioNaCenaAtual(string nomeCena)
+    {
+        GerenciadorAudioRehab audio = Object.FindFirstObjectByType<GerenciadorAudioRehab>();
+        if (audio == null)
+        {
+            GameObject goAudio = new GameObject("[IC] Audio_Ambiente_E_SFX_ReRobLab");
+            audio = goAudio.AddComponent<GerenciadorAudioRehab>();
+        }
+        audio.ConfigurarAudioParaCenaAtual(nomeCena);
+        audio.ConectarTodosBotoesUIDaCena();
     }
 
     private static Material ObterOuCriarMaterialViveController()

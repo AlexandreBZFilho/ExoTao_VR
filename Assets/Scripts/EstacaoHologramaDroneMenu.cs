@@ -229,6 +229,22 @@ public class EstacaoHologramaDroneMenu : MonoBehaviour
         MeshRenderer mr = droneHologramaRaiz.GetComponent<MeshRenderer>();
         if (mr == null) mr = droneHologramaRaiz.gameObject.AddComponent<MeshRenderer>();
         mr.sharedMaterials = new Material[] { matHologramaChassis, matEscuro, matGlow };
+
+        // Som 3D espacial suave de levitação holográfica no console do Menu Principal
+        AudioSource fonteHolo = droneHologramaRaiz.GetComponent<AudioSource>();
+        if (fonteHolo == null) fonteHolo = droneHologramaRaiz.gameObject.AddComponent<AudioSource>();
+        AudioClip clipHover = Resources.Load<AudioClip>("Audio/SFX_Drone_Hover_Loop");
+        fonteHolo.clip = clipHover;
+        fonteHolo.loop = true;
+        fonteHolo.playOnAwake = true;
+        fonteHolo.spatialBlend = 1.0f;
+        fonteHolo.minDistance = 0.8f;
+        fonteHolo.maxDistance = 6.5f;
+        fonteHolo.volume = 0.18f;
+        if (Application.isPlaying && clipHover != null && !fonteHolo.isPlaying)
+        {
+            fonteHolo.Play();
+        }
     }
 
     private void ConstruirDisplayWallSciFi()
