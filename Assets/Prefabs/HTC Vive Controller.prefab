@@ -68,6 +68,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.y
       value: -180
       objectReference: {fileID: 0}
+    - target: {fileID: 178937237134677788, guid: 0978ed46afec2bf4c8d0c299c9dea129, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 4435a82867106894ab1c548b274ec0b5, type: 2}
     - target: {fileID: 919132149155446097, guid: 0978ed46afec2bf4c8d0c299c9dea129, type: 3}
       propertyPath: m_Name
       value: HTC Vive Controller

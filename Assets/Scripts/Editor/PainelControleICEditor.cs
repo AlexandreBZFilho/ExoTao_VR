@@ -309,7 +309,302 @@ public static class PainelControleICEditor
         return null;
     }
 
-    [MenuItem("ExoTao IC/2. Fixar Drone Guia IA e Telemetria na Cena Atual", false, 10)]
+    [MenuItem("ExoTao IC/2. Configurar TODAS as Cenas (Y Bot + Drone Sci-Fi + Corrigir Rosa)", false, 8)]
+    public static void ConfigurarTodasAsCenasEArrumarMateriais()
+    {
+        // 1. Configura os Sprites UI gerados (SciFi_HUD_Frame e Drone_Holo_Blueprint)
+        ConfigurarSpritesUISciFi();
+
+        // 2. Corrige materiais globais e o prefab do HTC Vive Controller
+        Material matVive = ObterOuCriarMaterialViveController();
+        CorrigirPrefabHTCViveController(matVive);
+        ConverterMateriaisURPParaStandardNoProjeto();
+
+        // 3. Atualiza os 3 prefabs de jogador
+        VerificarEConfigurarAvatar3DAutomatico(forcarRebuildPrefabs: true);
+
+        // 4. Percorre todas as cenas do projeto em Assets/Scenes
+        string[] guidsCenas = AssetDatabase.FindAssets("t:Scene", new[] { "Assets/Scenes" });
+        int cenasProcessadas = 0;
+
+        foreach (string guid in guidsCenas)
+        {
+            string caminhoCena = AssetDatabase.GUIDToAssetPath(guid);
+            if (string.IsNullOrEmpty(caminhoCena) || !caminhoCena.EndsWith(".unity"))
+                continue;
+
+            var cena = EditorSceneManager.OpenScene(caminhoCena, OpenSceneMode.Single);
+            if (!cena.IsValid()) continue;
+
+            // a) Corrige Canvases VR
+            AutoCorrigirAvisosCanvas();
+
+            // b) Corrige qualquer Renderer sem material (ex: HTC Vive Controller 3D) ou com shader rosa
+            CorrigirRenderersNaCenaAtual(matVive);
+
+            // c) Configura Y Bot + Exoesqueleto + ReceptorUDP no jogador da cena
+            ReceptorUDP receptor = null;
+            CharacterController cc = Object.FindFirstObjectByType<CharacterController>();
+            if (cc != null)
+            {
+                GameObject goJogador = cc.gameObject;
+                receptor = goJogador.GetComponent<ReceptorUDP>();
+                if (receptor == null)
+                    receptor = goJogador.AddComponent<ReceptorUDP>();
+                receptor.controlePaciente = cc;
+
+                AvatarBiomecanicoVR avatar = goJogador.GetComponent<AvatarBiomecanicoVR>();
+                if (avatar == null)
+                    avatar = goJogador.AddComponent<AvatarBiomecanicoVR>();
+
+                avatar.receptorExo = receptor;
+                avatar.InicializarAvatarECinematica();
+            }
+
+            // d) No Menu Principal: constrói a Estação Holográfica Sci-Fi do Drone
+            if (cena.name == "Menu_Principal")
+            {
+                ConfigurarEstacaoHologramaNoMenu(receptor);
+            }
+            // e) Nos Mapas de Reabilitação: adiciona e inicializa o Drone Guia IA 3D + Telemetria na cena
+            else if (cena.name != "CenaDeLoading")
+            {
+                InserirSistemasNaCenaAtualSilencioso(receptor, cc);
+            }
+
+            EditorSceneManager.MarkSceneDirty(cena);
+            EditorSceneManager.SaveScene(cena);
+            cenasProcessadas++;
+            UnityEngine.Debug.Log($"[ExoTao IC] Cena '{cena.name}' atualizada e salva com sucesso (Y Bot + Materiais + Drone IA)!");
+        }
+
+        // Reabre o Menu_Principal ao final
+        if (File.Exists("Assets/Scenes/Menu_Principal.unity"))
+        {
+            EditorSceneManager.OpenScene("Assets/Scenes/Menu_Principal.unity", OpenSceneMode.Single);
+        }
+
+        AssetDatabase.SaveAssets();
+        SceneView.RepaintAll();
+        UnityEngine.Debug.Log($"[ExoTao IC] TODAS as {cenasProcessadas} cenas foram configuradas com Y Bot 3D, controles HTC Vive corrigidos e Estação Sci-Fi do Drone!");
+    }
+
+    private static void ConfigurarSpritesUISciFi()
+    {
+        AssetDatabase.Refresh();
+        string[] caminhosSprites = {
+            "Assets/Resources/UI/SciFi_HUD_Frame.jpg",
+            "Assets/Resources/UI/Drone_Holo_Blueprint.jpg"
+        };
+
+        foreach (string p in caminhosSprites)
+        {
+            if (!File.Exists(p)) continue;
+            TextureImporter ti = AssetImporter.GetAtPath(p) as TextureImporter;
+            if (ti != null && ti.textureType != TextureImporterType.Sprite)
+            {
+                ti.textureType = TextureImporterType.Sprite;
+                ti.spriteImportMode = SpriteImportMode.Single;
+                ti.mipmapEnabled = false;
+                ti.SaveAndReimport();
+            }
+        }
+    }
+
+    private static Material ObterOuCriarMaterialViveController()
+    {
+        if (!AssetDatabase.IsValidFolder("Assets/Resources"))
+            AssetDatabase.CreateFolder("Assets", "Resources");
+        if (!AssetDatabase.IsValidFolder("Assets/Resources/Materials"))
+            AssetDatabase.CreateFolder("Assets/Resources", "Materials");
+
+        string matPath = "Assets/Resources/Materials/HTC_Vive_Controller_Mat.mat";
+        Shader std = Shader.Find("Standard");
+        Material mat = AssetDatabase.LoadAssetAtPath<Material>(matPath);
+        if (mat == null)
+        {
+            mat = new Material(std);
+            mat.name = "HTC_Vive_Controller_Mat";
+            mat.color = new Color(0.16f, 0.18f, 0.22f, 1f);
+            if (mat.HasProperty("_Metallic")) mat.SetFloat("_Metallic", 0.65f);
+            if (mat.HasProperty("_Glossiness")) mat.SetFloat("_Glossiness", 0.72f);
+            AssetDatabase.CreateAsset(mat, matPath);
+        }
+        else if (std != null && mat.shader != std)
+        {
+            mat.shader = std;
+            EditorUtility.SetDirty(mat);
+        }
+        return mat;
+    }
+
+    private static void CorrigirPrefabHTCViveController(Material matVive)
+    {
+        string prefabPath = "Assets/Prefabs/HTC Vive Controller.prefab";
+        if (!File.Exists(prefabPath) || matVive == null) return;
+
+        GameObject raiz = PrefabUtility.LoadPrefabContents(prefabPath);
+        if (raiz == null) return;
+
+        try
+        {
+            bool alterou = false;
+            foreach (Renderer r in raiz.GetComponentsInChildren<Renderer>(true))
+            {
+                if (r.sharedMaterial == null || (r.sharedMaterial.shader != null && r.sharedMaterial.shader.name.Contains("Universal")))
+                {
+                    r.sharedMaterial = matVive;
+                    alterou = true;
+                }
+            }
+            if (alterou)
+            {
+                PrefabUtility.SaveAsPrefabAsset(raiz, prefabPath);
+                UnityEngine.Debug.Log("[ExoTao IC] Prefab 'HTC Vive Controller.prefab' corrigido com material Standard escuro metálico!");
+            }
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(raiz);
+        }
+    }
+
+    private static void ConverterMateriaisURPParaStandardNoProjeto()
+    {
+        if (UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline != null)
+            return;
+
+        Shader std = Shader.Find("Standard");
+        if (std == null) return;
+
+        string[] guids = AssetDatabase.FindAssets("t:Material", new[] { "Assets" });
+        int convertidos = 0;
+
+        foreach (string g in guids)
+        {
+            string p = AssetDatabase.GUIDToAssetPath(g);
+            if (p.Contains("Assets/Samples/Universal RP")) continue;
+
+            Material m = AssetDatabase.LoadAssetAtPath<Material>(p);
+            if (m == null || m.shader == null) continue;
+
+            string sn = m.shader.name;
+            if (sn.Contains("Universal Render Pipeline") || sn.Contains("Error"))
+            {
+                Texture tex = m.HasProperty("_BaseMap") ? m.GetTexture("_BaseMap") : m.mainTexture;
+                Color cor = m.HasProperty("_BaseColor") ? m.GetColor("_BaseColor") : (m.HasProperty("_Color") ? m.color : Color.white);
+                float metallic = m.HasProperty("_Metallic") ? m.GetFloat("_Metallic") : 0.1f;
+                float smooth = m.HasProperty("_Smoothness") ? m.GetFloat("_Smoothness") : 0.5f;
+
+                m.shader = std;
+                m.color = cor;
+                if (tex != null) m.mainTexture = tex;
+                if (m.HasProperty("_Metallic")) m.SetFloat("_Metallic", metallic);
+                if (m.HasProperty("_Glossiness")) m.SetFloat("_Glossiness", smooth);
+
+                EditorUtility.SetDirty(m);
+                convertidos++;
+            }
+        }
+
+        if (convertidos > 0)
+        {
+            AssetDatabase.SaveAssets();
+            UnityEngine.Debug.Log($"[ExoTao IC] {convertidos} materiais URP/Error convertidos para Standard shader!");
+        }
+    }
+
+    private static void CorrigirRenderersNaCenaAtual(Material matFallback)
+    {
+        Shader std = Shader.Find("Standard");
+        Renderer[] renderers = Object.FindObjectsByType<Renderer>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+        foreach (Renderer r in renderers)
+        {
+            if (r == null) continue;
+            // Ignora ParticleSystemRenderer sem malha
+            if (r is ParticleSystemRenderer) continue;
+
+            Material[] mats = r.sharedMaterials;
+            bool mudou = false;
+
+            for (int i = 0; i < mats.Length; i++)
+            {
+                if (mats[i] == null)
+                {
+                    mats[i] = matFallback;
+                    mudou = true;
+                }
+                else if (UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline == null &&
+                         mats[i].shader != null &&
+                         (mats[i].shader.name.Contains("Universal") || mats[i].shader.name.Contains("Error")))
+                {
+                    Texture tex = mats[i].HasProperty("_BaseMap") ? mats[i].GetTexture("_BaseMap") : mats[i].mainTexture;
+                    Color cor = mats[i].HasProperty("_BaseColor") ? mats[i].GetColor("_BaseColor") : (mats[i].HasProperty("_Color") ? mats[i].color : Color.white);
+                    mats[i].shader = std;
+                    mats[i].color = cor;
+                    if (tex != null) mats[i].mainTexture = tex;
+                    EditorUtility.SetDirty(mats[i]);
+                    mudou = true;
+                }
+            }
+
+            if (mudou)
+            {
+                r.sharedMaterials = mats;
+            }
+        }
+    }
+
+    private static void ConfigurarEstacaoHologramaNoMenu(ReceptorUDP receptor)
+    {
+        EstacaoHologramaDroneMenu estacaoExistente = Object.FindFirstObjectByType<EstacaoHologramaDroneMenu>(FindObjectsInactive.Include);
+        GameObject goEstacao;
+
+        if (estacaoExistente != null)
+        {
+            goEstacao = estacaoExistente.gameObject;
+        }
+        else
+        {
+            goEstacao = new GameObject("[IC] Estacao_Holograma_Drone_SciFi");
+            estacaoExistente = goEstacao.AddComponent<EstacaoHologramaDroneMenu>();
+        }
+
+        // Posiciona à direita do jogador, em área ampla e livre da sala (X=7.05, Y=0.0, Z=1.85),
+        // angulado em 75 graus para que a frente (-Z) olhe diretamente para o jogador em (4.50, 2.31)
+        // sem encostar no painel de Mapas Exploráveis nem nas cadeiras ao fundo.
+        goEstacao.transform.position = new Vector3(7.05f, 0.00f, 1.85f);
+        goEstacao.transform.rotation = Quaternion.Euler(0f, 75f, 0f);
+        goEstacao.transform.localScale = Vector3.one;
+
+        estacaoExistente.receptorExo = receptor;
+        estacaoExistente.ConstruirEstacaoCompletaSeNecessario();
+    }
+
+    private static void InserirSistemasNaCenaAtualSilencioso(ReceptorUDP receptor, CharacterController controle)
+    {
+        TelemetriaClinica telemetria = Object.FindFirstObjectByType<TelemetriaClinica>();
+        if (telemetria == null)
+        {
+            GameObject goTel = new GameObject("[IC] Telemetria_Clinica_ReRobLab");
+            telemetria = goTel.AddComponent<TelemetriaClinica>();
+        }
+        telemetria.receptorExo = receptor;
+        telemetria.controlePaciente = controle;
+
+        DroneGuiaIA drone = Object.FindFirstObjectByType<DroneGuiaIA>();
+        if (drone == null)
+        {
+            GameObject goDrone = new GameObject("[IC] Drone_Guia_IA_ExoBot");
+            drone = goDrone.AddComponent<DroneGuiaIA>();
+        }
+        drone.receptorExo = receptor;
+        drone.telemetria = telemetria;
+        drone.InicializarNoEditor();
+    }
+
+    [MenuItem("ExoTao IC/3. Fixar Drone Guia IA e Telemetria na Cena Atual", false, 10)]
     public static void InserirSistemasNaCenaAtual()
     {
         ReceptorUDP receptor = Object.FindFirstObjectByType<ReceptorUDP>();

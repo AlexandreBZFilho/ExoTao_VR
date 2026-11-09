@@ -86,8 +86,19 @@ public class DroneGuiaIA : MonoBehaviour
         LocalizarReferencias();
         ConstruirVisualProceduralSeNecessario();
         ConstruirHUDHolografico();
+        if (Application.isPlaying)
+        {
+            PosicionarInicialmenteNaFrenteDoPaciente();
+            MudarEstado(EstadoDrone.SaudacaoInicial);
+        }
+    }
+
+    public void InicializarNoEditor()
+    {
+        LocalizarReferencias();
+        ConstruirVisualProceduralSeNecessario();
+        ConstruirHUDHolografico();
         PosicionarInicialmenteNaFrenteDoPaciente();
-        MudarEstado(EstadoDrone.SaudacaoInicial);
     }
 
     public void LocalizarReferencias()
@@ -401,28 +412,36 @@ public class DroneGuiaIA : MonoBehaviour
             imgBordaPainel.color = new Color(cor.r, cor.g, cor.b, 0.85f);
     }
 
-    private void ConstruirVisualProceduralSeNecessario()
+    public void ConstruirVisualProceduralSeNecessario()
     {
-        if (modeloRaiz != null) return;
+        bool usandoSRP = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline != null;
+        Shader shaderAtivo = usandoSRP
+            ? (Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"))
+            : (Shader.Find("Standard") ?? Shader.Find("Universal Render Pipeline/Lit"));
 
-        modeloRaiz = new GameObject("Modelo_3D_ExoBot").transform;
-        modeloRaiz.SetParent(transform, false);
+        Material matCorpoBranco = ObterOuCriarMaterialDrone(shaderAtivo, "ExoBot_Body_Mat", new Color(0.92f, 0.95f, 0.98f), 0.25f, 0.85f, false);
+        Material matMetalEscuro = ObterOuCriarMaterialDrone(shaderAtivo, "ExoBot_DarkMetal_Mat", new Color(0.15f, 0.18f, 0.22f), 0.70f, 0.75f, false);
+        Material matGlowBase = ObterOuCriarMaterialDrone(shaderAtivo, "ExoBot_Glow_Mat", corGuiandoNormal, 0.20f, 0.90f, true);
 
-        Shader shaderURP = Shader.Find("Universal Render Pipeline/Lit");
-        if (shaderURP == null) shaderURP = Shader.Find("Standard");
+        materialEmissivoDinamico = Application.isPlaying ? new Material(matGlowBase) : matGlowBase;
 
-        Material matCorpoBranco = new Material(shaderURP);
-        if (matCorpoBranco.HasProperty("_BaseColor")) matCorpoBranco.SetColor("_BaseColor", new Color(0.92f, 0.95f, 0.98f));
-        if (matCorpoBranco.HasProperty("_Smoothness")) matCorpoBranco.SetFloat("_Smoothness", 0.85f);
+        if (modeloRaiz == null)
+            modeloRaiz = transform.Find("Modelo_3D_ExoBot");
 
-        Material matMetalEscuro = new Material(shaderURP);
-        if (matMetalEscuro.HasProperty("_BaseColor")) matMetalEscuro.SetColor("_BaseColor", new Color(0.15f, 0.18f, 0.22f));
-        if (matMetalEscuro.HasProperty("_Smoothness")) matMetalEscuro.SetFloat("_Smoothness", 0.7f);
+        if (modeloRaiz != null && modeloRaiz.childCount > 0)
+        {
+            anelGiroscopico = modeloRaiz.Find("Anel_Giroscopico_Orbital");
+            olhoVisor = modeloRaiz.Find("Olho_Biomedico_Emissivo");
+            Transform tLuz = modeloRaiz.Find("Luz_Biofeedback");
+            if (tLuz != null) luzNucleo = tLuz.GetComponent<Light>();
+            return;
+        }
 
-        materialEmissivoDinamico = new Material(shaderURP);
-        materialEmissivoDinamico.EnableKeyword("_EMISSION");
-        if (materialEmissivoDinamico.HasProperty("_BaseColor")) materialEmissivoDinamico.SetColor("_BaseColor", corGuiandoNormal);
-        if (materialEmissivoDinamico.HasProperty("_EmissionColor")) materialEmissivoDinamico.SetColor("_EmissionColor", corGuiandoNormal * 2.2f);
+        if (modeloRaiz == null)
+        {
+            modeloRaiz = new GameObject("Modelo_3D_ExoBot").transform;
+            modeloRaiz.SetParent(transform, false);
+        }
 
         // 1. Esfera Central do Drone Médico
         GameObject esferaCentral = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -495,9 +514,30 @@ public class DroneGuiaIA : MonoBehaviour
         luzNucleo.color = corGuiandoNormal;
     }
 
-    private void ConstruirHUDHolografico()
+    public void ConstruirHUDHolografico()
     {
-        if (canvasHolograma != null) return;
+        if (canvasHolograma == null)
+        {
+            Transform tCanvas = transform.Find("Canvas_Holograma_Clinico");
+            if (tCanvas != null) canvasHolograma = tCanvas.GetComponent<Canvas>();
+        }
+
+        if (canvasHolograma != null)
+        {
+            Transform f = canvasHolograma.transform.Find("Fundo_Holograma");
+            if (f != null)
+            {
+                Transform b = f.Find("Barra_Estado_Topo");
+                if (b != null) imgBordaPainel = b.GetComponent<Image>();
+                Transform tf = f.Find("Texto_Fala_IA");
+                if (tf != null) txtFalaIA = tf.GetComponent<TextMeshProUGUI>();
+                Transform tm = f.Find("Texto_Telemetria");
+                if (tm != null) txtMetricasHUD = tm.GetComponent<TextMeshProUGUI>();
+                Transform bf = f.Find("Fundo_Barra_Simetria/Fill_Barra_Simetria");
+                if (bf != null) imgBarraSimetria = bf.GetComponent<Image>();
+            }
+            return;
+        }
 
         GameObject goCanvas = new GameObject("Canvas_Holograma_Clinico");
         goCanvas.transform.SetParent(transform, false);
@@ -520,14 +560,23 @@ public class DroneGuiaIA : MonoBehaviour
         rtFundo.offsetMax = Vector2.zero;
 
         Image imgFundo = goFundo.AddComponent<Image>();
-        imgFundo.color = new Color(0.04f, 0.08f, 0.14f, 0.86f);
+        Sprite spriteHud = Resources.Load<Sprite>("UI/SciFi_HUD_Frame");
+        if (spriteHud != null)
+        {
+            imgFundo.sprite = spriteHud;
+            imgFundo.color = new Color(1f, 1f, 1f, 0.94f);
+        }
+        else
+        {
+            imgFundo.color = new Color(0.04f, 0.08f, 0.14f, 0.86f);
+        }
 
         // Barra Superior de Cor de Estado
         GameObject goBorda = new GameObject("Barra_Estado_Topo");
         goBorda.transform.SetParent(goFundo.transform, false);
         RectTransform rtBorda = goBorda.AddComponent<RectTransform>();
-        rtBorda.anchorMin = new Vector2(0f, 0.92f);
-        rtBorda.anchorMax = new Vector2(1f, 1f);
+        rtBorda.anchorMin = new Vector2(0.08f, 0.92f);
+        rtBorda.anchorMax = new Vector2(0.92f, 0.96f);
         rtBorda.offsetMin = Vector2.zero;
         rtBorda.offsetMax = Vector2.zero;
         imgBordaPainel = goBorda.AddComponent<Image>();
@@ -537,13 +586,13 @@ public class DroneGuiaIA : MonoBehaviour
         GameObject goTxtFala = new GameObject("Texto_Fala_IA");
         goTxtFala.transform.SetParent(goFundo.transform, false);
         RectTransform rtFala = goTxtFala.AddComponent<RectTransform>();
-        rtFala.anchorMin = new Vector2(0.04f, 0.46f);
-        rtFala.anchorMax = new Vector2(0.96f, 0.89f);
+        rtFala.anchorMin = new Vector2(0.07f, 0.46f);
+        rtFala.anchorMax = new Vector2(0.93f, 0.89f);
         rtFala.offsetMin = Vector2.zero;
         rtFala.offsetMax = Vector2.zero;
 
         txtFalaIA = goTxtFala.AddComponent<TextMeshProUGUI>();
-        txtFalaIA.fontSize = 22f;
+        txtFalaIA.fontSize = 21f;
         txtFalaIA.alignment = TextAlignmentOptions.Center;
         txtFalaIA.color = Color.white;
         txtFalaIA.text = "EXO-BOT IA Inicializado";
@@ -552,13 +601,13 @@ public class DroneGuiaIA : MonoBehaviour
         GameObject goTxtMetricas = new GameObject("Texto_Telemetria");
         goTxtMetricas.transform.SetParent(goFundo.transform, false);
         RectTransform rtMetricas = goTxtMetricas.AddComponent<RectTransform>();
-        rtMetricas.anchorMin = new Vector2(0.04f, 0.14f);
-        rtMetricas.anchorMax = new Vector2(0.96f, 0.44f);
+        rtMetricas.anchorMin = new Vector2(0.07f, 0.16f);
+        rtMetricas.anchorMax = new Vector2(0.93f, 0.44f);
         rtMetricas.offsetMin = Vector2.zero;
         rtMetricas.offsetMax = Vector2.zero;
 
         txtMetricasHUD = goTxtMetricas.AddComponent<TextMeshProUGUI>();
-        txtMetricasHUD.fontSize = 17.5f;
+        txtMetricasHUD.fontSize = 16.5f;
         txtMetricasHUD.alignment = TextAlignmentOptions.Center;
         txtMetricasHUD.color = new Color(0.8f, 0.95f, 1f);
         txtMetricasHUD.text = "PASSOS: 0 | DISTÂNCIA: 0.0m | SIMETRIA: 100%";
@@ -567,8 +616,8 @@ public class DroneGuiaIA : MonoBehaviour
         GameObject goBarraFundo = new GameObject("Fundo_Barra_Simetria");
         goBarraFundo.transform.SetParent(goFundo.transform, false);
         RectTransform rtBarraFundo = goBarraFundo.AddComponent<RectTransform>();
-        rtBarraFundo.anchorMin = new Vector2(0.08f, 0.04f);
-        rtBarraFundo.anchorMax = new Vector2(0.92f, 0.11f);
+        rtBarraFundo.anchorMin = new Vector2(0.12f, 0.07f);
+        rtBarraFundo.anchorMax = new Vector2(0.88f, 0.13f);
         rtBarraFundo.offsetMin = Vector2.zero;
         rtBarraFundo.offsetMax = Vector2.zero;
         Image imgBarraBg = goBarraFundo.AddComponent<Image>();
@@ -586,10 +635,57 @@ public class DroneGuiaIA : MonoBehaviour
         imgBarraSimetria.color = corGuiandoNormal;
     }
 
+    private Material ObterOuCriarMaterialDrone(Shader shader, string nome, Color cor, float metallic, float smoothness, bool emissivo)
+    {
+        Material existente = Resources.Load<Material>("Materials/" + nome);
+        if (existente != null)
+        {
+            if (shader != null && existente.shader != shader)
+            {
+                existente.shader = shader;
+            }
+            return existente;
+        }
+
+        Material m = new Material(shader);
+        m.name = nome;
+        m.color = cor;
+        if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", cor);
+        if (m.HasProperty("_Color")) m.SetColor("_Color", cor);
+        if (m.HasProperty("_Metallic")) m.SetFloat("_Metallic", metallic);
+        if (m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", smoothness);
+        if (m.HasProperty("_Glossiness")) m.SetFloat("_Glossiness", smoothness);
+
+        if (emissivo)
+        {
+            m.EnableKeyword("_EMISSION");
+            if (m.HasProperty("_EmissionColor"))
+                m.SetColor("_EmissionColor", cor * 2.2f);
+        }
+
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+        {
+            if (!UnityEditor.AssetDatabase.IsValidFolder("Assets/Resources"))
+                UnityEditor.AssetDatabase.CreateFolder("Assets", "Resources");
+            if (!UnityEditor.AssetDatabase.IsValidFolder("Assets/Resources/Materials"))
+                UnityEditor.AssetDatabase.CreateFolder("Assets/Resources", "Materials");
+            string path = $"Assets/Resources/Materials/{nome}.mat";
+            if (UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(path) == null)
+                UnityEditor.AssetDatabase.CreateAsset(m, path);
+        }
+#endif
+        return m;
+    }
+
     private void RemoverCollider(GameObject go)
     {
         Collider col = go.GetComponent<Collider>();
-        if (col != null) Destroy(col);
+        if (col != null)
+        {
+            if (Application.isPlaying) Destroy(col);
+            else DestroyImmediate(col);
+        }
     }
 
     void OnDestroy()
