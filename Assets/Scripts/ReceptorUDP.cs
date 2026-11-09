@@ -12,7 +12,7 @@ public class ReceptorUDP : MonoBehaviour
     public int portaUDP = 5005;
     public int portaTCP = 1515;
 
-    [Header("Ossos do Mixamo")]
+    [Header("Ossos do Mixamo (Y Bot)")]
     public Transform articulacaoQuadrilDir;
     public Transform articulacaoJoelhoDir;
     public Transform articulacaoQuadrilEsq;
@@ -29,6 +29,10 @@ public class ReceptorUDP : MonoBehaviour
     public bool simuladorInternoAtivo = false;
     public float velocidadeSimuladorInterno = 2.2f;
 
+    // Referência ao controlador biomecânico 3D completo (Y Bot + Exoesqueleto)
+    [HideInInspector]
+    public AvatarBiomecanicoVR avatarBiomecanico;
+
     // Rede (UDP + TCP simultâneos para aceitar tanto o simulador_robo.py quanto o ReRobApp)
     private UdpClient udpClient;
     private TcpListener tcpListener;
@@ -43,7 +47,14 @@ public class ReceptorUDP : MonoBehaviour
     private float anguloJoelhoEsq = 0f, anguloQuadrilEsq = 0f;
     private float tempoSimuladorInterno = 0f;
 
-    // Propriedades Públicas para Telemetria Clínica e Drone Guia IA
+    // Rotações iniciais de repouso caso operado sem AvatarBiomecanicoVR (ex: cilindros de teste)
+    private Quaternion rotBaseQuadDir = Quaternion.identity;
+    private Quaternion rotBaseJoelhoDir = Quaternion.identity;
+    private Quaternion rotBaseQuadEsq = Quaternion.identity;
+    private Quaternion rotBaseJoelhoEsq = Quaternion.identity;
+    private bool rotBaseCapturada = false;
+
+    // Propriedades Públicas para Telemetria Clínica, Avatar 3D e Drone Guia IA
     public float AnguloJoelhoDir { get; private set; }
     public float AnguloQuadrilDir { get; private set; }
     public float AnguloJoelhoEsq { get; private set; }
@@ -62,6 +73,22 @@ public class ReceptorUDP : MonoBehaviour
                 controlePaciente = GetComponentInParent<CharacterController>();
         }
 
+        // Conecta ou inicializa o AvatarBiomecanicoVR (Y Bot 3D + Exoesqueleto) se estivermos no jogador
+        avatarBiomecanico = GetComponent<AvatarBiomecanicoVR>();
+        if (avatarBiomecanico == null)
+            avatarBiomecanico = GetComponentInParent<AvatarBiomecanicoVR>();
+        if (avatarBiomecanico == null)
+            avatarBiomecanico = GetComponentInChildren<AvatarBiomecanicoVR>();
+
+        if (avatarBiomecanico == null && controlePaciente != null)
+        {
+            avatarBiomecanico = controlePaciente.gameObject.AddComponent<AvatarBiomecanicoVR>();
+            avatarBiomecanico.receptorExo = this;
+            avatarBiomecanico.InicializarAvatarECinematica();
+        }
+
+        CapturarRotacoesBase();
+
         aExecutar = true;
 
         // Inicia escuta UDP (Porta 5005 - simulador_robo.py / câmera)
@@ -75,6 +102,16 @@ public class ReceptorUDP : MonoBehaviour
         receiveThreadTCP.Start();
 
         Debug.Log($"[ExoTao Receptor] Ouvindo simultaneamente UDP (porta {portaUDP}) e TCP (porta {portaTCP}). Pressione F9 para Simulador Interno.");
+    }
+
+    private void CapturarRotacoesBase()
+    {
+        if (rotBaseCapturada) return;
+        if (articulacaoQuadrilDir != null) rotBaseQuadDir = articulacaoQuadrilDir.localRotation;
+        if (articulacaoJoelhoDir != null) rotBaseJoelhoDir = articulacaoJoelhoDir.localRotation;
+        if (articulacaoQuadrilEsq != null) rotBaseQuadEsq = articulacaoQuadrilEsq.localRotation;
+        if (articulacaoJoelhoEsq != null) rotBaseJoelhoEsq = articulacaoJoelhoEsq.localRotation;
+        rotBaseCapturada = true;
     }
 
     private void ReceiveDataUDP()
@@ -111,7 +148,6 @@ public class ReceptorUDP : MonoBehaviour
                 }
                 catch (SocketException)
                 {
-                    // Socket fechado ao encerrar cena
                     break;
                 }
                 catch (Exception err)
@@ -241,18 +277,22 @@ public class ReceptorUDP : MonoBehaviour
             AnguloJoelhoEsq = anguloJoelhoEsq;
         }
 
-        // 1. Aplica a rotação nos ossos (Cinemática Direta com interpolação suave)
-        float fatorSlerp = suavizacaoOssos > 0f ? Mathf.Clamp01(Time.deltaTime * suavizacaoOssos) : 1f;
+        // 1. Se o AvatarBiomecanicoVR não estiver gerenciando o Y Bot (ex: objeto de teste isolado), aplica rotação relativa à base
+        if (avatarBiomecanico == null)
+        {
+            CapturarRotacoesBase();
+            float fatorSlerp = suavizacaoOssos > 0f ? Mathf.Clamp01(Time.deltaTime * suavizacaoOssos) : 1f;
 
-        if (articulacaoQuadrilDir)
-            articulacaoQuadrilDir.localRotation = Quaternion.Slerp(articulacaoQuadrilDir.localRotation, Quaternion.Euler(AnguloQuadrilDir, 0, 0), fatorSlerp);
-        if (articulacaoJoelhoDir)
-            articulacaoJoelhoDir.localRotation = Quaternion.Slerp(articulacaoJoelhoDir.localRotation, Quaternion.Euler(AnguloJoelhoDir, 0, 0), fatorSlerp);
+            if (articulacaoQuadrilDir)
+                articulacaoQuadrilDir.localRotation = Quaternion.Slerp(articulacaoQuadrilDir.localRotation, rotBaseQuadDir * Quaternion.Euler(AnguloQuadrilDir, 0, 0), fatorSlerp);
+            if (articulacaoJoelhoDir)
+                articulacaoJoelhoDir.localRotation = Quaternion.Slerp(articulacaoJoelhoDir.localRotation, rotBaseJoelhoDir * Quaternion.Euler(-Mathf.Abs(AnguloJoelhoDir), 0, 0), fatorSlerp);
 
-        if (articulacaoQuadrilEsq)
-            articulacaoQuadrilEsq.localRotation = Quaternion.Slerp(articulacaoQuadrilEsq.localRotation, Quaternion.Euler(AnguloQuadrilEsq, 0, 0), fatorSlerp);
-        if (articulacaoJoelhoEsq)
-            articulacaoJoelhoEsq.localRotation = Quaternion.Slerp(articulacaoJoelhoEsq.localRotation, Quaternion.Euler(AnguloJoelhoEsq, 0, 0), fatorSlerp);
+            if (articulacaoQuadrilEsq)
+                articulacaoQuadrilEsq.localRotation = Quaternion.Slerp(articulacaoQuadrilEsq.localRotation, rotBaseQuadEsq * Quaternion.Euler(AnguloQuadrilEsq, 0, 0), fatorSlerp);
+            if (articulacaoJoelhoEsq)
+                articulacaoJoelhoEsq.localRotation = Quaternion.Slerp(articulacaoJoelhoEsq.localRotation, rotBaseJoelhoEsq * Quaternion.Euler(-Mathf.Abs(AnguloJoelhoEsq), 0, 0), fatorSlerp);
+        }
 
         // 2. Calcula a locomoção física no mapa
         MoverUsuario();
@@ -261,6 +301,14 @@ public class ReceptorUDP : MonoBehaviour
     void MoverUsuario()
     {
         if (controlePaciente == null)
+        {
+            VelocidadeHorizontalAtual = 0f;
+            return;
+        }
+
+        // No Menu Principal ou Tela de Loading, permite testar a cinemática 3D das pernas no lugar sem deslocar o jogador para longe do menu
+        string cenaAtual = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        if (cenaAtual == "Menu_Principal" || cenaAtual == "CenaDeLoading")
         {
             VelocidadeHorizontalAtual = 0f;
             return;
@@ -282,8 +330,16 @@ public class ReceptorUDP : MonoBehaviour
 
         if (avanco > 5f)
         {
-            // UPGRADE VR: Usa transform.forward em vez de Vector3.forward para respeitar a rotação do corpo
-            movimento = transform.forward * (avanco * sensibilidadePasso);
+            // Usa a direção horizontal da câmera VR se disponível (respeitando SnapTurn e giro da cabeça), ou transform.forward
+            Vector3 dirFrente = transform.forward;
+            if (avatarBiomecanico != null && avatarBiomecanico.cameraVR != null)
+            {
+                Vector3 frenteCam = Vector3.ProjectOnPlane(avatarBiomecanico.cameraVR.forward, Vector3.up);
+                if (frenteCam.sqrMagnitude > 0.01f)
+                    dirFrente = frenteCam.normalized;
+            }
+
+            movimento = dirFrente * (avanco * sensibilidadePasso);
         }
 
         VelocidadeHorizontalAtual = new Vector3(movimento.x, 0f, movimento.z).magnitude;

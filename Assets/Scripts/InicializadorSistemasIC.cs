@@ -4,7 +4,11 @@ using UnityEngine.XR.Interaction.Toolkit.UI;
 
 /// <summary>
 /// Inicializador automático para garantir que todas as cenas de reabilitação do ExoTao VR Rehab
-/// tenham a Telemetria Clínica (CSV/Métricas), o Drone Guia IA e a configuração correta de Canvases VR.
+/// tenham:
+/// 1. O Avatar 3D (Y Bot Mixamo) com Exoesqueleto ExoTao e Cinemática conectada ao ReceptorUDP;
+/// 2. A Telemetria Clínica (CSV/Métricas);
+/// 3. O Drone Guia IA (EXO-BOT);
+/// 4. A configuração correta de Canvases VR.
 /// </summary>
 public static class InicializadorSistemasIC
 {
@@ -36,38 +40,65 @@ public static class InicializadorSistemasIC
         // 0. Em QUALQUER cena (inclusive Menu Principal), configura Canvases WorldSpace para VR
         ConfigurarCanvasesVR();
 
-        // Ignora o Menu Principal e a Tela de Loading para injeção de drone/telemetria
+        // Ignora o Menu Principal e a Tela de Loading para injeção de locomoção/drone/telemetria
         if (nomeCena == "Menu_Principal" || nomeCena == "CenaDeLoading")
             return;
 
-        // Verifica se é uma cena de reabilitação (tem ReceptorUDP ou CharacterController)
-        ReceptorUDP receptor = Object.FindFirstObjectByType<ReceptorUDP>();
+        // Localiza o jogador (CharacterController ou ReceptorUDP)
         CharacterController controle = Object.FindFirstObjectByType<CharacterController>();
+        ReceptorUDP receptor = Object.FindFirstObjectByType<ReceptorUDP>();
 
         if (receptor == null && controle == null)
             return;
 
-        // 1. Garante que o Módulo de Telemetria Clínica exista na cena
+        GameObject goJogador = controle != null ? controle.gameObject : receptor.gameObject;
+
+        // 1. Garante que o ReceptorUDP exista no jogador e esteja vinculado ao CharacterController
+        if (receptor == null)
+        {
+            receptor = goJogador.AddComponent<ReceptorUDP>();
+            receptor.controlePaciente = controle;
+            Debug.Log($"[ExoTao IC] ReceptorUDP adicionado automaticamente ao jogador '{goJogador.name}' na cena '{nomeCena}'.");
+        }
+        else if (receptor.controlePaciente == null && controle != null)
+        {
+            receptor.controlePaciente = controle;
+        }
+
+        // 2. Garante que o Avatar 3D (Y Bot + Exoesqueleto ExoTao + Cinemática) exista e esteja conectado aos ossos
+        AvatarBiomecanicoVR avatar = goJogador.GetComponent<AvatarBiomecanicoVR>();
+        if (avatar == null)
+        {
+            avatar = Object.FindFirstObjectByType<AvatarBiomecanicoVR>();
+        }
+        if (avatar == null)
+        {
+            avatar = goJogador.AddComponent<AvatarBiomecanicoVR>();
+        }
+        avatar.receptorExo = receptor;
+        avatar.InicializarAvatarECinematica();
+
+        // 3. Garante que o Módulo de Telemetria Clínica exista na cena
         TelemetriaClinica telemetria = Object.FindFirstObjectByType<TelemetriaClinica>();
         if (telemetria == null)
         {
             GameObject goTelemetria = new GameObject("[IC] Telemetria_Clinica_ReRobLab");
             telemetria = goTelemetria.AddComponent<TelemetriaClinica>();
-            telemetria.receptorExo = receptor;
-            telemetria.controlePaciente = controle;
             Debug.Log($"[ExoTao IC] Telemetria Clínica injetada automaticamente na cena '{nomeCena}'.");
         }
+        telemetria.receptorExo = receptor;
+        telemetria.controlePaciente = controle;
 
-        // 2. Garante que o Drone Guia IA exista na cena
+        // 4. Garante que o Drone Guia IA exista na cena
         DroneGuiaIA drone = Object.FindFirstObjectByType<DroneGuiaIA>();
         if (drone == null)
         {
             GameObject goDrone = new GameObject("[IC] Drone_Guia_IA_ExoBot");
             drone = goDrone.AddComponent<DroneGuiaIA>();
-            drone.receptorExo = receptor;
-            drone.telemetria = telemetria;
             Debug.Log($"[ExoTao IC] Drone Guia IA (EXO-BOT) injetado automaticamente na cena '{nomeCena}'.");
         }
+        drone.receptorExo = receptor;
+        drone.telemetria = telemetria;
     }
 
     private static void ConfigurarCanvasesVR()
