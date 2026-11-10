@@ -57,6 +57,8 @@ public class DroneGuiaIA : MonoBehaviour
     public bool permitirArrasteEspacial = true;
     public bool estaArrastandoDrone = false;
     public bool ponteiroSobreDroneOuHUD = false;
+    [Tooltip("Indica se o Drone está executando busca autônoma de objetos (FetchBot)")]
+    public bool sobControleFetch = false;
 
     [Header("Cores de Biofeedback Clínico")]
     public Color corGuiandoNormal = new Color(0.0f, 0.96f, 0.83f);   // Ciano Biomédico
@@ -288,11 +290,11 @@ public class DroneGuiaIA : MonoBehaviour
         ProcessarInteracaoEspacialRaycast();
         AtualizarMaquinaDeEstados(caminhandoAgora);
 
-        if (!estaArrastandoDrone)
+        if (!estaArrastandoDrone && !sobControleFetch)
         {
             AtualizarLocomocaoEFlutuacao(caminhandoAgora);
         }
-        else
+        else if (estaArrastandoDrone)
         {
             OrientarDroneECanvasParaPaciente(false);
         }
@@ -750,6 +752,23 @@ public class DroneGuiaIA : MonoBehaviour
                     break;
             }
         }
+    }
+
+    /// <summary>
+    /// Exibe mensagem customizada no HUD holográfico do Drone com alteração opcional de cor de biofeedback.
+    /// </summary>
+    public void DefinirMensagemPersonalizada(string mensagem, Color? cor = null)
+    {
+        if (txtFalaIA != null) txtFalaIA.text = mensagem;
+        if (cor.HasValue) AplicarCorBiofeedback(cor.Value);
+    }
+
+    /// <summary>
+    /// Restaura o texto e a cor correspondentes ao estado clínico atual da FSM.
+    /// </summary>
+    public void RestaurarMensagemEstado()
+    {
+        MudarEstado(estadoAtual);
     }
 
     private void AtualizarLocomocaoEFlutuacao(bool caminhando)

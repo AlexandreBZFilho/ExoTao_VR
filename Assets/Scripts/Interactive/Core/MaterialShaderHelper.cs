@@ -137,6 +137,35 @@ namespace VRRehab.Core
         }
 
         /// <summary>
+        /// Cria um material luminoso aditivo para raios, lasers e feixes tratores holográficos.
+        /// </summary>
+        public static Material CreateBeamGlowMaterial(string name, Color color)
+        {
+            Shader shader = null;
+            if (IsURPActive)
+            {
+                shader = Shader.Find("Universal Render Pipeline/Particles/Unlit") ?? Shader.Find("Universal Render Pipeline/Unlit");
+            }
+            else
+            {
+                shader = Shader.Find("Mobile/Particles/Additive") ?? Shader.Find("Particles/Standard Unlit") ?? Shader.Find("Legacy Shaders/Particles/Additive");
+            }
+
+            if (shader == null) shader = GetUnlitShader();
+
+            Material mat = new Material(shader)
+            {
+                name = name
+            };
+
+            SetBaseColor(mat, color);
+            if (mat.HasProperty("_TintColor")) mat.SetColor("_TintColor", color);
+            SetEmission(mat, color, 2.5f);
+
+            return mat;
+        }
+
+        /// <summary>
         /// Atribui a cor base nos slots corretos (_BaseColor para URP ou _Color para Standard).
         /// </summary>
         public static void SetBaseColor(Material mat, Color color)
