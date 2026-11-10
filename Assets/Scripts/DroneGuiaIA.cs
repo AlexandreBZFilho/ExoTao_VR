@@ -903,7 +903,7 @@ public class DroneGuiaIA : MonoBehaviour
             for (int i = modeloRaiz.childCount - 1; i >= 0; i--)
             {
                 GameObject f = modeloRaiz.GetChild(i).gameObject;
-                if (f.name != "Luz_Biofeedback")
+                if (f.name != "Luz_Biofeedback" && f.name != "Visor_LED_Frontal")
                 {
                     if (Application.isPlaying) Destroy(f);
                     else DestroyImmediate(f);
