@@ -117,12 +117,13 @@ namespace VRRehab.EditorTools
         {
             GameObject tempCamGo = null;
             GameObject tempLightGo = null;
+            Camera cam = null;
             RenderTexture rt = null;
 
             try
             {
                 tempCamGo = new GameObject("__VisualQA_Temp_Camera__");
-                Camera cam = tempCamGo.AddComponent<Camera>();
+                cam = tempCamGo.AddComponent<Camera>();
                 cam.transform.position = cameraPos;
                 cam.transform.LookAt(lookAtTarget);
                 cam.fieldOfView = 60f;
@@ -173,6 +174,10 @@ namespace VRRehab.EditorTools
             }
             finally
             {
+                if (cam != null)
+                {
+                    cam.targetTexture = null;
+                }
                 if (rt != null)
                 {
                     rt.Release();
