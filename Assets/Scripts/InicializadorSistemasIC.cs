@@ -110,6 +110,12 @@ public static class InicializadorSistemasIC
 
     private static void GarantirSistemaDeAudio(string nomeCena)
     {
+        if (nomeCena == "Menu_Principal")
+        {
+            RadioMenu3D radio = Object.FindFirstObjectByType<RadioMenu3D>();
+            if (radio != null) radio.ConfigurarRadioSeNecessario();
+        }
+
         GerenciadorAudioRehab audio = Object.FindFirstObjectByType<GerenciadorAudioRehab>();
         if (audio == null)
         {

@@ -70,7 +70,6 @@ public class DroneGuiaIA : MonoBehaviour
     private Material materialEmissivoDinamico;
     private AudioSource fonteHover3D;
     private AudioSource fonteVozPet3D;
-    private float timerChirpEspontaneo = 0f;
 
     // HUD Holográfico Acoplado ao Drone
     private Canvas canvasHolograma;

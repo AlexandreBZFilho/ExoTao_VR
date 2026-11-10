@@ -168,12 +168,26 @@ public class GerenciadorAudioRehab : MonoBehaviour
 
         if (ehMenuOuLoading)
         {
-            // No Menu Principal: Toca a música ambiente Sci-Fi suave + Pad holográfico acolhedor
-            fonteMusicaAmbiente.clip = clipMusicaMenuSciFi != null ? clipMusicaMenuSciFi : clipAmbientePadSciFi;
-            fonteMusicaAmbiente.volume = MusicVol * 0.72f;
+            // No Menu Principal: se o Rádio 3D estiver presente, a música emana fisicamente dele no espaço 3D!
+            RadioMenu3D radio3D = Object.FindFirstObjectByType<RadioMenu3D>();
+            if (radio3D != null && nomeCena == "Menu_Principal")
+            {
+                fonteMusicaAmbiente.Stop();
+                fonteMusicaAmbiente.clip = null;
 
-            fonteCamadaSecundaria.clip = clipAmbientePadSciFi;
-            fonteCamadaSecundaria.volume = MusicVol * 0.45f;
+                // Mantém um suave room tone difuso com o pad Sci-Fi no resto da sala
+                fonteCamadaSecundaria.clip = clipAmbientePadSciFi;
+                fonteCamadaSecundaria.volume = MusicVol * 0.22f;
+            }
+            else
+            {
+                // Fallback 2D normal
+                fonteMusicaAmbiente.clip = clipMusicaMenuSciFi != null ? clipMusicaMenuSciFi : clipAmbientePadSciFi;
+                fonteMusicaAmbiente.volume = MusicVol * 0.72f;
+
+                fonteCamadaSecundaria.clip = clipAmbientePadSciFi;
+                fonteCamadaSecundaria.volume = MusicVol * 0.45f;
+            }
         }
         else
         {

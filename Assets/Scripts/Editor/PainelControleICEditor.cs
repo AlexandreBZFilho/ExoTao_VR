@@ -362,10 +362,11 @@ public static class PainelControleICEditor
                 avatar.InicializarAvatarECinematica();
             }
 
-            // d) No Menu Principal: constrói a Estação Holográfica Sci-Fi do Drone
+            // d) No Menu Principal: constrói a Estação Holográfica Sci-Fi do Drone e o Rádio 3D
             if (cena.name == "Menu_Principal")
             {
                 ConfigurarEstacaoHologramaNoMenu(receptor);
+                ConfigurarRadioNoMenu();
             }
             // e) Nos Mapas de Reabilitação: adiciona e inicializa o Drone Guia IA 3D + Telemetria na cena
             else if (cena.name != "CenaDeLoading")
@@ -618,6 +619,38 @@ public static class PainelControleICEditor
 
         estacaoExistente.receptorExo = receptor;
         estacaoExistente.ConstruirEstacaoCompletaSeNecessario();
+    }
+
+    private static void ConfigurarRadioNoMenu()
+    {
+        RadioMenu3D radioExistente = Object.FindFirstObjectByType<RadioMenu3D>(FindObjectsInactive.Include);
+        GameObject goRadio;
+
+        if (radioExistente != null)
+        {
+            goRadio = radioExistente.gameObject;
+        }
+        else
+        {
+            goRadio = new GameObject("[IC] Radio_Menu_3D");
+            radioExistente = goRadio.AddComponent<RadioMenu3D>();
+        }
+
+        // Posiciona o rádio sobre a mesa lateral junto à parede esquerda:
+        // full_desk_3 (1) em x = 0.63, tampo em y = 0.95, espaço livre e limpo em z = 0.36
+        // Angulado a 75 graus para que a frente (+Z) olhe em direção ao centro da sala e ao jogador
+        goRadio.transform.position = new Vector3(0.66f, 0.952f, 0.36f);
+        goRadio.transform.rotation = Quaternion.Euler(0f, 75f, 0f);
+        goRadio.transform.localScale = Vector3.one * 1.15f;
+
+        // Ajusta sutilmente o pequeno acessório da mesa (Deco Variant 3) para z = 0.62 para desobstruir a área do rádio
+        GameObject deco = GameObject.Find("Building/full_desk_3 (1)/Deco Variant 3");
+        if (deco != null)
+        {
+            deco.transform.position = new Vector3(0.65f, 0.95f, 0.62f);
+        }
+
+        radioExistente.ConfigurarRadioSeNecessario();
     }
 
     private static void InserirSistemasNaCenaAtualSilencioso(ReceptorUDP receptor, CharacterController controle)
