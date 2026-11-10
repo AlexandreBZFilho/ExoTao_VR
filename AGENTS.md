@@ -66,7 +66,7 @@ Para garantir que **todas as 16 tarefas recebam exatamente o mesmo nível de esf
 | ID | Módulo | Tarefa | Status | Assets (Blender / Áudio / API) | Scripts & Prefabs | Visual QA (Screenshots Validados) |
 | :--- | :--- | :--- | :---: | :--- | :--- | :--- |
 | **TASK-01** | Core / Base | Infraestrutura Multissensorial + Utilitário de Captura de Tela Automática (`VisualQACapture`) | `[x]` | 6 Áudios Core (`.wav` em `Assets/Audio/Generated/Core/`) | `MaterialShaderHelper`, `VRFeedbackManager`, `InteractableHighlightFeedback`, `VisualQACaptureEditor` | `TASK-01_Menu_Overview.png`, `TASK-01_Menu_DeskZone.png`, `TASK-01_Floresta_Overview.png` |
-| **TASK-02** | Core / Base | Ergonomia Exoesqueleto: Force Grab Assistido, Auto-Respawn e Aim Assist Magnético | `[ ]` | Retícula 3D de Mira (`Blender MCP`) | - | - |
+| **TASK-02** | Core / Base | Ergonomia Exoesqueleto: Force Grab Assistido, Auto-Respawn e Aim Assist Magnético | `[x]` | `ReticleTargetRing.fbx` + `M_Reticle_HoloCyan.mat` (Blender 5.1) | `IAimAssistTarget`, `ThrowAimAssist`, `TargetAimReticle`, `ErgonomicGrabInteractable`, `ErgonomicInteractiveToy.prefab` | `TASK-02_Reticle_Aim.png`, `TASK-02_ForceGrab_Preview.png`, `TASK-02_AutoRespawn_Zone.png` |
 | **TASK-03** | Drone Pet | Máquina de Estados do Drone + Mecânica de "Buscar" (*FetchBot* com Feixe Trator) | `[ ]` | Emissor Trator + Bastão (`Blender MCP`) | - | - |
 | **TASK-04** | Drone Pet | Reatividade Afetiva (Carinho/Poke, Expressões LED e Dança no Ritmo do Rádio) | `[ ]` | Atlas LED + Sons Robóticos | - | - |
 | **TASK-05** | Drone Pet | Sistema de Celebração de Metas Clínicas (Pirueta, Confetes, Fanfarra e Frases) | `[ ]` | JSON de frases (`Gemini API`) | - | - |
