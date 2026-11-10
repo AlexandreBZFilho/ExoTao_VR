@@ -48,6 +48,8 @@ namespace VRRehab.Interactive.Task13
 
         public bool IsLit => isLit;
 
+        public static event System.Action<PathLanternInteractable> OnLanternIgnitedEvent;
+
         private void Awake()
         {
             if (flameObject == null)
@@ -202,6 +204,7 @@ namespace VRRehab.Interactive.Task13
         {
             if (isLit) return;
             isLit = true;
+            OnLanternIgnitedEvent?.Invoke(this);
 
             if (igniteSfx != null && audioSource != null)
             {

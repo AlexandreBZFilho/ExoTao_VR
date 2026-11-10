@@ -45,6 +45,8 @@ namespace VRRehab.Interactive.Task12
 
         public bool IsMushroomCluster => isMushroomCluster;
 
+        public static event System.Action<SproutingPlantLifecycle> OnPlantSproutedEvent;
+
         private void Awake()
         {
             initialTargetScale = transform.localScale;
@@ -59,6 +61,7 @@ namespace VRRehab.Interactive.Task12
         {
             // Inicia do tamanho zero e expande elasticamente
             StartCoroutine(ElasticSproutRoutine());
+            OnPlantSproutedEvent?.Invoke(this);
 
             if (pollenParticles != null && !pollenParticles.isPlaying)
             {

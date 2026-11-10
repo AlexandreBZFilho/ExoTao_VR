@@ -39,6 +39,8 @@ namespace VRRehab.Interactive.Task11
         public int TotalScore => totalScore;
         public int ApplesScoredCount => applesScoredCount;
 
+        public static event System.Action<int, int> OnAppleScoredEvent; // pointsEarned, totalApplesScored
+
         private HashSet<InteractiveApple> scoredApples = new HashSet<InteractiveApple>();
         private DroneMilestoneCelebration droneCelebration;
 
@@ -81,6 +83,7 @@ namespace VRRehab.Interactive.Task11
             int pointsEarned = apple.ScoreValue;
             totalScore += pointsEarned;
             applesScoredCount++;
+            OnAppleScoredEvent?.Invoke(pointsEarned, applesScoredCount);
 
             // 1. Áudio alegre de sino de pontuação
             if (sfxScoreBell != null)
