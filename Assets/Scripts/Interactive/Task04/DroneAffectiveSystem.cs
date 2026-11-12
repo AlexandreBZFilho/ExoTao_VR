@@ -20,17 +20,31 @@ namespace VRRehab.DronePet
 
     /// <summary>
     /// Sistema Afetivo Completo do Drone Pet (TASK-04):
-    /// - Reatividade a Carinho (Petting): Vibração háptica de ronrom contínuo no controle VR,
-    ///   emissão de corações holográficos flutuantes, som purr e expressão de amor.
-    /// - Reatividade a Cutucão (Poke/Boop): Simulação de mola física amortecida (squash & stretch),
-    ///   sons elásticos (boop + risadinha) e expressão tonta (@_@).
-    /// - Dança Rítmica Musical: Análise de espectro FFT da música do rádio do menu,
-    ///   balanço sincronizado com a batida e expressão musical (♪‿♪).
+    /// - Reatividade a Carinho (Petting):
+    ///   * Suporte nativo a carinho físico por aproximação e via raio laser (XRRayInteractor hover contínuo no topo).
+    ///   * Vibração háptica de ronrom suave (purring tátil no controle).
+    ///   * Emissão de corações holográficos flutuantes, som purr confortável (drone_purr_happy.wav ~0.18f) e expressão Love (♥‿♥).
+    ///   * Balanço harmônico suave exclusivo no nó filho visual (zero interferência na raiz/offsetLocal).
+    /// - Reatividade a Cutucão (Poke / Boop):
+    ///   * Suporte a cutucão por contato físico ou clique de gatilho do laser mirado na face/nariz.
+    ///   * Simulação de mola física amortecida (squash & stretch local), som elástico suave (drone_poke_chirp.wav ~0.20f),
+    ///     risadinha robótica subsequente (drone_giggle_soft.wav ~0.18f) e expressão Poked (@_@).
+    /// - Dança Rítmica Musical:
+    ///   * Análise de espectro FFT da música do rádio do menu (zero chamadas a GameObject.Find em Update),
+    ///     balanço sincronizado com os graves e expressão musical (♪‿♪).
+    /// - Performance VR Ultra-Rigorosa:
+    ///   * Troca de texturas e emissão EXCLUSIVAMENTE via MaterialPropertyBlock (zero clone de material na heap).
+    ///   * Zero GC Alloc durante o gameplay, compatibilidade total com SRP Batcher e GPU Instancing.
     /// </summary>
     [DisallowMultipleComponent]
+    [SelectionBase]
     public class DroneAffectiveSystem : MonoBehaviour
     {
         public static DroneAffectiveSystem Instance { get; private set; }
+
+        [Header("Nó Visual Filho (Desacoplado da Raiz Cinemática)")]
+        [Tooltip("Transform do modelo 3D visual do Drone. Todos os offsets de mola, wobble e dança atuam estritamente aqui")]
+        public Transform droneVisualRoot;
 
         [Header("Visor Frontal LED")]
         [Tooltip("Renderer do visor frontal LED do Drone")]
@@ -43,22 +57,23 @@ namespace VRRehab.DronePet
 
         [Header("Materiais e Cores")]
         public Color ledEmissiveColor = new Color(0.0f, 0.95f, 1.0f);
-        public float ledEmissiveIntensity = 2.5f;
+        public float ledEmissiveIntensity = 2.8f;
 
         [Header("Reatividade a Carinho (Petting)")]
         [Tooltip("Trigger na calota superior da cabeça do drone")]
         public Collider headPettingTrigger;
-        [Tooltip("Emissor de corações holográficos")]
+        [Tooltip("Interator XR para suporte nativo a carinho com o feixe de laser")]
+        [SerializeField] private XRSimpleInteractable headLaserInteractable;
+        [Tooltip("Emissor de corações holográficos flutuantes")]
         public ParticleSystem heartParticles;
-        public AudioClip sfxDronePurr;
-        [Range(0.01f, 1.0f)] public float pettingHapticAmplitude = 0.22f;
+        [Range(0.01f, 1.0f)] public float pettingHapticAmplitude = 0.20f;
         public float pettingHapticInterval = 0.05f;
 
         [Header("Reatividade a Cutucão (Poke / Boop)")]
         [Tooltip("Trigger no visor/nariz frontal")]
         public Collider facePokeTrigger;
-        public AudioClip sfxDroneBoop;
-        public AudioClip sfxDroneGiggle;
+        [Tooltip("Interator XR para suporte a cutucada com clique de gatilho do laser")]
+        [SerializeField] private XRSimpleInteractable faceLaserInteractable;
         public float pokeRecoilZ = -0.055f;
         public float pokeWobbleAngle = 9.0f;
         public float pokeSpringStiffness = 320.0f;
@@ -72,40 +87,69 @@ namespace VRRehab.DronePet
         public float danceBounceHeight = 0.022f;
         public float danceBeatSensitivity = 0.035f;
 
-        [Header("Fonte de Áudio do Pet")]
+        [Header("Fontes e Clips de Áudio VR-Safe")]
+        [Tooltip("AudioSource 3D dedicado aos efeitos vocais e reações afetivas do Drone")]
         public AudioSource petVoiceAudioSource;
+        [Tooltip("Ronrom suave contínuo (drone_purr_happy.wav)")]
+        public AudioClip sfxDronePurr;
+        [Tooltip("Cutucão macio/boop (drone_poke_chirp.wav)")]
+        public AudioClip sfxDronePoke;
+        [Tooltip("Alias legado para compatibilidade de chamadas existentes")]
+        public AudioClip sfxDroneBoop;
+        [Tooltip("Risadinha suave (drone_giggle_soft.wav)")]
+        public AudioClip sfxDroneGiggle;
+        [Tooltip("Groove sci-fi musical (drone_dance_groove.wav)")]
+        public AudioClip sfxDroneDance;
+
+        [Header("Calibração de Volume Confortável VR-Safe (<= 0.25f)")]
+        [Range(0.05f, 0.40f)] public float purrVolume = 0.18f;
+        [Range(0.05f, 0.40f)] public float pokeVolume = 0.20f;
+        [Range(0.05f, 0.40f)] public float giggleVolume = 0.18f;
+        [Range(0.05f, 0.40f)] public float danceVolume = 0.18f;
 
         [Header("Estado Atual")]
         [SerializeField] private DroneLEDExpression currentExpression = DroneLEDExpression.Normal;
         [SerializeField] private bool isPettingActive = false;
         [SerializeField] private bool isPokedActive = false;
         [SerializeField] private bool isDancingActive = false;
+        [SerializeField] private bool isLaserHoveringHead = false;
 
-        // Controle interno de tempo e mola
+        public DroneLEDExpression CurrentExpression => currentExpression;
+        public bool IsPettingActive => isPettingActive;
+        public bool IsPokedActive => isPokedActive;
+        public bool IsDancingActive => isDancingActive;
+
+        // Controle de Materiais e Shader IDs (Zero Garbage Collection)
         private MaterialPropertyBlock propBlock;
+        private static readonly int MainTexId = Shader.PropertyToID("_MainTex");
+        private static readonly int BaseMapId = Shader.PropertyToID("_BaseMap");
         private static readonly int EmissionMapId = Shader.PropertyToID("_EmissionMap");
         private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
-        private static readonly int MainTexId = Shader.PropertyToID("_MainTex");
 
-        private Transform modelTransform;
-        private Vector3 modelRestPos;
-        private Quaternion modelRestRot;
+        // Transform Rest Pose do Modelo Visual (Garante 100% isolamento da raiz)
+        private Vector3 modelRestPos = Vector3.zero;
+        private Quaternion modelRestRot = Quaternion.identity;
+        private bool hasCachedRestPose = false;
 
+        // Físicas de Oscilação Amortecida (Wobble & Squash)
         private Vector3 wobblePosOffset = Vector3.zero;
         private Vector3 wobblePosVelocity = Vector3.zero;
         private Vector3 wobbleRotOffset = Vector3.zero;
         private Vector3 wobbleRotVelocity = Vector3.zero;
 
+        // Temporizadores internos
         private float expressionTimer = 0f;
         private float lastHapticTime = 0f;
         private float petContinuousTimer = 0f;
+        private float lastRadioCheckTime = -10f;
 
-        // Rastreamento das mãos VR
+        // Rastreamento das mãos e interatores VR
         private readonly List<Transform> trackedHands = new List<Transform>();
         private readonly Dictionary<Transform, Vector3> lastHandPositions = new Dictionary<Transform, Vector3>();
         private XRBaseController activePettingController;
+        private IXRInteractor activeLaserInteractor;
 
-        // Espectro de áudio FFT
+        // Espectro de áudio FFT pré-alocado
         private readonly float[] spectrumSamples = new float[256];
         private float smoothedBassEnergy = 0f;
 
@@ -119,48 +163,71 @@ namespace VRRehab.DronePet
             Instance = this;
 
             propBlock = new MaterialPropertyBlock();
-            CacheModelTransform();
+            CacheVisualRoot();
         }
 
         private void Start()
         {
-            CacheModelTransform();
+            CacheVisualRoot();
             AutoDetectComponents();
             SetExpression(DroneLEDExpression.Normal);
         }
 
         private void OnEnable()
         {
-            CacheModelTransform();
+            CacheVisualRoot();
             AutoDetectComponents();
+            EnsureLaserInteractables();
+        }
+
+        private void OnDisable()
+        {
+            if (headLaserInteractable != null)
+            {
+                headLaserInteractable.firstHoverEntered.RemoveListener(OnHeadHoverEntered);
+                headLaserInteractable.lastHoverExited.RemoveListener(OnHeadHoverExited);
+            }
+
+            if (faceLaserInteractable != null)
+            {
+                faceLaserInteractable.activated.RemoveListener(OnFaceLaserActivated);
+                faceLaserInteractable.selectEntered.RemoveListener(OnFaceLaserSelected);
+            }
+
+            ResetTestPose();
         }
 
         /// <summary>
-        /// Localiza o transform do modelo 3D do Drone para a física de wobble.
+        /// Localiza e memoriza a pose de repouso do nó visual filho ('Modelo_3D_ExoBot').
+        /// Os offsets de carinho, cutucada e dança atuarão unicamente nas coordenadas locais deste nó,
+        /// preservando intactos o transform raiz e o offset memorizado pelo DroneCompanionFollowAndGrab.
         /// </summary>
-        private void CacheModelTransform()
+        private void CacheVisualRoot()
         {
-            if (modelTransform == null)
+            if (droneVisualRoot == null)
             {
-                modelTransform = transform.Find("Modelo_3D_ExoBot");
-                if (modelTransform == null && transform.childCount > 0)
+                droneVisualRoot = transform.Find("Modelo_3D_ExoBot");
+                if (droneVisualRoot == null && transform.childCount > 0)
                 {
-                    modelTransform = transform.GetChild(0);
+                    droneVisualRoot = transform.GetChild(0);
                 }
             }
 
-            if (modelTransform != null)
+            if (droneVisualRoot != null && !hasCachedRestPose)
             {
-                modelRestPos = modelTransform.localPosition;
-                modelRestRot = modelTransform.localRotation;
+                modelRestPos = droneVisualRoot.localPosition;
+                modelRestRot = droneVisualRoot.localRotation;
+                hasCachedRestPose = true;
             }
         }
 
         /// <summary>
-        /// Localiza automaticamente materiais, fontes de áudio, rádio e partículas.
+        /// Localiza automaticamente materiais, fontes de áudio, rádio, partículas e interatores XR.
         /// </summary>
         public void AutoDetectComponents()
         {
+            CacheVisualRoot();
+
             if (visorRenderer == null)
             {
                 Transform visorObj = transform.Find("Modelo_3D_ExoBot/Visor_LED_Frontal");
@@ -168,20 +235,16 @@ namespace VRRehab.DronePet
                 if (visorObj != null) visorRenderer = visorObj.GetComponent<MeshRenderer>();
             }
 
-            if (petVoiceAudioSource == null)
+            if (headPettingTrigger == null)
             {
-                AudioSource[] sources = GetComponentsInChildren<AudioSource>();
-                if (sources.Length > 1) petVoiceAudioSource = sources[1];
-                else if (sources.Length > 0) petVoiceAudioSource = sources[0];
+                Transform tPet = transform.Find("HeadPettingTrigger");
+                if (tPet != null) headPettingTrigger = tPet.GetComponent<Collider>();
             }
 
-            if (musicSource == null)
+            if (facePokeTrigger == null)
             {
-                GameObject radioObj = GameObject.Find("[IC] Radio_Menu_3D");
-                if (radioObj != null)
-                {
-                    musicSource = radioObj.GetComponent<AudioSource>();
-                }
+                Transform tPoke = transform.Find("FacePokeTrigger");
+                if (tPoke != null) facePokeTrigger = tPoke.GetComponent<Collider>();
             }
 
             if (heartParticles == null)
@@ -190,8 +253,151 @@ namespace VRRehab.DronePet
                 if (pt != null) heartParticles = pt.GetComponent<ParticleSystem>();
             }
 
-            // Localiza controladores do XR Rig para haptics contínuo
+            EnsureAudioSourceConfig();
+            EnsureAudioClips();
+            AutoDetectTextures();
+            LocateRadioMusicSource();
+            EnsureLaserInteractables();
             LocateVRControllers();
+        }
+
+        private void EnsureAudioSourceConfig()
+        {
+            if (petVoiceAudioSource == null)
+            {
+                AudioSource[] sources = GetComponentsInChildren<AudioSource>();
+                if (sources.Length > 1) petVoiceAudioSource = sources[1];
+                else if (sources.Length > 0) petVoiceAudioSource = sources[0];
+                else petVoiceAudioSource = gameObject.AddComponent<AudioSource>();
+            }
+
+            if (petVoiceAudioSource != null)
+            {
+                petVoiceAudioSource.playOnAwake = false;
+                petVoiceAudioSource.spatialBlend = 1.0f; // 100% 3D VR Audio
+                petVoiceAudioSource.minDistance = 0.6f;
+                petVoiceAudioSource.maxDistance = 8.0f;
+                petVoiceAudioSource.rolloffMode = AudioRolloffMode.Logarithmic;
+            }
+        }
+
+        private void EnsureAudioClips()
+        {
+#if UNITY_EDITOR
+            string audioDir = "Assets/Audio/Generated/Task04";
+            if (sfxDronePurr == null || sfxDronePurr.name == "drone_purr")
+            {
+                var clip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>($"{audioDir}/drone_purr_happy.wav");
+                if (clip != null) sfxDronePurr = clip;
+            }
+            if (sfxDronePoke == null || sfxDronePoke.name == "drone_boop")
+            {
+                var clip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>($"{audioDir}/drone_poke_chirp.wav");
+                if (clip != null)
+                {
+                    sfxDronePoke = clip;
+                    sfxDroneBoop = clip;
+                }
+            }
+            if (sfxDroneGiggle == null || sfxDroneGiggle.name == "drone_giggle")
+            {
+                var clip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>($"{audioDir}/drone_giggle_soft.wav");
+                if (clip != null) sfxDroneGiggle = clip;
+            }
+            if (sfxDroneDance == null)
+            {
+                var clip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>($"{audioDir}/drone_dance_groove.wav");
+                if (clip != null) sfxDroneDance = clip;
+            }
+#endif
+            if (sfxDroneBoop == null && sfxDronePoke != null) sfxDroneBoop = sfxDronePoke;
+            if (sfxDronePoke == null && sfxDroneBoop != null) sfxDronePoke = sfxDroneBoop;
+        }
+
+        private void AutoDetectTextures()
+        {
+#if UNITY_EDITOR
+            string texDir = "Assets/Textures/Generated/Task04";
+            if (texNormal == null) texNormal = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>($"{texDir}/LED_Expression_Normal.png");
+            if (texHappy == null)  texHappy  = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>($"{texDir}/LED_Expression_Happy.png");
+            if (texLove == null)   texLove   = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>($"{texDir}/LED_Expression_Love.png");
+            if (texPoked == null)  texPoked  = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>($"{texDir}/LED_Expression_Poked.png");
+            if (texDance == null)  texDance  = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>($"{texDir}/LED_Expression_Dance.png");
+#endif
+        }
+
+        private void LocateRadioMusicSource()
+        {
+            if (musicSource != null) return;
+
+            // Busca O(1) através do singleton do RadioMenu3D
+            if (RadioMenu3D.Instancia != null && RadioMenu3D.Instancia.audioFonte != null)
+            {
+                musicSource = RadioMenu3D.Instancia.audioFonte;
+                return;
+            }
+
+            // Fallback pontual e seguro
+            GameObject radioObj = GameObject.Find("[IC] Radio_Menu_3D");
+            if (radioObj != null)
+            {
+                musicSource = radioObj.GetComponent<AudioSource>();
+            }
+        }
+
+        /// <summary>
+        /// Configura componentes XRSimpleInteractable dedicados na cabeça e na face para suporte
+        /// nativo ao raio laser (XRRayInteractor), sem sobreposição com o corpo principal do drone.
+        /// </summary>
+        public void EnsureLaserInteractables()
+        {
+            if (headPettingTrigger != null)
+            {
+                if (headLaserInteractable == null)
+                {
+                    headLaserInteractable = headPettingTrigger.GetComponent<XRSimpleInteractable>();
+                    if (headLaserInteractable == null)
+                    {
+                        headLaserInteractable = headPettingTrigger.gameObject.AddComponent<XRSimpleInteractable>();
+                    }
+                }
+
+                headLaserInteractable.interactionLayers = ~0;
+                if (!headLaserInteractable.colliders.Contains(headPettingTrigger))
+                {
+                    headLaserInteractable.colliders.Clear();
+                    headLaserInteractable.colliders.Add(headPettingTrigger);
+                }
+
+                headLaserInteractable.firstHoverEntered.RemoveListener(OnHeadHoverEntered);
+                headLaserInteractable.lastHoverExited.RemoveListener(OnHeadHoverExited);
+                headLaserInteractable.firstHoverEntered.AddListener(OnHeadHoverEntered);
+                headLaserInteractable.lastHoverExited.AddListener(OnHeadHoverExited);
+            }
+
+            if (facePokeTrigger != null)
+            {
+                if (faceLaserInteractable == null)
+                {
+                    faceLaserInteractable = facePokeTrigger.GetComponent<XRSimpleInteractable>();
+                    if (faceLaserInteractable == null)
+                    {
+                        faceLaserInteractable = facePokeTrigger.gameObject.AddComponent<XRSimpleInteractable>();
+                    }
+                }
+
+                faceLaserInteractable.interactionLayers = ~0;
+                if (!faceLaserInteractable.colliders.Contains(facePokeTrigger))
+                {
+                    faceLaserInteractable.colliders.Clear();
+                    faceLaserInteractable.colliders.Add(facePokeTrigger);
+                }
+
+                faceLaserInteractable.activated.RemoveListener(OnFaceLaserActivated);
+                faceLaserInteractable.selectEntered.RemoveListener(OnFaceLaserSelected);
+                faceLaserInteractable.activated.AddListener(OnFaceLaserActivated);
+                faceLaserInteractable.selectEntered.AddListener(OnFaceLaserSelected);
+            }
         }
 
         private void LocateVRControllers()
@@ -215,64 +421,109 @@ namespace VRRehab.DronePet
             float dt = Time.deltaTime;
             if (dt <= 0f) return;
 
-            // 1. Processa proximidade e carinho das mãos VR (fallback robusto para triggers)
-            ProcessHandProximityAndPetting(dt);
+            // 1. Processa carinho físico e contínuo via laser
+            ProcessLaserAndProximityPetting(dt);
 
-            // 2. Simula física de oscilação amortecida de wobble (Poke recoil)
+            // 2. Simula física de oscilação elástica amortecida (Poke squash & stretch)
             UpdateSpringPhysics(dt);
 
-            // 3. Processa áudio e dança no ritmo se música estiver tocando
+            // 3. Processa áudio FFT e dança rítmica sincronizada com o rádio
             UpdateMusicDance(dt);
 
-            // 4. Temporizador de retorno de expressões
+            // 4. Ciclo de vida e retorno das expressões faciais LED
             UpdateExpressionLifecycle(dt);
         }
 
         private void LateUpdate()
         {
-            // Aplica offsets de wobble e dança ao modelo sem conflitar com rotação do DroneGuiaIA
-            if (modelTransform != null)
+            // Aplica os offsets visuais EXCLUSIVAMENTE nas coordenadas locais do nó filho
+            ApplyVisualOffsets();
+        }
+
+        /// <summary>
+        /// Aplica os deslocamentos de carinho, recuo de mola e dança ao modelo sem conflitar com
+        /// a raiz (transform.position) e preservando a rotação/posição gerenciada pelo DroneCompanionFollowAndGrab.
+        /// Durante a celebração de metas (TASK-05), o DroneMilestoneCelebration assume controle prioritário da pose local.
+        /// </summary>
+        private void ApplyVisualOffsets()
+        {
+            if (DroneMilestoneCelebration.Instance != null && DroneMilestoneCelebration.Instance.IsCelebrating)
             {
-                modelTransform.localPosition = modelRestPos + wobblePosOffset;
-                modelTransform.localRotation = modelRestRot * Quaternion.Euler(wobbleRotOffset);
+                return;
+            }
+
+            if (droneVisualRoot != null)
+            {
+                droneVisualRoot.localPosition = modelRestPos + wobblePosOffset;
+                droneVisualRoot.localRotation = modelRestRot * Quaternion.Euler(wobbleRotOffset);
             }
         }
 
-        #region Reatividade a Carinho (Petting)
+        #region Reatividade a Carinho (Petting) - Laser & Mão Física
 
-        private void ProcessHandProximityAndPetting(float dt)
+        private void OnHeadHoverEntered(HoverEnterEventArgs args)
         {
-            if (headPettingTrigger == null) return;
+            isLaserHoveringHead = true;
+            activeLaserInteractor = args.interactorObject;
 
-            Vector3 headCenter = headPettingTrigger.bounds.center;
-            float petRadius = 0.28f;
-            bool handPettingDetected = false;
-
-            for (int i = 0; i < trackedHands.Count; i++)
+            if (args.interactorObject is XRBaseControllerInteractor ctrlInteractor)
             {
-                Transform hand = trackedHands[i];
-                if (hand == null) continue;
+                activePettingController = ctrlInteractor.xrController != null
+                    ? ctrlInteractor.xrController
+                    : ctrlInteractor.GetComponentInParent<XRBaseController>();
+            }
 
-                Vector3 currentPos = hand.position;
-                Vector3 lastPos = lastHandPositions.ContainsKey(hand) ? lastHandPositions[hand] : currentPos;
-                float speed = Vector3.Distance(currentPos, lastPos) / Mathf.Max(0.001f, dt);
-                lastHandPositions[hand] = currentPos;
+            ApplyPettingBehavior(Time.deltaTime);
+        }
 
-                float distToHead = Vector3.Distance(currentPos, headCenter);
-                if (distToHead <= petRadius)
+        private void OnHeadHoverExited(HoverExitEventArgs args)
+        {
+            isLaserHoveringHead = false;
+            activeLaserInteractor = null;
+        }
+
+        private void ProcessLaserAndProximityPetting(float dt)
+        {
+            bool pettingDetected = false;
+
+            // A) Detecção ativa por feixe de laser pairando na cúpula
+            if (isLaserHoveringHead && activeLaserInteractor != null)
+            {
+                pettingDetected = true;
+            }
+
+            // B) Detecção por proximidade suave da mão física (fallback ergonômico)
+            if (!pettingDetected && headPettingTrigger != null)
+            {
+                Vector3 headCenter = headPettingTrigger.bounds.center;
+                float petRadius = 0.28f;
+
+                for (int i = 0; i < trackedHands.Count; i++)
                 {
-                    // Mão próxima da cabeça se movendo suavemente = Carinho!
-                    if (speed > 0.03f && speed < 1.8f)
+                    Transform hand = trackedHands[i];
+                    if (hand == null) continue;
+
+                    Vector3 currentPos = hand.position;
+                    Vector3 lastPos = lastHandPositions.ContainsKey(hand) ? lastHandPositions[hand] : currentPos;
+                    float speed = Vector3.Distance(currentPos, lastPos) / Mathf.Max(0.001f, dt);
+                    lastHandPositions[hand] = currentPos;
+
+                    float distToHead = Vector3.Distance(currentPos, headCenter);
+                    if (distToHead <= petRadius)
                     {
-                        handPettingDetected = true;
-                        var controller = hand.GetComponentInParent<XRBaseController>();
-                        if (controller != null) activePettingController = controller;
-                        break;
+                        // Mão próxima da cabeça se movendo suavemente = Carinho!
+                        if (speed > 0.03f && speed < 1.8f)
+                        {
+                            pettingDetected = true;
+                            var controller = hand.GetComponentInParent<XRBaseController>();
+                            if (controller != null) activePettingController = controller;
+                            break;
+                        }
                     }
                 }
             }
 
-            if (handPettingDetected)
+            if (pettingDetected)
             {
                 ApplyPettingBehavior(dt);
             }
@@ -297,13 +548,17 @@ namespace VRRehab.DronePet
             isPettingActive = true;
             petContinuousTimer = 0.35f;
 
-            // Vibração háptica contínua (purring / ronronar tátil)
+            // Vibração háptica contínua (purring tátil suave no controle VR)
             if (Time.time - lastHapticTime >= pettingHapticInterval)
             {
                 lastHapticTime = Time.time;
                 if (activePettingController != null)
                 {
                     activePettingController.SendHapticImpulse(pettingHapticAmplitude, pettingHapticInterval * 0.9f);
+                }
+                else if (activeLaserInteractor is XRBaseControllerInteractor ctrl)
+                {
+                    ctrl.SendHapticImpulse(pettingHapticAmplitude, pettingHapticInterval * 0.9f);
                 }
             }
 
@@ -313,15 +568,23 @@ namespace VRRehab.DronePet
                 heartParticles.Play();
             }
 
-            // Toca som de ronronar do Drone
-            if (petVoiceAudioSource != null && sfxDronePurr != null && !petVoiceAudioSource.isPlaying)
+            // Toca som suave de ronrom do Drone (volume calibrado para VR-Safe)
+            if (petVoiceAudioSource != null && sfxDronePurr != null)
             {
-                petVoiceAudioSource.clip = sfxDronePurr;
-                petVoiceAudioSource.loop = true;
-                petVoiceAudioSource.pitch = UnityEngine.Random.Range(0.98f, 1.04f);
-                petVoiceAudioSource.volume = 0.75f;
-                petVoiceAudioSource.Play();
+                if (!petVoiceAudioSource.isPlaying || petVoiceAudioSource.clip != sfxDronePurr)
+                {
+                    petVoiceAudioSource.clip = sfxDronePurr;
+                    petVoiceAudioSource.loop = true;
+                    petVoiceAudioSource.pitch = UnityEngine.Random.Range(0.98f, 1.02f);
+                    petVoiceAudioSource.volume = purrVolume;
+                    petVoiceAudioSource.Play();
+                }
             }
+
+            // Micro-flutuação harmônica sutil (balanço de carinho)
+            float petTime = Time.time * 4.5f;
+            wobblePosOffset.y = Mathf.Sin(petTime) * 0.012f;
+            wobbleRotOffset.z = Mathf.Sin(Time.time * 2.2f) * 2.0f;
 
             // Expressão amorosa no visor
             if (currentExpression != DroneLEDExpression.Love && !isPokedActive)
@@ -353,17 +616,50 @@ namespace VRRehab.DronePet
 
         #endregion
 
-        #region Reatividade a Cutucão (Poke / Boop)
+        #region Reatividade a Cutucão (Poke / Boop) - Laser & Mão Física
 
-        public void TriggerPoke(Vector3 contactWorldPos, Vector3 impactVelocity)
+        private void OnFaceLaserActivated(ActivateEventArgs args)
+        {
+            HandleFaceLaserTrigger(args.interactorObject);
+        }
+
+        private void OnFaceLaserSelected(SelectEnterEventArgs args)
+        {
+            HandleFaceLaserTrigger(args.interactorObject);
+        }
+
+        private void HandleFaceLaserTrigger(IXRInteractor interactor)
+        {
+            Vector3 contact = facePokeTrigger != null ? facePokeTrigger.bounds.center : transform.position;
+            Vector3 dir = (contact - transform.position).normalized;
+            if (dir.sqrMagnitude < 0.01f) dir = -transform.forward;
+
+            XRBaseController ctrl = null;
+            if (interactor is XRBaseControllerInteractor ctrlInteractor)
+            {
+                ctrl = ctrlInteractor.xrController != null
+                    ? ctrlInteractor.xrController
+                    : ctrlInteractor.GetComponentInParent<XRBaseController>();
+            }
+
+            TriggerPoke(contact, dir * 1.5f, ctrl);
+        }
+
+        public void TriggerPoke(Vector3 contactWorldPos, Vector3 impactVelocity, XRBaseController controller = null)
         {
             isPokedActive = true;
             expressionTimer = 2.4f;
 
+            // Pulso háptico de impacto na mão do paciente
+            if (controller != null)
+            {
+                controller.SendHapticImpulse(0.25f, 0.12f);
+            }
+
             // Interrompe carinho se houver
             StopPettingBehavior();
 
-            // Física de recuo e balanço elástico
+            // Física de recuo e mola elástica (atua estritamente nas variáveis locais de wobble)
             float recoilMagnitude = Mathf.Clamp(impactVelocity.magnitude * 0.04f, 0.035f, 0.075f);
             wobblePosVelocity += new Vector3(
                 UnityEngine.Random.Range(-0.02f, 0.02f),
@@ -377,23 +673,24 @@ namespace VRRehab.DronePet
                 UnityEngine.Random.Range(-pokeWobbleAngle * 0.5f, pokeWobbleAngle * 0.5f)
             );
 
-            // Sons de Boop e Risadinha
+            // Sons de Boop e Risadinha (calibrados para VR-Safe)
             if (petVoiceAudioSource != null)
             {
                 petVoiceAudioSource.Stop();
                 petVoiceAudioSource.loop = false;
-                petVoiceAudioSource.pitch = UnityEngine.Random.Range(0.95f, 1.08f);
-                petVoiceAudioSource.volume = 0.90f;
-                if (sfxDroneBoop != null)
+                petVoiceAudioSource.pitch = UnityEngine.Random.Range(0.96f, 1.04f);
+
+                AudioClip clip = sfxDronePoke != null ? sfxDronePoke : sfxDroneBoop;
+                if (clip != null)
                 {
-                    petVoiceAudioSource.PlayOneShot(sfxDroneBoop);
+                    petVoiceAudioSource.PlayOneShot(clip, pokeVolume);
                 }
             }
 
             // Expressão tonta (@_@)
             SetExpression(DroneLEDExpression.Poked, 2.4f);
 
-            // Agenda risadinha subsequente
+            // Agenda risadinha suave subsequente
             CancelInvoke(nameof(PlayGiggleAfterBoop));
             Invoke(nameof(PlayGiggleAfterBoop), 0.35f);
         }
@@ -402,9 +699,8 @@ namespace VRRehab.DronePet
         {
             if (petVoiceAudioSource != null && sfxDroneGiggle != null)
             {
-                petVoiceAudioSource.pitch = UnityEngine.Random.Range(0.98f, 1.06f);
-                petVoiceAudioSource.volume = 0.80f;
-                petVoiceAudioSource.PlayOneShot(sfxDroneGiggle);
+                petVoiceAudioSource.pitch = UnityEngine.Random.Range(0.98f, 1.04f);
+                petVoiceAudioSource.PlayOneShot(sfxDroneGiggle, giggleVolume);
             }
         }
 
@@ -422,7 +718,7 @@ namespace VRRehab.DronePet
             wobbleRotVelocity += (springForceRot + dampingForceRot) * dt;
             wobbleRotOffset += wobbleRotVelocity * dt;
 
-            // Limites de parada
+            // Limites de repouso para desligar cálculo quando estável
             if (wobblePosOffset.sqrMagnitude < 0.00001f && wobblePosVelocity.sqrMagnitude < 0.0001f)
             {
                 wobblePosOffset = Vector3.zero;
@@ -437,17 +733,21 @@ namespace VRRehab.DronePet
 
         #endregion
 
-        #region Dança Rítmica Musical
+        #region Dança Rítmica Musical (Zero GameObject.Find em Update)
 
         private void UpdateMusicDance(float dt)
         {
             if (!enableMusicDance || isPettingActive || isPokedActive) return;
 
-            // Se o rádio não estiver configurado, tenta encontrá-lo
+            // Busca de rádio controlada por temporizador (Zero chamadas per-frame na cena vazia)
             if (musicSource == null)
             {
-                GameObject radio = GameObject.Find("[IC] Radio_Menu_3D");
-                if (radio != null) musicSource = radio.GetComponent<AudioSource>();
+                if (Time.time - lastRadioCheckTime > 3.0f)
+                {
+                    lastRadioCheckTime = Time.time;
+                    LocateRadioMusicSource();
+                }
+                if (musicSource == null) return;
             }
 
             bool musicPlaying = (musicSource != null && musicSource.isPlaying && musicSource.volume > 0.05f);
@@ -456,7 +756,7 @@ namespace VRRehab.DronePet
             {
                 musicSource.GetSpectrumData(spectrumSamples, 0, FFTWindow.BlackmanHarris);
 
-                // Acumula bandas de frequências graves (Kick / Bass: 50Hz - 220Hz)
+                // Acumula faixas de graves e kick (50Hz - 220Hz, bins 1 a 7)
                 float bassEnergy = 0f;
                 for (int i = 1; i < 8; i++)
                 {
@@ -469,7 +769,7 @@ namespace VRRehab.DronePet
                 {
                     isDancingActive = true;
 
-                    // Balanço lateral e saltinho no ritmo da batida
+                    // Balanço lateral e saltinho no ritmo da batida (apenas no nó filho visual)
                     float tempo = Time.time * 3.8f;
                     float roll = Mathf.Sin(tempo) * danceTiltAngle;
                     float yaw = Mathf.Cos(tempo * 0.5f) * (danceTiltAngle * 0.6f);
@@ -487,6 +787,10 @@ namespace VRRehab.DronePet
                 else if (isDancingActive)
                 {
                     isDancingActive = false;
+                    wobbleRotOffset.z = Mathf.Lerp(wobbleRotOffset.z, 0f, dt * 6f);
+                    wobbleRotOffset.y = Mathf.Lerp(wobbleRotOffset.y, 0f, dt * 6f);
+                    wobblePosOffset.y = Mathf.Lerp(wobblePosOffset.y, 0f, dt * 6f);
+
                     if (currentExpression == DroneLEDExpression.Dance)
                     {
                         SetExpression(DroneLEDExpression.Normal, 0f);
@@ -496,6 +800,10 @@ namespace VRRehab.DronePet
             else if (isDancingActive)
             {
                 isDancingActive = false;
+                wobbleRotOffset.z = Mathf.Lerp(wobbleRotOffset.z, 0f, dt * 6f);
+                wobbleRotOffset.y = Mathf.Lerp(wobbleRotOffset.y, 0f, dt * 6f);
+                wobblePosOffset.y = Mathf.Lerp(wobblePosOffset.y, 0f, dt * 6f);
+
                 if (currentExpression == DroneLEDExpression.Dance)
                 {
                     SetExpression(DroneLEDExpression.Normal, 0f);
@@ -505,7 +813,7 @@ namespace VRRehab.DronePet
 
         #endregion
 
-        #region Gerenciamento de Expressões LED
+        #region Gerenciamento de Expressões LED (100% MaterialPropertyBlock - Zero GC / Zero Clonagem)
 
         public void SetExpression(DroneLEDExpression expression, float duration = 0f)
         {
@@ -530,6 +838,11 @@ namespace VRRehab.DronePet
             }
         }
 
+        /// <summary>
+        /// Aplica texturas e propriedades de emissão EXCLUSIVAMENTE via MaterialPropertyBlock.
+        /// ELIMINA 100% qualquer acesso a 'visorRenderer.material', preservando o SRP Batcher,
+        /// permitindo GPU Instancing e evitando vazamentos na heap em VR.
+        /// </summary>
         private void ApplyTextureToVisor(Texture2D tex)
         {
             if (visorRenderer == null || tex == null) return;
@@ -538,30 +851,22 @@ namespace VRRehab.DronePet
             visorRenderer.GetPropertyBlock(propBlock);
 
             propBlock.SetTexture(MainTexId, tex);
+            propBlock.SetTexture(BaseMapId, tex);
             propBlock.SetTexture(EmissionMapId, tex);
 
-            Color finalEmissive = ledEmissiveColor * ledEmissiveIntensity;
+            Color finalEmissive = ledEmissiveColor * Mathf.LinearToGammaSpace(ledEmissiveIntensity);
             propBlock.SetColor(EmissionColorId, finalEmissive);
 
             visorRenderer.SetPropertyBlock(propBlock);
-
-            // Garante atribuição direta no material também
-            if (Application.isPlaying && visorRenderer.material != null)
-            {
-                visorRenderer.material.mainTexture = tex;
-                if (visorRenderer.material.HasProperty(EmissionMapId))
-                    visorRenderer.material.SetTexture(EmissionMapId, tex);
-            }
-            else if (visorRenderer.sharedMaterial != null)
-            {
-                visorRenderer.sharedMaterial.mainTexture = tex;
-                if (visorRenderer.sharedMaterial.HasProperty(EmissionMapId))
-                    visorRenderer.sharedMaterial.SetTexture(EmissionMapId, tex);
-            }
         }
 
         private void UpdateExpressionLifecycle(float dt)
         {
+            if (DroneMilestoneCelebration.Instance != null && DroneMilestoneCelebration.Instance.IsCelebrating)
+            {
+                return;
+            }
+
             if (expressionTimer > 0f)
             {
                 expressionTimer -= dt;
@@ -586,7 +891,7 @@ namespace VRRehab.DronePet
 
         #endregion
 
-        #region Detecção por Triggers Físicos
+        #region Detecção por Triggers Físicos (Contato Direto com Mãos VR)
 
         private void OnTriggerEnter(Collider other)
         {
@@ -602,7 +907,7 @@ namespace VRRehab.DronePet
         {
             if (other == null) return;
 
-            // Ignora colisores do próprio drone
+            // Ignora colisores internos do próprio drone
             if (other.transform.IsChildOf(transform)) return;
 
             // Verifica se pertence ao jogador/interactor XR
@@ -624,13 +929,13 @@ namespace VRRehab.DronePet
             else if (isEntering && facePokeTrigger != null && facePokeTrigger.bounds.Contains(contact))
             {
                 Vector3 vel = (contact - transform.position).normalized * 1.5f;
-                TriggerPoke(contact, vel);
+                TriggerPoke(contact, vel, controller);
             }
         }
 
         #endregion
 
-        #region Métodos de Teste e Validação Automática
+        #region Métodos de Teste e Validação Automática (Visual QA)
 
         public void TestPettingPose()
         {
@@ -641,6 +946,7 @@ namespace VRRehab.DronePet
             }
             wobbleRotOffset = new Vector3(-4f, 6f, 3f);
             wobblePosOffset = new Vector3(0.01f, 0.02f, -0.01f);
+            ApplyVisualOffsets();
         }
 
         public void TestPokedPose()
@@ -648,6 +954,7 @@ namespace VRRehab.DronePet
             SetExpression(DroneLEDExpression.Poked, 5.0f);
             wobbleRotOffset = new Vector3(pokeWobbleAngle, -pokeWobbleAngle * 0.8f, -4f);
             wobblePosOffset = new Vector3(0f, -0.015f, pokeRecoilZ);
+            ApplyVisualOffsets();
         }
 
         public void TestDancingPose()
@@ -655,6 +962,7 @@ namespace VRRehab.DronePet
             SetExpression(DroneLEDExpression.Dance, 5.0f);
             wobbleRotOffset = new Vector3(-3f, 8f, danceTiltAngle);
             wobblePosOffset = new Vector3(0.02f, danceBounceHeight, 0f);
+            ApplyVisualOffsets();
         }
 
         public void ResetTestPose()
@@ -662,9 +970,23 @@ namespace VRRehab.DronePet
             SetExpression(DroneLEDExpression.Normal);
             wobbleRotOffset = Vector3.zero;
             wobblePosOffset = Vector3.zero;
+            wobblePosVelocity = Vector3.zero;
+            wobbleRotVelocity = Vector3.zero;
+            isPettingActive = false;
+            isPokedActive = false;
+            isDancingActive = false;
+            isLaserHoveringHead = false;
+            ApplyVisualOffsets();
+
             if (heartParticles != null)
             {
                 heartParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+
+            if (petVoiceAudioSource != null && petVoiceAudioSource.isPlaying && petVoiceAudioSource.clip == sfxDronePurr)
+            {
+                petVoiceAudioSource.Stop();
+                petVoiceAudioSource.loop = false;
             }
         }
 

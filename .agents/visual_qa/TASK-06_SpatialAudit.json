@@ -1,0 +1,709 @@
+{
+    "taskId": "TASK-06",
+    "timestamp": "2026-11-12T02:38:25Z",
+    "sceneName": "Menu_Principal",
+    "furnitureAudited": "full_desk_3 (1)",
+    "furnitureTopY": 0.9490000009536743,
+    "requiredClearanceMeters": 0.07999999821186066,
+    "hasOverlap": false,
+    "minPairClearanceMeters": 0.10679999738931656,
+    "minPairClearancePair": "CassetteOrganizerRack_Instance × full_desk_3 (1)/pc_monitor (decoração fixa do móvel)",
+    "groundGapMeters": 0.003000000026077032,
+    "isPhysicallyGrounded": true,
+    "isInsideFurnitureTop": true,
+    "isOriginClean": true,
+    "originSweepRadiusMeters": 1.0,
+    "objectsAtOriginZero": [],
+    "duplicateObjectsFound": [],
+    "instanceCounts": [
+        "[IC] Radio_Menu_3D: 1",
+        "RadioCassetteDeck_Instance: 1",
+        "CassetteOrganizerRack_Instance: 1",
+        "Tape_CyberHorizon_Active: 1",
+        "Tape_LunaCantina_Rack: 1",
+        "Tape_NeonSunset_Rack: 1",
+        "Tape_EmeraldZen_Rack: 1",
+        "TrophyDisplayStand_Instance: 1",
+        "EnvironmentControlLever_Instance: 1",
+        "FireworksLaunchButton_Instance: 1",
+        "ExoMascotBobblehead_Instance: 1",
+        "BalloonGunDispenser_Instance: 1",
+        "ArcadeBallSpawner_Instance: 1",
+        "Demo_Basketball_Table: 1",
+        "ArcadeBasketballHoop_Instance: 1",
+        "[IC] Ergonomic_Toy_Demo: 1",
+        "[IC] Drone_Guia_IA_ExoBot: 1",
+        "Room_Fireworks_Launcher: 1",
+        "MusicCassetteTape (total): 4",
+        "RadioCassetteSocket (total): 1"
+    ],
+    "objectsOnFurniture": [
+        {
+            "name": "[IC] Radio_Menu_3D",
+            "boundsMin": {
+                "x": 0.44699999690055849,
+                "y": 0.9520000219345093,
+                "z": 0.1420000046491623
+            },
+            "boundsMax": {
+                "x": 0.8109999895095825,
+                "y": 1.5110000371932984,
+                "z": 0.5889999866485596
+            },
+            "groundGapMeters": 0.003000000026077032
+        },
+        {
+            "name": "RadioCassetteDeck_Instance",
+            "boundsMin": {
+                "x": 0.4860000014305115,
+                "y": 0.9509999752044678,
+                "z": -0.7680000066757202
+            },
+            "boundsMax": {
+                "x": 0.6830000281333923,
+                "y": 1.0429999828338624,
+                "z": -0.5360000133514404
+            },
+            "groundGapMeters": 0.0020000000949949028
+        },
+        {
+            "name": "Tape_CyberHorizon_Active (no slot do deck)",
+            "boundsMin": {
+                "x": 0.5659999847412109,
+                "y": 1.0010000467300416,
+                "z": -0.7020000219345093
+            },
+            "boundsMax": {
+                "x": 0.621999979019165,
+                "y": 1.065000057220459,
+                "z": -0.597000002861023
+            },
+            "groundGapMeters": -1.0
+        },
+        {
+            "name": "CassetteOrganizerRack_Instance",
+            "boundsMin": {
+                "x": 0.7590000033378601,
+                "y": 0.9509999752044678,
+                "z": -0.43799999356269839
+            },
+            "boundsMax": {
+                "x": 0.9300000071525574,
+                "y": 1.0260000228881837,
+                "z": -0.26600000262260439
+            },
+            "groundGapMeters": 0.0020000000949949028
+        },
+        {
+            "name": "Tape_LunaCantina_Rack (no slot do rack)",
+            "boundsMin": {
+                "x": 0.8080000281333923,
+                "y": 0.968999981880188,
+                "z": -0.40700000524520876
+            },
+            "boundsMax": {
+                "x": 0.8640000224113464,
+                "y": 1.0329999923706055,
+                "z": -0.3019999861717224
+            },
+            "groundGapMeters": -1.0
+        },
+        {
+            "name": "Tape_NeonSunset_Rack (no slot do rack)",
+            "boundsMin": {
+                "x": 0.8330000042915344,
+                "y": 0.9769999980926514,
+                "z": -0.4000000059604645
+            },
+            "boundsMax": {
+                "x": 0.8889999985694885,
+                "y": 1.0410000085830689,
+                "z": -0.29499998688697817
+            },
+            "groundGapMeters": -1.0
+        },
+        {
+            "name": "Tape_EmeraldZen_Rack (no slot do rack)",
+            "boundsMin": {
+                "x": 0.8579999804496765,
+                "y": 0.9850000143051148,
+                "z": -0.3930000066757202
+            },
+            "boundsMax": {
+                "x": 0.9139999747276306,
+                "y": 1.0490000247955323,
+                "z": -0.289000004529953
+            },
+            "groundGapMeters": -1.0
+        },
+        {
+            "name": "full_desk_3 (1)/pc_monitor (decoração fixa do móvel)",
+            "boundsMin": {
+                "x": 0.2809999883174896,
+                "y": 0.9449999928474426,
+                "z": -0.42899999022483828
+            },
+            "boundsMax": {
+                "x": 0.6520000100135803,
+                "y": 1.406000018119812,
+                "z": 0.020999999716877939
+            },
+            "groundGapMeters": -1.0
+        }
+    ],
+    "pairwiseClearances": [
+        {
+            "objectA": "[IC] Radio_Menu_3D",
+            "objectB": "RadioCassetteDeck_Instance",
+            "clearanceMeters": 0.6779000163078308,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "[IC] Radio_Menu_3D",
+            "objectB": "Tape_CyberHorizon_Active (no slot do deck)",
+            "clearanceMeters": 0.7390000224113464,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "[IC] Radio_Menu_3D",
+            "objectB": "CassetteOrganizerRack_Instance",
+            "clearanceMeters": 0.4081999957561493,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "[IC] Radio_Menu_3D",
+            "objectB": "Tape_LunaCantina_Rack (no slot do rack)",
+            "clearanceMeters": 0.4438999891281128,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "[IC] Radio_Menu_3D",
+            "objectB": "Tape_NeonSunset_Rack (no slot do rack)",
+            "clearanceMeters": 0.4377000033855438,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "[IC] Radio_Menu_3D",
+            "objectB": "Tape_EmeraldZen_Rack (no slot do rack)",
+            "clearanceMeters": 0.43299999833106997,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "[IC] Radio_Menu_3D",
+            "objectB": "full_desk_3 (1)/pc_monitor (decoração fixa do móvel)",
+            "clearanceMeters": 0.12049999833106995,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "RadioCassetteDeck_Instance",
+            "objectB": "Tape_CyberHorizon_Active (no slot do deck)",
+            "clearanceMeters": -0.04230000078678131,
+            "passes": true,
+            "excludedFromOverlapCheck": true,
+            "note": "mesmo conjunto: fita assentada no slot do próprio suporte (contato intencional socket/slot)"
+        },
+        {
+            "objectA": "RadioCassetteDeck_Instance",
+            "objectB": "CassetteOrganizerRack_Instance",
+            "clearanceMeters": 0.1242000013589859,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "RadioCassetteDeck_Instance",
+            "objectB": "Tape_LunaCantina_Rack (no slot do rack)",
+            "clearanceMeters": 0.17990000545978547,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "RadioCassetteDeck_Instance",
+            "objectB": "Tape_NeonSunset_Rack (no slot do rack)",
+            "clearanceMeters": 0.20260000228881837,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "RadioCassetteDeck_Instance",
+            "objectB": "Tape_EmeraldZen_Rack (no slot do rack)",
+            "clearanceMeters": 0.22599999606609345,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "RadioCassetteDeck_Instance",
+            "objectB": "full_desk_3 (1)/pc_monitor (decoração fixa do móvel)",
+            "clearanceMeters": 0.10740000009536743,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "Tape_CyberHorizon_Active (no slot do deck)",
+            "objectB": "CassetteOrganizerRack_Instance",
+            "clearanceMeters": 0.20990000665187837,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "Tape_CyberHorizon_Active (no slot do deck)",
+            "objectB": "Tape_LunaCantina_Rack (no slot do rack)",
+            "clearanceMeters": 0.26589998602867129,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "Tape_CyberHorizon_Active (no slot do deck)",
+            "objectB": "Tape_NeonSunset_Rack (no slot do rack)",
+            "clearanceMeters": 0.28859999775886538,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "Tape_CyberHorizon_Active (no slot do deck)",
+            "objectB": "Tape_EmeraldZen_Rack (no slot do rack)",
+            "clearanceMeters": 0.3118000030517578,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "Tape_CyberHorizon_Active (no slot do deck)",
+            "objectB": "full_desk_3 (1)/pc_monitor (decoração fixa do móvel)",
+            "clearanceMeters": 0.16850000619888307,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "CassetteOrganizerRack_Instance",
+            "objectB": "Tape_LunaCantina_Rack (no slot do rack)",
+            "clearanceMeters": -0.05730000138282776,
+            "passes": true,
+            "excludedFromOverlapCheck": true,
+            "note": "mesmo conjunto: fita assentada no slot do próprio suporte (contato intencional socket/slot)"
+        },
+        {
+            "objectA": "CassetteOrganizerRack_Instance",
+            "objectB": "Tape_NeonSunset_Rack (no slot do rack)",
+            "clearanceMeters": -0.049300000071525577,
+            "passes": true,
+            "excludedFromOverlapCheck": true,
+            "note": "mesmo conjunto: fita assentada no slot do próprio suporte (contato intencional socket/slot)"
+        },
+        {
+            "objectA": "CassetteOrganizerRack_Instance",
+            "objectB": "Tape_EmeraldZen_Rack (no slot do rack)",
+            "clearanceMeters": -0.04129999876022339,
+            "passes": true,
+            "excludedFromOverlapCheck": true,
+            "note": "mesmo conjunto: fita assentada no slot do próprio suporte (contato intencional socket/slot)"
+        },
+        {
+            "objectA": "CassetteOrganizerRack_Instance",
+            "objectB": "full_desk_3 (1)/pc_monitor (decoração fixa do móvel)",
+            "clearanceMeters": 0.10679999738931656,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "Tape_LunaCantina_Rack (no slot do rack)",
+            "objectB": "Tape_NeonSunset_Rack (no slot do rack)",
+            "clearanceMeters": -0.030899999663233758,
+            "passes": true,
+            "excludedFromOverlapCheck": true,
+            "note": "mesmo conjunto: fita assentada no slot do próprio suporte (contato intencional socket/slot)"
+        },
+        {
+            "objectA": "Tape_LunaCantina_Rack (no slot do rack)",
+            "objectB": "Tape_EmeraldZen_Rack (no slot do rack)",
+            "clearanceMeters": -0.005799999926239252,
+            "passes": true,
+            "excludedFromOverlapCheck": true,
+            "note": "mesmo conjunto: fita assentada no slot do próprio suporte (contato intencional socket/slot)"
+        },
+        {
+            "objectA": "Tape_LunaCantina_Rack (no slot do rack)",
+            "objectB": "full_desk_3 (1)/pc_monitor (decoração fixa do móvel)",
+            "clearanceMeters": 0.155799999833107,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "Tape_NeonSunset_Rack (no slot do rack)",
+            "objectB": "Tape_EmeraldZen_Rack (no slot do rack)",
+            "clearanceMeters": -0.030899999663233758,
+            "passes": true,
+            "excludedFromOverlapCheck": true,
+            "note": "mesmo conjunto: fita assentada no slot do próprio suporte (contato intencional socket/slot)"
+        },
+        {
+            "objectA": "Tape_NeonSunset_Rack (no slot do rack)",
+            "objectB": "full_desk_3 (1)/pc_monitor (decoração fixa do móvel)",
+            "clearanceMeters": 0.1809999942779541,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        },
+        {
+            "objectA": "Tape_EmeraldZen_Rack (no slot do rack)",
+            "objectB": "full_desk_3 (1)/pc_monitor (decoração fixa do móvel)",
+            "clearanceMeters": 0.2061000019311905,
+            "passes": true,
+            "excludedFromOverlapCheck": false,
+            "note": ""
+        }
+    ],
+    "relocations": [
+        {
+            "objectName": "TrophyDisplayStand_Instance",
+            "task": "TASK-16",
+            "oldPosition": {
+                "x": 0.6800000071525574,
+                "y": 0.9520000219345093,
+                "z": -0.3799999952316284
+            },
+            "newPosition": {
+                "x": 9.583000183105469,
+                "y": 1.2170000076293946,
+                "z": -0.054999999701976779
+            },
+            "oldRotY": 270.0,
+            "newRotY": 270.0,
+            "fromFurniture": "full_desk_3 (1)",
+            "toFurniture": "modern_shelves_3 (1)",
+            "surfaceTopY": 1.1937999725341797,
+            "groundGapMeters": 0.0020000000949949028,
+            "minClearanceToNeighboursMeters": 0.06199999898672104
+        },
+        {
+            "objectName": "EnvironmentControlLever_Instance",
+            "task": "TASK-09",
+            "oldPosition": {
+                "x": 0.6600000262260437,
+                "y": 0.9549999833106995,
+                "z": 0.6200000047683716
+            },
+            "newPosition": {
+                "x": 8.973999977111817,
+                "y": 0.9509999752044678,
+                "z": -1.5290000438690186
+            },
+            "oldRotY": 270.0,
+            "newRotY": 270.0,
+            "fromFurniture": "full_desk_3 (1)",
+            "toFurniture": "counter_2_b",
+            "surfaceTopY": 0.9490000009536743,
+            "groundGapMeters": 0.0020000000949949028,
+            "minClearanceToNeighboursMeters": 0.1979999989271164
+        },
+        {
+            "objectName": "FireworksLaunchButton_Instance",
+            "task": "TASK-09",
+            "oldPosition": {
+                "x": 0.7900000214576721,
+                "y": 0.9549999833106995,
+                "z": 0.6000000238418579
+            },
+            "newPosition": {
+                "x": 8.977999687194825,
+                "y": 0.9509999752044678,
+                "z": -2.0250000953674318
+            },
+            "oldRotY": 270.0,
+            "newRotY": 270.0,
+            "fromFurniture": "full_desk_3 (1)",
+            "toFurniture": "counter_2_b",
+            "surfaceTopY": 0.9490000009536743,
+            "groundGapMeters": 0.0020000000949949028,
+            "minClearanceToNeighboursMeters": 0.25600001215934756
+        },
+        {
+            "objectName": "ExoMascotBobblehead_Instance",
+            "task": "TASK-09",
+            "oldPosition": {
+                "x": 0.7300000190734863,
+                "y": 0.9549999833106995,
+                "z": 0.7200000286102295
+            },
+            "newPosition": {
+                "x": 0.746999979019165,
+                "y": 0.9200000166893005,
+                "z": 5.1570000648498539
+            },
+            "oldRotY": 215.0,
+            "newRotY": 215.0,
+            "fromFurniture": "full_desk_3 (1)",
+            "toFurniture": "drawer_simple",
+            "surfaceTopY": 0.9180999994277954,
+            "groundGapMeters": 0.0020000000949949028,
+            "minClearanceToNeighboursMeters": 0.07599999755620957
+        },
+        {
+            "objectName": "BalloonGunDispenser_Instance",
+            "task": "TASK-07",
+            "oldPosition": {
+                "x": 0.7799999713897705,
+                "y": 0.9760000109672546,
+                "z": 0.47999998927116396
+            },
+            "newPosition": {
+                "x": 4.989999771118164,
+                "y": 1.0509999990463257,
+                "z": 7.620999813079834
+            },
+            "oldRotY": 145.0,
+            "newRotY": 145.0,
+            "fromFurniture": "full_desk_3 (1)",
+            "toFurniture": "counter_3_a (1)",
+            "surfaceTopY": 0.9490000009536743,
+            "groundGapMeters": 0.0020000000949949028,
+            "minClearanceToNeighboursMeters": 0.06199999898672104
+        },
+        {
+            "objectName": "ArcadeBallSpawner_Instance",
+            "task": "TASK-08",
+            "oldPosition": {
+                "x": 0.800000011920929,
+                "y": 0.9549999833106995,
+                "z": 0.15000000596046449
+            },
+            "newPosition": {
+                "x": 0.4440000057220459,
+                "y": 0.9509999752044678,
+                "z": 4.815999984741211
+            },
+            "oldRotY": 90.0,
+            "newRotY": 90.0,
+            "fromFurniture": "full_desk_3 (1)",
+            "toFurniture": "counter_1",
+            "surfaceTopY": 0.9490000009536743,
+            "groundGapMeters": 0.0020000000949949028,
+            "minClearanceToNeighboursMeters": 0.06400000303983689
+        },
+        {
+            "objectName": "Demo_Basketball_Table",
+            "task": "TASK-08",
+            "oldPosition": {
+                "x": 0.6399999856948853,
+                "y": 1.0449999570846558,
+                "z": -0.019999999552965165
+            },
+            "newPosition": {
+                "x": 0.6890000104904175,
+                "y": 1.0130000114440919,
+                "z": 5.872000217437744
+            },
+            "oldRotY": 30.0,
+            "newRotY": 30.0,
+            "fromFurniture": "full_desk_3 (1)",
+            "toFurniture": "drawer_simple (1)",
+            "surfaceTopY": 0.9180999994277954,
+            "groundGapMeters": 0.0020000000949949028,
+            "minClearanceToNeighboursMeters": 0.2939999997615814
+        },
+        {
+            "objectName": "[IC] Ergonomic_Toy_Demo",
+            "task": "TASK-02",
+            "oldPosition": {
+                "x": 0.5799999833106995,
+                "y": 1.024999976158142,
+                "z": -0.2800000011920929
+            },
+            "newPosition": {
+                "x": 9.067999839782715,
+                "y": 1.0210000276565552,
+                "z": 4.531000137329102
+            },
+            "oldRotY": 0.0,
+            "newRotY": 0.0,
+            "fromFurniture": "full_desk_3 (1)",
+            "toFurniture": "counter_3_a",
+            "surfaceTopY": 0.9490000009536743,
+            "groundGapMeters": 0.0020000000949949028,
+            "minClearanceToNeighboursMeters": 0.06300000101327896
+        },
+        {
+            "objectName": "Table Lamp",
+            "task": "decoração do móvel (não-TASK)",
+            "oldPosition": {
+                "x": 0.746999979019165,
+                "y": 0.949999988079071,
+                "z": -0.5569999814033508
+            },
+            "newPosition": {
+                "x": 6.560999870300293,
+                "y": 0.953000009059906,
+                "z": 7.164000034332275
+            },
+            "oldRotY": 33.5,
+            "newRotY": 348.5,
+            "fromFurniture": "full_desk_3 (1)",
+            "toFurniture": "counter_3_c (3)",
+            "surfaceTopY": 0.9490000009536743,
+            "groundGapMeters": 0.0020000000949949028,
+            "minClearanceToNeighboursMeters": 0.06599999964237213
+        },
+        {
+            "objectName": "Deco Variant 3",
+            "task": "decoração do móvel (não-TASK)",
+            "oldPosition": {
+                "x": 0.5600000023841858,
+                "y": 0.9539999961853027,
+                "z": 0.6000000238418579
+            },
+            "newPosition": {
+                "x": 4.132999897003174,
+                "y": 0.9520000219345093,
+                "z": 7.116000175476074
+            },
+            "oldRotY": 98.30000305175781,
+            "newRotY": 98.30000305175781,
+            "fromFurniture": "full_desk_3 (1)",
+            "toFurniture": "counter_3_c (2)",
+            "surfaceTopY": 0.9490000009536743,
+            "groundGapMeters": 0.0020000000949949028,
+            "minClearanceToNeighboursMeters": 0.06300000101327896
+        },
+        {
+            "objectName": "Demo_Balloon_Red",
+            "task": "TASK-07 (balão demo flutuante)",
+            "oldPosition": {
+                "x": 4.739999771118164,
+                "y": 1.5499999523162842,
+                "z": 7.170000076293945
+            },
+            "newPosition": {
+                "x": 4.739999771118164,
+                "y": 1.5499999523162842,
+                "z": 7.170000076293945
+            },
+            "oldRotY": 0.0,
+            "newRotY": 0.0,
+            "fromFurniture": "ar acima da Mesa 1",
+            "toFurniture": "ar acima da pistola de balões",
+            "surfaceTopY": 0.0,
+            "groundGapMeters": 0.0,
+            "minClearanceToNeighboursMeters": 0.0
+        },
+        {
+            "objectName": "Demo_Balloon_Cyan",
+            "task": "TASK-07 (balão demo flutuante)",
+            "oldPosition": {
+                "x": 5.190999984741211,
+                "y": 1.75,
+                "z": 7.020999908447266
+            },
+            "newPosition": {
+                "x": 5.190999984741211,
+                "y": 1.75,
+                "z": 7.020999908447266
+            },
+            "oldRotY": 0.0,
+            "newRotY": 0.0,
+            "fromFurniture": "ar acima da Mesa 1",
+            "toFurniture": "ar acima da pistola de balões",
+            "surfaceTopY": 0.0,
+            "groundGapMeters": 0.0,
+            "minClearanceToNeighboursMeters": 0.0
+        },
+        {
+            "objectName": "Demo_Balloon_Yellow",
+            "task": "TASK-07 (balão demo flutuante)",
+            "oldPosition": {
+                "x": 5.440000057220459,
+                "y": 1.899999976158142,
+                "z": 7.271999835968018
+            },
+            "newPosition": {
+                "x": 5.440000057220459,
+                "y": 1.899999976158142,
+                "z": 7.271999835968018
+            },
+            "oldRotY": 0.0,
+            "newRotY": 0.0,
+            "fromFurniture": "ar acima da Mesa 1",
+            "toFurniture": "ar acima da pistola de balões",
+            "surfaceTopY": 0.0,
+            "groundGapMeters": 0.0,
+            "minClearanceToNeighboursMeters": 0.0
+        }
+    ],
+    "notes": [
+        "Folga = distância euclidiana entre AABBs mundiais (renderers não-TMP + colliders sólidos). Para objetos girados (rotY≈75°) a AABB é maior que o objeto real, então o valor é conservador.",
+        "Pares deck↔fita do slot e rack↔fitas do rack (e fitas do rack entre si) estão listados mas excluídos do critério de sobreposição: o contato é o encaixe funcional (XRSocketInteractor / slots).",
+        "groundGapMeters = |base AABB − tampo (raycast no collider da mesa)| para rádio, deck e rack.",
+        "Pós-simulação: cena recarregada do disco; deck 1 / rack 1 / fitas 4; (0,0,0) r=1.0 m limpo.",
+        "Pós-simulação: cena recarregada do disco; deck 1 / rack 1 / fitas 4; (0,0,0) r=1.0 m limpo.",
+        "Pós-simulação: cena recarregada do disco; deck 1 / rack 1 / fitas 4; (0,0,0) r=1.0 m limpo.",
+        "Eject REAL (runtime RadioCassetteSocket.EjectRoutine pós-fix [C], Physics.Simulate 1/90 s, Rigidbody real): PASS — repouso 0.816/0.955/-0.590, base 0.949 sobre o tampo 0.949, 0.230 m do slot, IgnoreCollision restaurado = True.",
+        "Pós-simulação: cena recarregada do disco; deck 1 / rack 1 / fitas 4; (0,0,0) r=1.0 m limpo."
+    ],
+    "ejectSimulation": {
+        "method": "RadioCassetteSocket.EjectRoutine real (corrotina iniciada por EjectCurrentTape) avançada quadro a quadro em Edit Mode + Physics.Simulate(1/90); base de tempo da corrotina emulada a 90 Hz (Time.deltaTime do Editor não é confiável); simulador NÃO altera IgnoreCollision",
+        "physicsStepSeconds": 0.011111111380159855,
+        "editorCoroutineFrameSeconds": 0.011111111380159855,
+        "ejectImpulseForce": 0.15000000596046449,
+        "maxEjectSpeed": 1.5,
+        "ejectIgnoreCollisionSeconds": 0.30000001192092898,
+        "ejectRecaptureCooldownSeconds": 1.0,
+        "runtimeIgnoreBegan": true,
+        "deckCollidersIgnoredByRuntime": 4,
+        "ignoreEndedAtSeconds": 0.30000001192092898,
+        "cooldownEndedAtSeconds": 1.000001311302185,
+        "socketRefusedRecaptureDuringCooldown": true,
+        "ignoreCollisionRestoredAfterEject": true,
+        "tapeCollidesWithDeckAgain": true,
+        "dropTestTapeBaseY": 0.9990333318710327,
+        "peakY": 1.0651732683181763,
+        "minY": 0.9550374150276184,
+        "launchSpeed": 0.0,
+        "midFlightPosition": {
+            "x": 0.7319999933242798,
+            "y": 1.0379999876022339,
+            "z": -0.6129999756813049
+        },
+        "midFlightTime": 0.15555556118488313,
+        "finalPosition": {
+            "x": 0.8159999847412109,
+            "y": 0.9549999833106995,
+            "z": -0.5899999737739563
+        },
+        "finalBaseY": 0.948737382888794,
+        "deskTopY": 0.9490374326705933,
+        "settleTimeSeconds": 0.3222222328186035,
+        "horizontalDistanceFromSlot": 0.2298373579978943,
+        "distanceToDeckAabb": 0.0893094539642334,
+        "outsideSlotTrigger": true,
+        "restingOnMesa1Top": true,
+        "insideMesa1TopEdges": true,
+        "minEdgeMarginMeters": 0.13420909643173219,
+        "respawnFloorThresholdY": 0.699999988079071,
+        "neverBelowRespawnFloor": true,
+        "recaptureRiskAfterCooldown": false,
+        "result": "PASS"
+    }
+}

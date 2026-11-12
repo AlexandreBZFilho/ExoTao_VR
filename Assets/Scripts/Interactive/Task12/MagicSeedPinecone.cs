@@ -8,7 +8,7 @@ namespace VRRehab.Interactive.Task12
 {
     /// <summary>
     /// Pinhão Mágico Arremessável para Reabilitação em VR.
-    /// Herda de ErgonomicGrabInteractable (Force Grab facilitado + mira assistida).
+    /// Herda de LaserSwingThrowInteractable (Física de Chicote por Raio Laser, Force Grab facilitado + mira assistida).
     /// Ao ser arremessado e colidir com o solo/terreno:
     /// 1. Toca sons de impacto místico e brotação elástica;
     /// 2. Dispara partículas de explosão de pólen/brilho;
@@ -17,7 +17,7 @@ namespace VRRehab.Interactive.Task12
     /// </summary>
     [DisallowMultipleComponent]
     [SelectionBase]
-    public class MagicSeedPinecone : ErgonomicGrabInteractable
+    public class MagicSeedPinecone : LaserSwingThrowInteractable
     {
         [Header("Prefabs Botânicos Procedurais")]
         [SerializeField] private GameObject flowerPatchPrefab;

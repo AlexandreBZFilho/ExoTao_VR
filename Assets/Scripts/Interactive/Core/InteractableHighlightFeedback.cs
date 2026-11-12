@@ -9,6 +9,7 @@ namespace VRRehab.Core
     /// Componente de feedback multissensorial acoplável a qualquer XRBaseInteractable.
     /// Realiza scale punch elástico, highlight emissivo via MaterialPropertyBlock (zero alocação de material)
     /// e emite áudio 3D + hápticos via VRFeedbackManager.
+    /// Cores calibradas: Hover Cyan (0.20, 0.60, 1.0) e Sucesso Gold (1.0, 0.78, 0.20).
     /// </summary>
     [RequireComponent(typeof(XRBaseInteractable))]
     [DisallowMultipleComponent]
@@ -21,7 +22,10 @@ namespace VRRehab.Core
 
         [SerializeField] private bool enableEmissionHighlight = true;
         [ColorUsage(true, true)]
-        [SerializeField] private Color highlightEmissionColor = new Color(0.2f, 0.6f, 1.0f, 1.0f) * 1.5f;
+        [SerializeField] private Color highlightEmissionColor = new Color(0.20f, 0.60f, 1.0f, 1.0f) * 1.5f;
+
+        [ColorUsage(true, true)]
+        [SerializeField] private Color successEmissionColor = new Color(1.0f, 0.78f, 0.20f, 1.0f) * 1.8f;
 
         [Header("Configuração Sensorial (Áudio & Haptics)")]
         [SerializeField] private bool playAudioOnHover = true;
@@ -36,13 +40,24 @@ namespace VRRehab.Core
         private Vector3 initialScale;
         private Vector3 targetScale;
         private Coroutine scaleCoroutine;
+        private Coroutine flashCoroutine;
 
         private MaterialPropertyBlock propBlock;
         private static readonly int EmissionColorPropId = Shader.PropertyToID("_EmissionColor");
-        private static readonly int BaseColorPropId = Shader.PropertyToID("_Color");
-        private static readonly int URPBaseColorPropId = Shader.PropertyToID("_BaseColor");
 
         private bool isHovered = false;
+
+        public Color HighlightEmissionColor
+        {
+            get => highlightEmissionColor;
+            set => highlightEmissionColor = value;
+        }
+
+        public Color SuccessEmissionColor
+        {
+            get => successEmissionColor;
+            set => successEmissionColor = value;
+        }
 
         private void Awake()
         {
@@ -94,6 +109,12 @@ namespace VRRehab.Core
                 scaleCoroutine = null;
             }
 
+            if (flashCoroutine != null)
+            {
+                StopCoroutine(flashCoroutine);
+                flashCoroutine = null;
+            }
+
             ClearEmissionHighlight();
         }
 
@@ -107,9 +128,9 @@ namespace VRRehab.Core
                 StartScaleAnimation();
             }
 
-            if (enableEmissionHighlight)
+            if (enableEmissionHighlight && flashCoroutine == null)
             {
-                ApplyEmissionHighlight();
+                ApplyEmissionHighlight(highlightEmissionColor);
             }
 
             if (playAudioOnHover || triggerHaptics)
@@ -129,7 +150,7 @@ namespace VRRehab.Core
                 StartScaleAnimation();
             }
 
-            if (enableEmissionHighlight)
+            if (enableEmissionHighlight && flashCoroutine == null)
             {
                 ClearEmissionHighlight();
             }
@@ -175,18 +196,55 @@ namespace VRRehab.Core
             scaleCoroutine = null;
         }
 
-        private void ApplyEmissionHighlight()
+        /// <summary>
+        /// Aciona um flash dourado de sucesso (Meta Clínica / Pontuação) via MaterialPropertyBlock.
+        /// </summary>
+        public void TriggerSuccessHighlight(float duration = 0.6f)
         {
-            foreach (var rend in targetRenderers)
+            if (!gameObject.activeInHierarchy) return;
+
+            if (flashCoroutine != null)
             {
+                StopCoroutine(flashCoroutine);
+            }
+            flashCoroutine = StartCoroutine(FlashSuccessRoutine(duration));
+        }
+
+        private IEnumerator FlashSuccessRoutine(float duration)
+        {
+            ApplyEmissionHighlight(successEmissionColor);
+            yield return new WaitForSeconds(duration);
+
+            if (isHovered)
+            {
+                ApplyEmissionHighlight(highlightEmissionColor);
+            }
+            else
+            {
+                ClearEmissionHighlight();
+            }
+
+            flashCoroutine = null;
+        }
+
+        private void ApplyEmissionHighlight(Color color)
+        {
+            if (propBlock == null) propBlock = new MaterialPropertyBlock();
+
+            for (int i = 0; i < targetRenderers.Count; i++)
+            {
+                Renderer rend = targetRenderers[i];
                 if (rend == null) continue;
 
                 rend.GetPropertyBlock(propBlock);
-                propBlock.SetColor(EmissionColorPropId, highlightEmissionColor);
+                propBlock.SetColor(EmissionColorPropId, color);
 
                 // Garante que o keyword _EMISSION esteja ativo no material compartilhado
-                foreach (var mat in rend.sharedMaterials)
+                // (usando sharedMaterials para NUNCA instanciar material duplicado em runtime)
+                Material[] sharedMats = rend.sharedMaterials;
+                for (int m = 0; m < sharedMats.Length; m++)
                 {
+                    Material mat = sharedMats[m];
                     if (mat != null && !mat.IsKeywordEnabled("_EMISSION"))
                     {
                         mat.EnableKeyword("_EMISSION");
@@ -199,8 +257,11 @@ namespace VRRehab.Core
 
         private void ClearEmissionHighlight()
         {
-            foreach (var rend in targetRenderers)
+            if (propBlock == null) propBlock = new MaterialPropertyBlock();
+
+            for (int i = 0; i < targetRenderers.Count; i++)
             {
+                Renderer rend = targetRenderers[i];
                 if (rend == null) continue;
 
                 rend.GetPropertyBlock(propBlock);

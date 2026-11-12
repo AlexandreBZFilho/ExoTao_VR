@@ -1,0 +1,110 @@
+=== TASK-06 [D] RE-RUN — RELAYOUT DA MESA 1, REALOCAÇÃO, EXPURGO, AUDITORIA E CAPTURAS ===
+Data/Hora local: 2026-11-11 23:10:30 | Execução: script de Editor na instância aberta (gatilho por arquivo), capturas offscreen via Camera.Render.
+
+--- 1. EXPURGO ANTES (SceneDuplicateAndOriginPurger.PurgeMenuScene + varredura r=1.0 m) ---
+  removidos na origem: 0 | duplicatas removidas: 0
+  varredura r=1.0m: limpa
+  duplicatas: nenhuma
+
+--- 2. MESA 1 'Building/full_desk_3 (1)' tampo Y=0.949 (raycast) | XZ min=(0.244, -0.002, -0.802) max=(0.994, 0.949, 0.762) ---
+
+--- 3. REALOCAÇÃO (Mesa 1 reservada a Rádio + Deck + Rack + 4 Fitas) ---
+  [MOVIDO] 'TrophyDisplayStand_Instance' (TASK-16) (9.583, 1.217, -0.055) rotY 270 → (9.583, 1.217, -0.055) rotY 270 | móvel: modern_shelves_3 (1) (tampo 1.194) | gap chão 0.0020 m | folga mín. vizinhos 0.062 m
+  [MOVIDO] 'EnvironmentControlLever_Instance' (TASK-09) (8.974, 0.951, -1.529) rotY 270 → (8.974, 0.951, -1.529) rotY 270 | móvel: counter_2_b (tampo 0.949) | gap chão 0.0020 m | folga mín. vizinhos 0.198 m
+  [MOVIDO] 'FireworksLaunchButton_Instance' (TASK-09) (8.978, 0.951, -2.025) rotY 270 → (8.978, 0.951, -2.025) rotY 270 | móvel: counter_2_b (tampo 0.949) | gap chão 0.0020 m | folga mín. vizinhos 0.256 m
+      seguidor 'Room_Fireworks_Launcher' → (8.978, 0.951, -2.025)
+  [MOVIDO] 'ExoMascotBobblehead_Instance' (TASK-09) (0.747, 0.920, 5.157) rotY 215 → (0.747, 0.920, 5.157) rotY 215 | móvel: drawer_simple (tampo 0.918) | gap chão 0.0020 m | folga mín. vizinhos 0.076 m
+    'BalloonGunDispenser_Instance': sem posição válida em 'Building/counter_3_c (3)'
+  [MOVIDO] 'BalloonGunDispenser_Instance' (TASK-07) (4.990, 1.051, 7.621) rotY 145 → (4.990, 1.051, 7.621) rotY 145 | móvel: counter_3_a (1) (tampo 0.949) | gap chão 0.0020 m | folga mín. vizinhos 0.062 m
+      nota: collider do prefab de 'ArcadeBallSpawner_Instance' desce 0.058 m abaixo da malha visível (geometria do prefab, fora do escopo de layout)
+  [MOVIDO] 'ArcadeBallSpawner_Instance' (TASK-08) (0.444, 0.951, 4.816) rotY 90 → (0.444, 0.951, 4.816) rotY 90 | móvel: counter_1 (tampo 0.949) | gap chão 0.0020 m | folga mín. vizinhos 0.064 m
+    'Demo_Basketball_Table': sem posição válida em 'Building/counter_1'
+  [MOVIDO] 'Demo_Basketball_Table' (TASK-08) (0.689, 1.013, 5.872) rotY 30 → (0.689, 1.013, 5.872) rotY 30 | móvel: drawer_simple (1) (tampo 0.918) | gap chão 0.0020 m | folga mín. vizinhos 0.294 m
+    '[IC] Ergonomic_Toy_Demo': sem posição válida em 'Building/drawer_simple (1)'
+    '[IC] Ergonomic_Toy_Demo': sem posição válida em 'Building/drawer_simple'
+  [MOVIDO] '[IC] Ergonomic_Toy_Demo' (TASK-02) (9.068, 1.021, 4.531) rotY 0 → (9.068, 1.021, 4.531) rotY 0 | móvel: counter_3_a (tampo 0.949) | gap chão 0.0020 m | folga mín. vizinhos 0.063 m
+    'Table Lamp': sem posição válida em 'Building/drawer_simple (1)'
+  [MOVIDO] 'Table Lamp' (decoração do móvel (não-TASK)) (0.665, 0.922, 5.838) rotY 34 → (6.561, 0.953, 7.164) rotY 349 | móvel: counter_3_c (3) (tampo 0.949) | gap chão 0.0020 m | folga mín. vizinhos 0.066 m
+  [MOVIDO] 'Deco Variant 3' (decoração do móvel (não-TASK)) (4.133, 0.952, 7.116) rotY 98 → (4.133, 0.952, 7.116) rotY 98 | móvel: counter_3_c (2) (tampo 0.949) | gap chão 0.0020 m | folga mín. vizinhos 0.063 m
+  [MOVIDO] 'Demo_Balloon_Red' (balão flutuante) (4.740, 1.550, 7.170) → (4.740, 1.550, 7.170)
+  [MOVIDO] 'Demo_Balloon_Cyan' (balão flutuante) (5.191, 1.750, 7.021) → (5.191, 1.750, 7.021)
+  [MOVIDO] 'Demo_Balloon_Yellow' (balão flutuante) (5.440, 1.900, 7.272) → (5.440, 1.900, 7.272)
+
+--- 4. DECK / RACK / FITAS NA MESA 1 ---
+  [PREFAB] Assets/Prefabs/Interactive/RadioCassetteDeck.prefab: BoxCollider raiz center (0.00, 0.02, 0.00) size (0.20, 0.05, 0.15) → center (0,0.024,0) size (0.20,0.048,0.15) + Collider_SideRim_L/R (0.025×0.075×0.15). Slot livre para a fita.
+  rádio AABB min=(0.447, 0.952, 0.142) max=(0.811, 1.511, 0.589) | decoração fixa do móvel: pc_monitor (0.281, 0.945, -0.429)-(0.652, 1.406, 0.021)
+  candidatos válidos para o deck: 46
+  [DECK] (0.584, 0.951, -0.652) → (0.584, 0.951, -0.652) rotY 75.0 | folga AABB deck+fita ↔ rádio = 0.678 m | zona de pouso do eject reservada min=(0.641, 0.954, -0.709) max=(0.991, 1.044, -0.471)
+  [RACK] (0.844, 0.951, -0.352) → (0.844, 0.951, -0.352) rotY 75.0 | folga rack+fitas ↔ deck+fita = 0.124 m | ↔ rádio = 0.408 m
+  [FITAS] deck: 'Tape_CyberHorizon_Active' em (0.594, 1.033, -0.649) (SlotAttachPoint) | rack: 'Tape_LunaCantina_Rack' (0.836, 1.001, -0.354), 'Tape_NeonSunset_Rack' (0.861, 1.009, -0.348), 'Tape_EmeraldZen_Rack' (0.886, 1.017, -0.341)
+  [REFS] socket.startingSelectedInteractable = Tape_CyberHorizon_Active | radioTarget = [IC] Radio_Menu_3D | ejectImpulseForce(cena) = 0.15 | maxEjectSpeed = 1.50
+  [REFS] rack: assignedTapes.Array.data[0]=Tape_CyberHorizon_Active | assignedTapes.Array.data[1]=Tape_LunaCantina_Rack | assignedTapes.Array.data[2]=Tape_NeonSunset_Rack | assignedTapes.Array.data[3]=Tape_EmeraldZen_Rack
+
+--- 5. EXPURGO DEPOIS ---
+  removidos na origem: 0 | duplicatas removidas: 0
+  (0,0,0) r=1.0m: LIMPO
+  duplicatas: nenhuma
+  contagem: [IC] Radio_Menu_3D: 1
+  contagem: RadioCassetteDeck_Instance: 1
+  contagem: CassetteOrganizerRack_Instance: 1
+  contagem: Tape_CyberHorizon_Active: 1
+  contagem: Tape_LunaCantina_Rack: 1
+  contagem: Tape_NeonSunset_Rack: 1
+  contagem: Tape_EmeraldZen_Rack: 1
+  contagem: TrophyDisplayStand_Instance: 1
+  contagem: EnvironmentControlLever_Instance: 1
+  contagem: FireworksLaunchButton_Instance: 1
+  contagem: ExoMascotBobblehead_Instance: 1
+  contagem: BalloonGunDispenser_Instance: 1
+  contagem: ArcadeBallSpawner_Instance: 1
+  contagem: Demo_Basketball_Table: 1
+  contagem: ArcadeBasketballHoop_Instance: 1
+  contagem: [IC] Ergonomic_Toy_Demo: 1
+  contagem: [IC] Drone_Guia_IA_ExoBot: 1
+  contagem: Room_Fireworks_Launcher: 1
+  contagem: MusicCassetteTape (total): 4
+  contagem: RadioCassetteSocket (total): 1
+
+--- 6. AUDITORIA PAIRWISE (todos os objetos sobre a Mesa 1) ---
+  objetos auditados sobre a Mesa 1: 8 | pares: 28 | pares avaliados: 21
+  menor folga entre pares avaliados: 0.107 m (CassetteOrganizerRack_Instance × full_desk_3 (1)/pc_monitor (decoração fixa do móvel)) | hasOverlap=False | groundGap máx = 0.0030 m | dentro do tampo = True
+      0.107 m  CassetteOrganizerRack_Instance × full_desk_3 (1)/pc_monitor (decoração fixa do móvel)
+      0.107 m  RadioCassetteDeck_Instance × full_desk_3 (1)/pc_monitor (decoração fixa do móvel)
+      0.121 m  [IC] Radio_Menu_3D × full_desk_3 (1)/pc_monitor (decoração fixa do móvel)
+      0.124 m  RadioCassetteDeck_Instance × CassetteOrganizerRack_Instance
+      0.156 m  Tape_LunaCantina_Rack (no slot do rack) × full_desk_3 (1)/pc_monitor (decoração fixa do móvel)
+      0.169 m  Tape_CyberHorizon_Active (no slot do deck) × full_desk_3 (1)/pc_monitor (decoração fixa do móvel)
+      0.180 m  RadioCassetteDeck_Instance × Tape_LunaCantina_Rack (no slot do rack)
+      0.181 m  Tape_NeonSunset_Rack (no slot do rack) × full_desk_3 (1)/pc_monitor (decoração fixa do móvel)
+
+  Cena salva: True (Assets/Scenes/Menu_Principal.unity)
+
+--- 7. CAPTURAS OFFSCREEN 1920x1080 ---
+  OK TASK-06_View1_Front.png | câmera (1.936, 1.499, -0.213) → alvo (0.686, 1.079, -0.213) fov 55
+  OK TASK-06_View2_Side_Grounding.png | câmera (1.376, 0.971, -0.273) → alvo (0.714, 0.979, -0.502) fov 50
+  OK TASK-06_View3_Closeup.png | câmera (0.884, 1.133, -0.572) → alvo (0.594, 1.008, -0.649) fov 50
+  OK TASK-06_Tape_Inserted_Slot.png | câmera (0.839, 1.183, -0.636) → alvo (0.594, 1.003, -0.649) fov 45
+  OK TASK-06_Cassette_Tapes_Closeup.png | câmera (1.153, 1.169, -0.269) → alvo (0.844, 1.009, -0.352) fov 50
+  OK TASK-06_Radio_Deck_Overview.png | câmera (1.626, 1.749, -0.555) → alvo (0.686, 1.119, -0.213) fov 55
+  (sequência de Eject refeita na seção 8 com a lógica real do runtime; diagnóstico antigo removido)
+
+  JSON: D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\TASK-06_SpatialAudit.json
+
+=== RESUMO: hasOverlap=False | minPairClearance=0.107 m (CassetteOrganizerRack_Instance × full_desk_3 (1)/pc_monitor (decoração fixa do móvel)) | groundGap=0.0030 m | isOriginClean=True | duplicatas=0 ===
+
+--- 8. EJECT (RE-RUN pós-correção [C] em RadioCassetteSocket: lógica REAL do runtime) ---
+  Data/Hora local: 2026-11-11 23:38:21
+  runtime CacheDeckColliders: 4 colliders sólidos do deck (RadioCassetteDeck_Instance, Eject_Button, Collider_SideRim_L, Collider_SideRim_R)
+  Time.deltaTime do Editor = 0.0000s → base de tempo da corrotina emulada a 90 Hz via campo '<elapsed>5__3'
+  após 1º trecho da corrotina: isKinematic=False |v|=0.00 m/s ejectCollisionIgnored=True (pares ignorados com 4 colliders do deck) IsEjectingCooldown=True
+  quadro 'em voo' t=0.16s pos=(0.732, 1.038, -0.613) base=1.011 (tampo 0.949)
+  corrotina: fim do IgnoreCollision em t=0.300s, fim do cooldown em t=1.000s (quadro da corrotina emulado = 0.0111s, 90 Hz), socket recusou recaptura durante todo o cooldown = True
+  trajetória: t=0.01s (0.604, 1.041, -0.647); t=0.11s (0.692, 1.061, -0.623); t=0.21s (0.781, 0.982, -0.599); t=0.31s (0.816, 0.955, -0.590); t=0.41s (0.816, 0.955, -0.590); t=0.51s (0.816, 0.955, -0.590); t=0.61s (0.816, 0.955, -0.590); t=0.71s (0.816, 0.955, -0.590); t=0.81s (0.816, 0.955, -0.590); t=0.91s (0.816, 0.955, -0.590); t=1.01s (0.816, 0.955, -0.590); t=1.11s (0.816, 0.955, -0.590); 
+  teste de colisão pós-eject: fita solta sobre o deck parou com base Y=0.999 (topo do deck sob ela 0.999) → colide com o deck = True
+  RESULTADO EJECT: PASS | repouso (0.816, 0.955, -0.590) base 0.949 (tampo 0.949, apoiada=True) | 0.230 m do slot (esperado 0.15–0.35: True) | folga AABB ao deck 0.089 m | fora do trigger do slot=True | margem à borda do tampo 0.134 m | pico Y 1.065 | Y mín 0.955 (> respawn 0.70: True) | IgnoreCollision restaurado=True | repouso em t=0.32s
+  OK TASK-06_Eject_Sequence.png 1920x1080 (antes | t=0.16s | repouso) câmera (1.206, 1.253, -1.003) → (0.720, 0.983, -0.616)
+  cena recarregada do disco (descarta mutações da simulação): fita em (0.594, 1.033, -0.649), erro ao SlotAttachPoint 0.0 mm, kinematic=True
+  expurgo: removidos na origem 0 | duplicatas removidas 0 | (0,0,0) r=1.0 m: LIMPO | duplicatas: nenhuma
+  contagem: deck 1 | rack 1 | fitas 4
+  cena com alterações pendentes ao final: False
+  JSON atualizado: D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\TASK-06_SpatialAudit.json

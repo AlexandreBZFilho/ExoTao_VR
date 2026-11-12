@@ -1,0 +1,38 @@
+{
+    "taskId": "TASK-02",
+    "timestamp": "2026-11-11T05:51:57Z",
+    "sceneName": "Menu_Principal",
+    "originPurgerStatus": {
+        "isOriginClean": true,
+        "rogueObjectsFound": 0,
+        "cleanedObjectsCount": 0,
+        "objectsAtOriginZero": 0
+    },
+    "instanceCounts": {
+        "expected": 1,
+        "actual": 1,
+        "hasDuplicates": false,
+        "duplicateObjectsFound": 0
+    },
+    "spatialDistribution": {
+        "furnitureAllocated": "full_desk_3 (1)",
+        "position": {
+            "x": 0.5799999833106995,
+            "y": 1.0269999504089356,
+            "z": -0.3799999952316284
+        },
+        "hasOverlap": false,
+        "minClearanceMeters": 0.2240000069141388
+    },
+    "groundingAudit": {
+        "groundGapMeters": 0.004999999888241291,
+        "isPhysicallyGrounded": true,
+        "isInsideMapBounds": true
+    },
+    "vrPerformanceCompliance": {
+        "gpuInstancingEnabled": true,
+        "zeroDynamicMeshColliders": true,
+        "zeroUpdateGetComponent": true,
+        "srpBatcherCompatible": true
+    }
+}

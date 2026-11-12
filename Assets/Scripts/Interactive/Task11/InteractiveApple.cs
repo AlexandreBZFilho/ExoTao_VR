@@ -16,14 +16,13 @@ namespace VRRehab.Interactive.Task11
 
     /// <summary>
     /// Maçã Interativa de Alta Fidelidade para o mapa da Floresta (TASK-11).
-    /// Herda de ErgonomicGrabInteractable (Force Grab, Auto-Respawn, Aim Assist),
-    /// integra com o Drone Guia (DroneFetchTarget) para recuperação a distância,
+    /// Herda de LaserSwingThrowInteractable (Física de Chicote por Raio Laser, Force Grab, Auto-Respawn, Aim Assist),
     /// possui física hidrodinâmica com splash no rio e som de impacto na terra.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(SphereCollider))]
     [DisallowMultipleComponent]
-    public class InteractiveApple : ErgonomicGrabInteractable, IAimAssistTarget
+    public class InteractiveApple : LaserSwingThrowInteractable, IAimAssistTarget
     {
         [Header("Tipo de Maçã & Pontuação")]
         [SerializeField] private AppleType appleType = AppleType.NormalRed;
@@ -61,7 +60,6 @@ namespace VRRehab.Interactive.Task11
 
         private Rigidbody appleRb;
         private SphereCollider appleCollider;
-        private DroneFetchTarget fetchTarget;
         private bool isFloatingInWater = false;
         private bool hasSplashed = false;
         private float originalLinearDrag = 0.05f;
@@ -81,13 +79,6 @@ namespace VRRehab.Interactive.Task11
                 originalAngularDrag = appleRb.angularDamping;
                 appleRb.mass = 0.18f;
                 appleRb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
-            }
-
-            // Garante presença do componente de busca pelo Drone Pet
-            fetchTarget = GetComponent<DroneFetchTarget>();
-            if (fetchTarget == null)
-            {
-                fetchTarget = gameObject.AddComponent<DroneFetchTarget>();
             }
 
             if (appleType == AppleType.GoldenBonus)

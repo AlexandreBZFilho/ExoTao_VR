@@ -21,8 +21,8 @@ namespace VRRehab.DronePet
         [Tooltip("Tempo de espera (em segundos) após soltar o objeto antes de acionar a busca")]
         [SerializeField] private float autoFetchDelay = 1.2f;
 
-        [Tooltip("Se ativado, mesmo com velocidade baixa, distâncias maiores que minFetchDistance acionam o drone")]
-        [SerializeField] private bool allowAutoFetch = true;
+        [Tooltip("Se ativado, mesmo com velocidade baixa, distâncias maiores que minFetchDistance acionam o drone (DESATIVADO PARA TASK-03)")]
+        [SerializeField] private bool allowAutoFetch = false;
 
         [Header("Parâmetros de Acoplamento ao Feixe Trator")]
         [Tooltip("Offset local em relação ao ponto de ancoragem do feixe trator (mantém item afastado da fuselagem)")]
@@ -78,14 +78,8 @@ namespace VRRehab.DronePet
 
         private void Update()
         {
-            if (!allowAutoFetch || isHeld || isBeingFetched) return;
-
-            timeSinceRelease += Time.deltaTime;
-
-            if (timeSinceRelease >= autoFetchDelay)
-            {
-                CheckFetchConditions();
-            }
+            // Desativado: o Drone nunca busca maçãs nem se afasta do paciente para pegar objetos
+            return;
         }
 
         private void OnGrabbed(SelectEnterEventArgs args)
@@ -144,18 +138,12 @@ namespace VRRehab.DronePet
         }
 
         /// <summary>
-        /// Solicita explicitamente que o Drone Guia venha buscar este objeto.
+        /// Solicita explicitamente que o Drone Guia venha buscar este objeto (Neutralizado para TASK-03).
         /// </summary>
         public void RequestFetch()
         {
-            if (isBeingFetched || isHeld) return;
-
-            if (DroneFetchController.Instance != null && DroneFetchController.Instance.CanAcceptFetch())
-            {
-                isBeingFetched = true;
-                onFetchRequested?.Invoke();
-                DroneFetchController.Instance.RequestFetch(this);
-            }
+            // Neutralizado: o Drone é companheiro de acompanhamento e nunca se afasta do paciente para buscar itens.
+            return;
         }
 
         /// <summary>

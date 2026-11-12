@@ -6,6 +6,8 @@ namespace VRRehab.Core
     /// <summary>
     /// Helper estático para detecção dinâmica de Render Pipeline (Built-in vs URP/HDRP)
     /// e fornecimento de shaders e materiais compatíveis, prevenindo shaders magenta/quebrados.
+    /// Garante que todos os materiais criados ativem GPU Instancing (mat.enableInstancing = true)
+    /// e configurem propriedades corretas de SRP Batcher e Emissão.
     /// </summary>
     public static class MaterialShaderHelper
     {
@@ -76,14 +78,16 @@ namespace VRRehab.Core
         }
 
         /// <summary>
-        /// Cria um novo Material Lit pronto com a cor e acabamento especificados.
+        /// Cria um novo Material Lit pronto com a cor e acabamento especificados,
+        /// com GPU Instancing ativado por padrão para alta performance em VR.
         /// </summary>
         public static Material CreateLitMaterial(string name, Color baseColor, float smoothness = 0.5f, float metallic = 0.0f)
         {
             Shader shader = GetStandardLitShader();
             Material mat = new Material(shader)
             {
-                name = name
+                name = name,
+                enableInstancing = true
             };
 
             SetBaseColor(mat, baseColor);
@@ -94,21 +98,24 @@ namespace VRRehab.Core
         }
 
         /// <summary>
-        /// Cria um novo Material Emissivo com brilho e cor configurados.
+        /// Cria um novo Material Emissivo com brilho, cor e keyword _EMISSION configurados,
+        /// com GPU Instancing ativado.
         /// </summary>
         public static Material CreateEmissiveMaterial(string name, Color baseColor, Color emissionColor, float intensity = 1.0f)
         {
             Material mat = CreateLitMaterial(name, baseColor, 0.4f, 0.0f);
+            mat.enableInstancing = true;
             SetEmission(mat, emissionColor, intensity);
             return mat;
         }
 
         /// <summary>
-        /// Cria um material transparente ajustando os blend modes corretamente.
+        /// Cria um material transparente ajustando os blend modes corretamente e ativando GPU Instancing.
         /// </summary>
         public static Material CreateTransparentMaterial(string name, Color baseColor, float alpha)
         {
             Material mat = CreateLitMaterial(name, new Color(baseColor.r, baseColor.g, baseColor.b, alpha));
+            mat.enableInstancing = true;
 
             if (IsURPActive)
             {
@@ -137,7 +144,8 @@ namespace VRRehab.Core
         }
 
         /// <summary>
-        /// Cria um material luminoso aditivo para raios, lasers e feixes tratores holográficos.
+        /// Cria um material luminoso aditivo para raios, lasers e feixes tratores holográficos,
+        /// com GPU Instancing ativado.
         /// </summary>
         public static Material CreateBeamGlowMaterial(string name, Color color)
         {
@@ -155,13 +163,30 @@ namespace VRRehab.Core
 
             Material mat = new Material(shader)
             {
-                name = name
+                name = name,
+                enableInstancing = true
             };
 
             SetBaseColor(mat, color);
             if (mat.HasProperty("_TintColor")) mat.SetColor("_TintColor", color);
             SetEmission(mat, color, 2.5f);
 
+            return mat;
+        }
+
+        /// <summary>
+        /// Cria um material Unlit básico com cor sólida e GPU Instancing ativado.
+        /// </summary>
+        public static Material CreateUnlitMaterial(string name, Color color)
+        {
+            Shader shader = GetUnlitShader();
+            Material mat = new Material(shader)
+            {
+                name = name,
+                enableInstancing = true
+            };
+
+            SetBaseColor(mat, color);
             return mat;
         }
 
@@ -183,7 +208,7 @@ namespace VRRehab.Core
         }
 
         /// <summary>
-        /// Configura a cor e intensidade da emissão, ativando a keyword necessária.
+        /// Configura a cor e intensidade da emissão, ativando a keyword _EMISSION para URP e Standard.
         /// </summary>
         public static void SetEmission(Material mat, Color emissionColor, float intensity = 1.0f)
         {
@@ -225,11 +250,13 @@ namespace VRRehab.Core
 
         /// <summary>
         /// Verifica se o shader do material está quebrado, nulo ou magenta (InternalErrorShader),
-        /// recuperando-o com o shader padrão compatível.
+        /// recuperando-o com o shader padrão compatível e assegurando enableInstancing = true.
         /// </summary>
         public static bool EnsureValidShader(Material mat)
         {
             if (mat == null) return false;
+
+            mat.enableInstancing = true;
 
             bool isBroken = mat.shader == null ||
                             mat.shader.name == "Hidden/InternalErrorShader" ||

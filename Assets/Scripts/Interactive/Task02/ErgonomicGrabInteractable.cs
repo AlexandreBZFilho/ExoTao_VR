@@ -19,42 +19,43 @@ namespace VRRehab.Ergonomics
     {
         [Header("Ergonomia de Força & Atração Suave")]
         [Tooltip("Tempo de aproximação suave durante o Force Grab (segundos).")]
-        [SerializeField] private float ergonomicAttachEaseInTime = 0.30f;
+        [SerializeField] protected float ergonomicAttachEaseInTime = 0.30f;
 
         [Header("Recuperação Automática (Auto-Respawn)")]
         [Tooltip("Ativa a recuperação automática quando o objeto cai no chão ou é abandonado longe da mesa.")]
-        [SerializeField] private bool enableAutoRespawn = true;
+        [SerializeField] protected bool enableAutoRespawn = true;
 
         [Tooltip("Tempo de espera (em segundos) após ser solto antes de checar as condições de retorno.")]
-        [SerializeField] private float respawnDelaySeconds = 2.5f;
+        [SerializeField] protected float respawnDelaySeconds = 2.5f;
 
         [Tooltip("Altitude mínima em Y (chão). Se cair abaixo desta cota, o retorno é acionado.")]
-        [SerializeField] private float respawnFloorThresholdY = 0.35f;
+        [SerializeField] protected float respawnFloorThresholdY = 0.35f;
 
         [Tooltip("Distância máxima permitida da zona inicial (em metros).")]
-        [SerializeField] private float respawnMaxDistance = 5.0f;
+        [SerializeField] protected float respawnMaxDistance = 5.0f;
 
         [Tooltip("Duração do voo suave de retorno para o ponto de origem (segundos).")]
-        [SerializeField] private float returnGlideDuration = 0.85f;
+        [SerializeField] protected float returnGlideDuration = 0.85f;
 
         [Tooltip("Ponto de ancoragem inicial (definido automaticamente na inicialização se nulo).")]
-        [SerializeField] private Transform customHomeAnchor;
+        [SerializeField] protected Transform customHomeAnchor;
 
         [Header("Eventos e Feedback")]
-        [SerializeField] private bool playAudioHapticFeedback = true;
+        [SerializeField] protected bool playAudioHapticFeedback = true;
 
-        private Vector3 homePosition;
-        private Quaternion homeRotation;
-        private bool isReturningHome = false;
-        private float lastDropTimestamp = -1f;
-        private bool isCurrentlyHeld = false;
-        private Rigidbody cachedRb;
-        private bool originalWasKinematic;
-        private Coroutine respawnMonitorCoroutine;
+        protected Vector3 homePosition;
+        protected Quaternion homeRotation;
+        protected bool isReturningHome = false;
+        protected float lastDropTimestamp = -1f;
+        protected bool isCurrentlyHeld = false;
+        protected Rigidbody cachedRb;
+        protected bool originalWasKinematic;
+        protected Coroutine respawnMonitorCoroutine;
 
         public Vector3 HomePosition => customHomeAnchor != null ? customHomeAnchor.position : homePosition;
         public Quaternion HomeRotation => customHomeAnchor != null ? customHomeAnchor.rotation : homeRotation;
         public bool IsReturningHome => isReturningHome;
+        public bool IsCurrentlyHeld => isCurrentlyHeld;
 
         protected override void Awake()
         {
@@ -195,7 +196,7 @@ namespace VRRehab.Ergonomics
         /// <summary>
         /// Coroutine de monitoramento contínuo de posição quando o objeto não estiver na mão do paciente.
         /// </summary>
-        private IEnumerator AutoRespawnMonitorRoutine()
+        protected virtual IEnumerator AutoRespawnMonitorRoutine()
         {
             WaitForSeconds waitInterval = new WaitForSeconds(0.4f);
 
@@ -214,15 +215,42 @@ namespace VRRehab.Ergonomics
                     Vector3 currentPos = transform.position;
                     Vector3 homePos = HomePosition;
 
-                    bool fallenOnFloor = currentPos.y < respawnFloorThresholdY;
-                    bool tooFarFromHome = Vector3.Distance(currentPos, homePos) > respawnMaxDistance;
-
-                    if (fallenOnFloor || tooFarFromHome)
+                    if (CheckOutOfBounds(currentPos, homePos))
                     {
                         StartCoroutine(ReturnHomeRoutine());
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Avalia se o objeto caiu fora dos limites válidos do cenário (chão, debaixo de terreno ou longe demais).
+        /// </summary>
+        protected virtual bool CheckOutOfBounds(Vector3 currentPos, Vector3 homePos)
+        {
+            // 1. Distância máxima permitida em relação à âncora/mesa
+            if (Vector3.Distance(currentPos, homePos) > respawnMaxDistance)
+            {
+                return true;
+            }
+
+            // 2. Proteção Anti-Queda debaixo do Terreno na cena da Floresta
+            if (Terrain.activeTerrain != null)
+            {
+                float terrainY = Terrain.activeTerrain.SampleHeight(currentPos) + Terrain.activeTerrain.transform.position.y;
+                if (currentPos.y < terrainY - 1.2f)
+                {
+                    return true;
+                }
+            }
+
+            // 3. Cota mínima absoluta em Y (ex: no Menu Principal ou queda no vazio)
+            if (currentPos.y < respawnFloorThresholdY)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -236,7 +264,7 @@ namespace VRRehab.Ergonomics
             }
         }
 
-        private IEnumerator ReturnHomeRoutine()
+        protected virtual IEnumerator ReturnHomeRoutine()
         {
             isReturningHome = true;
 
@@ -296,8 +324,9 @@ namespace VRRehab.Ergonomics
         #endregion
 
         #region Helpers de Compatibilidade de Física (Unity 6 / LinearVelocity)
-        private static Vector3 GetRigidbodyVelocity(Rigidbody rb)
+        protected static Vector3 GetRigidbodyVelocity(Rigidbody rb)
         {
+            if (rb == null) return Vector3.zero;
 #if UNITY_6000_0_OR_NEWER
             return rb.linearVelocity;
 #else
@@ -305,8 +334,9 @@ namespace VRRehab.Ergonomics
 #endif
         }
 
-        private static void SetRigidbodyVelocity(Rigidbody rb, Vector3 velocity)
+        protected static void SetRigidbodyVelocity(Rigidbody rb, Vector3 velocity)
         {
+            if (rb == null) return;
 #if UNITY_6000_0_OR_NEWER
             rb.linearVelocity = velocity;
 #else
@@ -314,8 +344,9 @@ namespace VRRehab.Ergonomics
 #endif
         }
 
-        private static void SetRigidbodyAngularVelocity(Rigidbody rb, Vector3 angularVelocity)
+        protected static void SetRigidbodyAngularVelocity(Rigidbody rb, Vector3 angularVelocity)
         {
+            if (rb == null) return;
 #if UNITY_6000_0_OR_NEWER
             rb.angularVelocity = angularVelocity;
 #else

@@ -349,11 +349,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d494154cf3a15149a37cb6e0c977d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  throwVelocityMultiplier: 1.45
-  minThrowSpeedThreshold: 0.35
-  aimAssistStrength: 0.65
-  maxConeAngleDegrees: 38
-  maxTargetDistance: 15
+  throwVelocityMultiplier: 1.65
+  minThrowSpeedThreshold: 0.2
+  aimAssistStrength: 0.5
+  maxConeAngleDegrees: 18
+  maxTargetDistance: 16
   showDebugRays: 0
 --- !u!114 &2109189435846581334
 MonoBehaviour:
@@ -389,6 +389,7 @@ MonoBehaviour:
   scaleTransitionSpeed: 14
   enableEmissionHighlight: 1
   highlightEmissionColor: {r: 0.3, g: 0.90000004, b: 1.5, a: 1.5}
+  successEmissionColor: {r: 1.8, g: 1.4039999, b: 0.35999998, a: 1.8}
   playAudioOnHover: 1
   playAudioOnSelect: 1
   triggerHaptics: 1

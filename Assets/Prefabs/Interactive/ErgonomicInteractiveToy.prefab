@@ -183,7 +183,7 @@ GameObject:
   - component: {fileID: 3112222103253624116}
   - component: {fileID: 2842487297118442077}
   - component: {fileID: 6521034115084220164}
-  - component: {fileID: 9139156064603727737}
+  - component: {fileID: 1075321312391795588}
   - component: {fileID: 6467139650684570971}
   - component: {fileID: 3429923555723905000}
   - component: {fileID: 1124644263864107586}
@@ -260,7 +260,7 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 1
---- !u!114 &9139156064603727737
+--- !u!114 &1075321312391795588
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -269,7 +269,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4403543246411096432}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d305b8bb998b71845afd02cd972201f3, type: 3}
+  m_Script: {fileID: 11500000, guid: 5237d9cb5c3072c4295ea9be6de465ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_InteractionManager: {fileID: 0}
@@ -387,7 +387,7 @@ MonoBehaviour:
   m_SmoothScale: 0
   m_SmoothScaleAmount: 8
   m_TightenScale: 0.1
-  m_ThrowOnDetach: 1
+  m_ThrowOnDetach: 0
   m_ThrowSmoothingDuration: 0.25
   m_ThrowSmoothingCurve:
     serializedVersion: 2
@@ -420,6 +420,13 @@ MonoBehaviour:
   returnGlideDuration: 0.85
   customHomeAnchor: {fileID: 0}
   playAudioHapticFeedback: 1
+  throwBoostMultiplier: 1.65
+  directThrowBoostMultiplier: 1.25
+  maxThrowSpeed: 18
+  maxAngularSpeed: 25
+  minWindowOffsetSeconds: 0.02
+  maxWindowOffsetSeconds: 0.125
+  laserThrowWooshClip: {fileID: 8300000, guid: c02283a1f14b43d29a54bb88319f02a2, type: 3}
 --- !u!114 &6467139650684570971
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -432,11 +439,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d494154cf3a15149a37cb6e0c977d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  throwVelocityMultiplier: 1.45
-  minThrowSpeedThreshold: 0.35
-  aimAssistStrength: 0.65
-  maxConeAngleDegrees: 38
-  maxTargetDistance: 15
+  throwVelocityMultiplier: 1.65
+  minThrowSpeedThreshold: 0.2
+  aimAssistStrength: 0.5
+  maxConeAngleDegrees: 18
+  maxTargetDistance: 16
   showDebugRays: 0
 --- !u!114 &3429923555723905000
 MonoBehaviour:
@@ -455,6 +462,7 @@ MonoBehaviour:
   scaleTransitionSpeed: 14
   enableEmissionHighlight: 1
   highlightEmissionColor: {r: 0.3, g: 0.90000004, b: 1.5, a: 1.5}
+  successEmissionColor: {r: 1.8, g: 1.4039999, b: 0.35999998, a: 1.8}
   playAudioOnHover: 1
   playAudioOnSelect: 1
   triggerHaptics: 1

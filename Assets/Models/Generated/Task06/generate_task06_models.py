@@ -20,12 +20,13 @@ def create_material(name, diffuse_color, metallic=0.0, roughness=0.5, is_emissiv
                 bsdf.inputs['Emission Strength'].default_value = 2.8
     return mat
 
-def create_spool_mesh(name, hub_radius=0.0042, outer_radius=0.0105, thickness=0.006, num_teeth=6):
+def create_spool_mesh(name, hub_radius=0.0040, outer_radius=0.0105, thickness=0.0070, num_teeth=6):
     mesh = bpy.data.meshes.new(name)
     obj = bpy.data.objects.new(name, mesh)
     bm = bmesh.new()
 
-    segments = 32
+    # Low-poly VR: 16 angular segments for exactly 128 triangles per spool
+    segments = 16
     y_half = thickness * 0.5
 
     verts_front = []
@@ -98,46 +99,10 @@ def build_cassette_tape(export_path):
 
     bev = shell.modifiers.new("Bevel", 'BEVEL')
     bev.width = 0.0018
-    bev.segments = 2
+    bev.segments = 1
+    bev.harden_normals = True
 
-    # 2. Label Sticker with Central Window Frame Cutout:
-    # Top label banner
-    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0, -0.0062, 0.020))
-    lbl_top = bpy.context.active_object
-    lbl_top.name = "Label_Top"
-    lbl_top.scale = (0.088, 0.0004, 0.016)
-    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-    lbl_top.data.materials.append(mat_label)
-    lbl_top.parent = root
-
-    # Bottom label banner
-    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0, -0.0062, -0.018))
-    lbl_bot = bpy.context.active_object
-    lbl_bot.name = "Label_Bottom"
-    lbl_bot.scale = (0.088, 0.0004, 0.014)
-    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-    lbl_bot.data.materials.append(mat_label)
-    lbl_bot.parent = root
-
-    # Left & Right label borders
-    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(-0.034, -0.0062, 0.001))
-    lbl_left = bpy.context.active_object
-    lbl_left.name = "Label_Left"
-    lbl_left.scale = (0.020, 0.0004, 0.024)
-    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-    lbl_left.data.materials.append(mat_label)
-    lbl_left.parent = root
-
-    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0.034, -0.0062, 0.001))
-    lbl_right = bpy.context.active_object
-    lbl_right.name = "Label_Right"
-    lbl_right.scale = (0.020, 0.0004, 0.024)
-    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-    lbl_right.data.materials.append(mat_label)
-    lbl_right.parent = root
-
-    # 3. Central Acrylic Clear Window:
-    # Perfectly visible through the label frame!
+    # 2. Central Acrylic Clear Window:
     bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0, 0, 0.001))
     window = bpy.context.active_object
     window.name = "Window_Glass"
@@ -146,8 +111,28 @@ def build_cassette_tape(export_path):
     window.data.materials.append(mat_window)
     window.parent = root
 
-    # 4. Tape Ribbon Rolls (cylinder along Y)
-    bpy.ops.mesh.primitive_cylinder_add(radius=0.0135, depth=0.0065, location=(-0.021, 0, 0.001))
+    # 3. Label_Front: Single planar sticker face with central window cutout (8 triangles, normal facing -Y)
+    mesh_lbl = bpy.data.meshes.new("Label_Front")
+    lbl_obj = bpy.data.objects.new("Label_Front", mesh_lbl)
+    bm = bmesh.new()
+    ow, oh = 0.088 / 2.0, 0.054 / 2.0
+    iw, ih = 0.050 / 2.0, 0.026 / 2.0
+    y_pos = -0.0062
+    ov = [bm.verts.new((-ow, y_pos, -oh)), bm.verts.new((ow, y_pos, -oh)), bm.verts.new((ow, y_pos, oh)), bm.verts.new((-ow, y_pos, oh))]
+    iv = [bm.verts.new((-iw, y_pos, -ih)), bm.verts.new((iw, y_pos, -ih)), bm.verts.new((iw, y_pos, ih)), bm.verts.new((-iw, y_pos, ih))]
+    bm.verts.ensure_lookup_table()
+    bm.faces.new([ov[0], ov[1], iv[1], iv[0]])
+    bm.faces.new([ov[1], ov[2], iv[2], iv[1]])
+    bm.faces.new([ov[2], ov[3], iv[3], iv[2]])
+    bm.faces.new([ov[3], ov[0], iv[0], iv[3]])
+    bm.to_mesh(mesh_lbl)
+    bm.free()
+    lbl_obj.data.materials.append(mat_label)
+    lbl_obj.parent = root
+    bpy.context.collection.objects.link(lbl_obj)
+
+    # 4. Tape Ribbon Rolls (cylinder along Y, 8 angular segments: 28 tris each)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.0135, depth=0.0065, location=(-0.021, 0, 0.001))
     ribbon_left = bpy.context.active_object
     ribbon_left.rotation_euler = (math.radians(90), 0, 0)
     bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
@@ -155,7 +140,7 @@ def build_cassette_tape(export_path):
     ribbon_left.data.materials.append(mat_ribbon)
     ribbon_left.parent = root
 
-    bpy.ops.mesh.primitive_cylinder_add(radius=0.0125, depth=0.0065, location=(0.021, 0, 0.001))
+    bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.0125, depth=0.0065, location=(0.021, 0, 0.001))
     ribbon_right = bpy.context.active_object
     ribbon_right.rotation_euler = (math.radians(90), 0, 0)
     bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
@@ -163,7 +148,7 @@ def build_cassette_tape(export_path):
     ribbon_right.data.materials.append(mat_ribbon)
     ribbon_right.parent = root
 
-    # 5. Toothed Spools (rotatable gears inside window)
+    # 5. Toothed Spools (rotatable gears inside window, 16 segments: 128 tris each)
     spool_left = create_spool_mesh("Spool_Left", hub_radius=0.0040, outer_radius=0.0105, thickness=0.0070, num_teeth=6)
     spool_left.location = (-0.021, 0, 0.001)
     spool_left.data.materials.append(mat_spool)
@@ -176,7 +161,7 @@ def build_cassette_tape(export_path):
     bpy.context.collection.objects.link(spool_right)
     spool_right.parent = root
 
-    all_objs = [root, shell, lbl_top, lbl_bot, lbl_left, lbl_right, window, ribbon_left, ribbon_right, spool_left, spool_right]
+    all_objs = [root, shell, lbl_obj, window, ribbon_left, ribbon_right, spool_left, spool_right]
     bpy.ops.object.select_all(action='DESELECT')
     for obj in all_objs:
         obj.select_set(True)
@@ -215,7 +200,8 @@ def build_deck_slot(export_path):
 
     bev = chassis.modifiers.new("Bevel", 'BEVEL')
     bev.width = 0.003
-    bev.segments = 2
+    bev.segments = 1
+    bev.harden_normals = True
 
     # Top Brass Faceplate
     bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0, 0, 0.0755))
@@ -259,7 +245,8 @@ def build_deck_slot(export_path):
 
     bev_btn = eject_btn.modifiers.new("Bevel", 'BEVEL')
     bev_btn.width = 0.0018
-    bev_btn.segments = 2
+    bev_btn.segments = 1
+    bev_btn.harden_normals = True
 
     # Eject Button Bezel Ring
     bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0.035, -0.040, 0.077))
@@ -270,9 +257,8 @@ def build_deck_slot(export_path):
     eject_ring.data.materials.append(mat_metal)
     eject_ring.parent = root
 
-    # Status LED on the FRONT-LEFT of the top plate:
-    # X = -0.035m (left), Y = -0.040m (front), Z = 0.078m
-    bpy.ops.mesh.primitive_cylinder_add(radius=0.005, depth=0.004, location=(-0.035, -0.040, 0.078))
+    # Status LED on the FRONT-LEFT of the top plate (12 segments: 44 tris)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.005, depth=0.004, location=(-0.035, -0.040, 0.078))
     led = bpy.context.active_object
     led.name = "Status_LED"
     led.data.materials.append(mat_led)
@@ -314,7 +300,8 @@ def build_organizer_rack(export_path):
 
     bev = base.modifiers.new("Bevel", 'BEVEL')
     bev.width = 0.002
-    bev.segments = 2
+    bev.segments = 1
+    bev.harden_normals = True
 
     # 5 Stepped Dividers tilted 18° backwards around X
     tilt_rad = math.radians(18.0)

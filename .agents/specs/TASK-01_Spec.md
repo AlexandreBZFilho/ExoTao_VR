@@ -1,108 +1,209 @@
-# TASK-01 Technical Specification: Multisensory Feedback & Visual QA Capture Utility
-
-**Project:** VR Rehab Gamification (ExoTao VR Rehab)  
-**Task ID:** TASK-01  
-**Module:** Core / Base Infrastructure  
-**Author:** Specialist Subagent  
-**Unity Version:** 6000.0.85f2 (Unity 6)  
-**XR Interaction Toolkit Version:** 2.6.5  
-**Active Render Pipeline:** Built-in Render Pipeline (Fallback/Compatible with URP 14.0.12)
+# Especificação Forense, Layout Multimóveis e Infraestrutura Core — TASK-01
+**Documento Técnico:** `.agents/specs/TASK-01_Spec.md`  
+**Autor:** Subagente [A] — Forensic Spec, Furniture Mapper & Playtest Bug Scout  
+**Status:** APROVADO PARA EXECUÇÃO  
+**Data:** 11/11/2026  
 
 ---
 
-## 1. Overview & Objectives
+## 1. Diagnóstico Forense: Bug do Teleporte Automático no Menu Principal & Neutralização
 
-TASK-01 establishes the foundational sensory and diagnostic layer for the entire project. It guarantees:
-1. **Material and Shader Compatibility (`MaterialShaderHelper`):** Zero broken/magenta shaders across different render pipelines (Built-in standard vs URP lit).
-2. **Multisensory Feedback Architecture (`VRFeedbackManager`):** Centralized 3D spatialized audio pooling (16 `AudioSource` nodes) combined with XR controller haptics (`SendHapticImpulse`) and pitch randomization.
-3. **Ergonomic Visual Interaction (`InteractableHighlightFeedback`):** Elastic scale punch and GPU-friendly `MaterialPropertyBlock` emission highlights on XRI hover and selection events.
-4. **Automated Visual QA Engine (`VisualQACaptureEditor`):** High-resolution (1920x1080) programmatic camera capture utility capable of framing bounding boxes, designated viewpoints, and persisting screenshots to `.agents/visual_qa/`.
+### 1.1. Causa Raiz Identificada
+A investigação nos scripts de gameplay e nos arquivos de cena revelou a origem exata do teleporte indesejado ocorrido durante o playtest VR:
 
----
+1. **Arquivo `Assets/Scripts/Interactive/Task10/PortalWorldSphere.cs`:**
+   * Linhas 207-222 (`ExecuteSceneTransition`): Executa `SceneManager.LoadScene("CenaDeLoading")` ou `SceneManager.LoadScene(targetSceneName)`.
+   * Linhas 147-151 (`CheckHeadsetProximity`): Dispara `InitiateTeleportSequence("Headset Proximity")`.
+2. **Arquivo `Assets/Scripts/Interactive/Task10/PortalPedestalSocket.cs`:**
+   * Linhas 117-144 (`OnSelectEntered`): Ao detectar o encaixe de qualquer `PortalWorldSphere`, inicia a corrotina `SocketCelebrationRoutine(orb)`.
+   * Linhas 175-206 (`SocketCelebrationRoutine`): Aguarda `celebrationDuration = 1.2f` e executa:
+     ```csharp
+     orb.InitiateTeleportSequence("Pedestal Socket Celebration");
+     ```
+3. **Causa na Cena `Assets/Scenes/Menu_Principal.unity`:**
+   * A esfera de portal `PortalOrbDiorama_Forest` foi posicionada em design-time diretamente sobre o berço magnético do pedestal `PortalPedestalSocket`.
+   * Ao entrar no modo Play, o componente `XRSocketInteractor` do pedestal detectou imediatamente a esfera no seu volume de gatilho, disparando `OnSelectEntered` no primeiro segundo de execução.
+   * Transcorridos os 1.2 segundos da celebração, `InitiateTeleportSequence` disparou o carregamento da cena `Floresta_e_Rio`, teletransportando o jogador involuntariamente.
 
-## 2. Component Architecture
-
-### 2.1 `MaterialShaderHelper.cs` (`Assets/Scripts/Interactive/Core/`)
-* **Namespace:** `VRRehab.Core`
-* **Responsibilities:**
-  - Detect active render pipeline dynamically:
-    - Checks `GraphicsSettings.currentRenderPipeline` and `QualitySettings.renderPipeline`.
-    - If null -> Built-in Render Pipeline.
-    - If contains "Universal" / "URP" -> Universal Render Pipeline.
-  - Provide safe shader references:
-    - Standard Lit: `Standard` (Built-in) or `Universal Render Pipeline/Lit` (URP).
-    - Unlit: `Unlit/Color` (Built-in) or `Universal Render Pipeline/Unlit` (URP).
-    - Transparent: Sets appropriate blend modes (`_Mode`, `_SrcBlend`, `_DstBlend`, `_ZWrite`).
-  - Provide creation helpers:
-    - `CreateLitMaterial(string name, Color baseColor, float smoothness, float metallic)`
-    - `CreateEmissiveMaterial(string name, Color baseColor, Color emissionColor, float intensity)`
-    - `EnsureValidShader(Material mat)` to repair any missing or broken shaders in runtime/editor.
-
-### 2.2 `VRFeedbackManager.cs` (`Assets/Scripts/Interactive/Core/`)
-* **Namespace:** `VRRehab.Core`
-* **Pattern:** Singleton with DontDestroyOnLoad (when in Play mode) or Editor fallback.
-* **Audio Pool:**
-  - 16 pre-allocated `AudioSource` instances parented to `VRFeedbackManager`.
-  - Configured with `spatialBlend = 1.0f` (full 3D), `minDistance = 0.5f`, `maxDistance = 25.0f`, `rolloffMode = AudioRolloffMode.Linear`.
-  - Recycled using round-robin / free-slot pooling.
-  - Pitch randomized per trigger within `[pitchMin, pitchMax]` (default `0.93f` to `1.07f`) to prevent acoustic fatigue.
-* **XR Haptics Support:**
-  - Overloads for `XRBaseControllerInteractor` and `XRBaseInteractable`.
-  - Safely extracts `XRBaseController` and invokes `controller.SendHapticImpulse(amplitude, duration)`.
-  - Handles null interactors gracefully without logging exceptions.
-* **Preset Feedback Types:**
-  - Hover: `PlayHover(Vector3 pos, XRBaseControllerInteractor interactor = null)`
-  - Grab / Select: `PlayGrab(Vector3 pos, XRBaseControllerInteractor interactor = null)`
-  - Release: `PlayRelease(Vector3 pos)`
-  - Mech Click: `PlayButtonClick(Vector3 pos, XRBaseControllerInteractor interactor = null)`
-  - Socket Snap: `PlaySocketSnap(Vector3 pos, XRBaseControllerInteractor interactor = null)`
-  - Success Chime: `PlaySuccess(Vector3 pos)`
-
-### 2.3 `InteractableHighlightFeedback.cs` (`Assets/Scripts/Interactive/Core/`)
-* **Namespace:** `VRRehab.Core`
-* **Inheritance:** `MonoBehaviour`
-* **Events Integration:**
-  - Hooked to `XRBaseInteractable.firstHoverEntered`, `lastHoverExited`, `selectEntered`, `selectExited`.
-* **Visual Punch:**
-  - Elastic scale punch on hover (e.g. `originalScale * 1.06f`) using `Mathf.SmoothDamp` or lerp coroutine.
-  - Returns smoothly to `originalScale` on `lastHoverExited`.
-* **Emission Highlight:**
-  - Uses `MaterialPropertyBlock` applied to cached `Renderer` components to avoid material instancing.
-  - Targets `_EmissionColor` (or standard diffuse tint if unlit).
-  - Enables `_EMISSION` keyword if needed.
-* **Audio & Haptics Trigger:**
-  - Dispatches calls to `VRFeedbackManager.Instance` on hover and select.
-
-### 2.4 `VisualQACaptureEditor.cs` (`Assets/Editor/VisualQA/`)
-* **Namespace:** `VRRehab.EditorTools`
-* **Capabilities:**
-  - Dedicated inspection camera with adjustable FOV, high-resolution `RenderTexture` (1920x1080, 24-bit depth, sRGB, anti-aliasing = 8).
-  - Automatically calculates camera distance and position to frame arbitrary `Renderer.bounds` or `GameObject` hierarchies.
-  - Includes helper lighting to guarantee inspection visibility even in dark or unbaked corners.
-  - Methods:
-    - `CaptureActiveScene(string outputPath, Vector3 pos, Vector3 targetLookAt)`
-    - `CaptureBounds(string outputPath, Bounds targetBounds, Vector3 angleOffset)`
-    - `CaptureAllTestViews()`: generates `.agents/visual_qa/TASK-01_Menu_Overview.png`, `TASK-01_Menu_DeskZone.png`, and `TASK-01_Floresta_Overview.png`.
-  - Exposed via `[MenuItem("VRRehab/VisualQA/Capture All Test Views")]` and static command line evaluation.
+### 1.2. Plano de Neutralização Imediata (Regra Inegociável da TASK-10)
+* **Remoção Total:** Eliminar 100% de qualquer chamada a `SceneManager.LoadScene`, `SceneManager.LoadSceneAsync` ou transição de mapa dos scripts `PortalWorldSphere.cs` e `PortalPedestalSocket.cs`.
+* **Novo Papel Estritamente Cosmético/Diorama:** O `PortalOrbDiorama_Forest` deve atuar única e exclusivamente como uma peça de diorama 3D interativa de alta tecnologia:
+  1. O paciente pode pegá-la livremente, inspecionar a mini-floresta interna girando suavemente em 360°;
+  2. Ao encaixar no pedestal, ocorrem efeitos de estalo magnético, pulso emissivo no anel de LED e subida de partículas luminosas verticais;
+  3. **Jamais** alterar a cena ativa. A navegação entre mapas é competência exclusiva do Canvas 2D original da clínica (`Canvas Menu Principal` / `ControladorInterface.cs`).
 
 ---
 
-## 3. Metric Scale & Spatial Context
+## 2. Especificação do `SceneDuplicateAndOriginPurger`
 
-* **VR Scale:** 1 Unity Unit = 1.0 Meter.
-* **Main Menu Hub Coordinates:**
-  - Player Origin: `(4.50, 0.00, 2.31)`
-  - Eye Height: `~1.67m`
-  - Desk / Workstation Zone: `(0.66, 0.95, 0.36)` and `(4.50, 0.95, 7.40)`
-  - Radio Deck Anchor: `(0.66, 0.95, 0.36)`
-  - Drone Hologram Station: `(7.05, 0.00, 1.85)`
-* **Floresta e Rio Coordinates:**
-  - Pathway origin: `(0, 0, 0)` extending through natural terrain with riverbanks and interactive trees.
+### 2.1. Problema Diagnosticado no Playtest
+A inspeção forense da cena `Assets/Scenes/Floresta_e_Rio.unity` revelou um acúmulo de objetos órfãos na coordenada `(0, 0, 0)`:
+* Múltiplas instâncias de `GoldenApple_Beside_Basket` e `Apple_In_Basket` duplicadas na raiz da cena (`m_TransformParent: {fileID: 0}`) num raio de $0.4\text{m}$ ao redor de `Vector3.zero`.
+* Na cena `Menu_Principal.unity`, instâncias residuais temporárias e sobreposições decorrentes de execuções anteriores.
+
+### 2.2. Regras de Limpeza e Expurgo Automatizado
+O utilitário de Editor `SceneDuplicateAndOriginPurger` deve operar segundo as seguintes diretrizes:
+
+1. **Whitelist de Sistemas Globais no `(0, 0, 0)` (Preservação Absoluta):**
+   * Objetos essenciais de infraestrutura que legitimamente residem na origem não podem ser tocados:
+     * `[IC] Telemetria_Clinica_ReRobLab`
+     * `[IC] Audio_Ambiente_E_SFX_ReRobLab`
+     * `Gerenciador_HUD`
+     * `EventSystem`
+     * `Building` (estrutura base da sala)
+     * `Pessoa_Virtual_sem3D` / `XR Origin (XR Rig)`
+     * Grupos organizadores de hierarquia (`[TASK-XX] ..._Group`).
+2. **Critério de Expurgo na Origem (`Origin Sweeper`):**
+   * Qualquer GameObject folha ou prefab instanciado interativo (maçãs, bolas, fidgets, troféus, moedas, balões) cujo centro esteja a uma distância menor que $0.80\text{m}$ de `Vector3.zero` E que não pertença à whitelist deve ser sumariamente destruído (`Undo.DestroyObjectImmediate`).
+3. **Critério de Eliminação de Duplicatas (`Duplicate Purger`):**
+   * Para cada Task, o script mantém um registro da contagem canônica esperada de objetos únicos.
+   * Se houver $N > 1$ cópias de um item singleton (ex: `RadioCassetteDeck_Instance`, `ArcadeBallSpawner_Instance`, `BalloonGunDispenser_Instance`), preserva-se a cópia canônica mais recente e removem-se os clones excedentes.
+   * Caso algum objeto canônico tenha sido removido por engano pelo usuário, o purger sinaliza a ausência para recriação limpa pelo respectivo `SceneAndPrefabBuilder`.
 
 ---
 
-## 4. Verification & QA Criteria
-- Zero compiler errors (`CSxxxx`).
-- All 6 generated audio files present in `Assets/Audio/Generated/Core/` and registered by Unity.
-- Screenshots generated in `.agents/visual_qa/` with zero missing shaders (no bright pink/magenta).
-- Materials adaptively function under both Built-in and URP pipelines.
+## 3. Mapeamento e Distribuição Multimóveis do Menu Principal
+
+A inspeção espacial da cena `Menu_Principal.unity` (composta pelos módulos do `VNB - Office Set 2` em um espaço de $10\text{m} \times 12\text{m}$) confirmou que os minigames e fidgets estavam todos amontoados em uma única mesa (`full_desk_3 (1)`).
+
+A sala possui ampla variedade de móveis disponíveis. O novo layout distribui os elementos em 4 Zonas Físicas Distintas com folga mínima de $0.35\text{m}$ entre peças:
+
+```
+                      [PAREDE NORTE: Z = 7.4m - 8.0m]
+    ┌─────────────────────────────────────────────────────────────┐
+    │  [ZONA 3: MINIGAMES ARCADE & BALÕES]                        │
+    │  - Tabela Basquete na Parede: (5.10, 2.20, 7.85)            │
+    │  - Spawner & Bolas no Balcão: (5.10, 0.95, 7.30)            │
+    │  - Pistola Dispenser Balões: (4.50, 0.95, 7.30)             │
+    └─────────────────────────────────────────────────────────────┘
+                                  ▲
+                                  │ (Espaço Central Amplo)
+                                  ▼
+    ┌─────────────────────────┐             ┌─────────────────────┐
+    │ [ZONA 2: FIDGET STATION]│             │ [ZONA 4: ESTANTES]  │
+    │ Balcão Lateral (X=0.6m) │             │ modern_shelves_3    │
+    │ - Alavanca Clima (4.40) │             │ (X=9.61m, Z=0.03m)  │
+    │ - Botão Fogos   (4.80)  │             │ - Maçã Dourada      │
+    │ - Bobblehead    (5.20)  │             │ - Bonsai Luminoso   │
+    │ (Folga >= 0.40m)        │             │ - Taça Estrela      │
+    └─────────────────────────┘             │ - Coroa do Drone    │
+                                            └─────────────────────┘
+                 ┌───────────────────────────┐
+                 │ [CANVAS 2D MENU PRINCIPAL]│
+                 │   Posição: (0, 0, 3.94)   │
+                 └───────────────────────────┘
+                               ▲
+                               │ Visão Frontal
+    ┌──────────────────────────┴──┐
+    │ JOGADOR VR (X=0, Y=0, Z=0)  │
+    └─────────────────────────────┘
+                 │ (À Direita do Jogador)
+                 ▼
+    ┌────────────────────────────────────────┐
+    │ [ZONA 1: MESA PRINCIPAL WORKSTATION]   │
+    │ full_desk_3 (1) em (0.63, 0.00, -0.02) │
+    │ - Rádio 3D + Deck Fitas: (0.66, 0.95, 0.14)
+    │ - Rack c/ 4 Fitas Cassete: (0.70, 0.95, -0.15)
+    │ - Diorama Orb Floresta: (0.66, 0.95, -0.42)
+    └────────────────────────────────────────┘
+```
+
+### Detalhamento das 4 Zonas de Móveis:
+
+| Zona | Móvel / Estrutura na Cena | Posição Base $(X, Y, Z)$ | Altura Superfície | Itens Alocados |
+| :--- | :--- | :--- | :--- | :--- |
+| **Zona 1: Workstation Musical** | `full_desk_3 (1)` | `(0.63, 0.00, -0.02)` | $Y = 0.95\text{m}$ | Rádio 3D, Deck de Fitas, Rack com 4 Fitas Cassete magnéticas, Diorama da Floresta (sem teleporte). |
+| **Zona 2: Estação Fidget** | `counter_1` & `drawer_simple` | `(0.59, 0.00, 4.47)` a `(0.58, 0.00, 5.36)` | $Y = 0.95\text{m}$ | Alavanca de Clima (`Z = 4.40`), Botão de Fogos (`Z = 4.80`), Bobblehead (`Z = 5.20`). Espaçamento real $\ge 0.40\text{m}$. |
+| **Zona 3: Minigames Arcade** | `counter_3_a / counter_3_c` & Parede Norte | `(4.17 - 6.17, 0.00, 7.44)` | $Y = 0.95\text{m}$ (Balcão) e $Y = 2.20\text{m}$ (Parede) | Pistola Dispenser de Balões (`X = 4.50`), Botão Spawner de Basquete (`X = 5.10`), Bolas de Basquete (`X = 5.35`), Aro Duplo na parede (`5.10, 2.20, 7.85`). |
+| **Zona 4: Galeria de Troféus** | `modern_shelves_3 (1)` | `(9.61, 0.00, 0.03)` | Prateleiras $Y = 0.85\text{m}$ e $Y = 1.25\text{m}$ | Os 4 Troféus clínicos desbloqueáveis distribuídos ordenadamente com suas respectivas plaquetas. |
+
+---
+
+## 4. Especificação do `VisualQACaptureEditor` e `SpatialAuditUtility`
+
+### 4.1. Câmeras e Renders de Auditoria Visual (1920x1080)
+Para cada Task, o script de automação no Unity Editor deve renderizar e salvar exatamente 3 perspectivas em `.agents/visual_qa/`:
+1. `TASK-XX_View1_Front.png`: Visão frontal ampla da estação ou objeto interativo em seu ambiente contextual.
+2. `TASK-XX_View2_Side_Grounding.png`: Visão lateral rasante demonstrando contato físico real com a mesa, estante ou terreno (comprovando ausência de flutuação).
+3. `TASK-XX_View3_Closeup.png`: Macro detalhado demonstrando affordances visuais, shaders URP/Standard, emissão e texto de UI legível.
+
+### 4.2. Estrutura do Relatório de Telemetria Espacial (`TASK-XX_SpatialAudit.json`)
+Cada validação automatizada salvará obrigatoriamente um arquivo JSON com o seguinte esquema:
+
+```json
+{
+  "taskId": "TASK-01",
+  "timestamp": "2026-11-11T04:30:00Z",
+  "sceneName": "Menu_Principal",
+  "originPurgerStatus": {
+    "isOriginClean": true,
+    "rogueObjectsFound": 0,
+    "cleanedObjectsCount": 0
+  },
+  "instanceCounts": {
+    "expected": 1,
+    "actual": 1,
+    "hasDuplicates": false
+  },
+  "spatialDistribution": {
+    "furnitureAllocated": "full_desk_3 (1)",
+    "position": {"x": 0.66, "y": 0.95, "z": 0.14},
+    "hasOverlap": false,
+    "minClearanceMeters": 0.38
+  },
+  "groundingAudit": {
+    "groundGapMeters": 0.001,
+    "isPhysicallyGrounded": true,
+    "isInsideMapBounds": true
+  },
+  "vrPerformanceCompliance": {
+    "gpuInstancingEnabled": true,
+    "zeroDynamicMeshColliders": true,
+    "zeroUpdateGetComponent": true,
+    "srpBatcherCompatible": true
+  }
+}
+```
+
+---
+
+## 5. Requisitos de Áudio Multissensorial Confortável (VR-Safe)
+
+Para prevenir desconforto ou fadiga auditiva em pacientes em reabilitação:
+1. **Calibração de Volume e Headroom:**
+   * Nenhum efeito sonoro de interação pode exceder o pico de volume de $-8\text{ dB}$ (valor nominal `volume <= 0.40f` no `AudioSource`).
+   * Som de hover suave: volume $0.20\text{f}$.
+   * Som de grab/pegada: volume $0.35\text{f}$.
+   * Som de encaixe no berço/socket: volume $0.40\text{f}$.
+2. **Filtragem de Frequências Irritantes:**
+   * Todos os sons sintetizados devem conter filtro passa-baixas (*low-pass*) ativo cortando frequências acima de $4.000\text{ Hz}$, eliminando estalos agressivos e chiados.
+3. **Espacialização e Efeito Doppler Nulo:**
+   * `AudioSource.spatialBlend = 1.0f` (áudio puramente tridimensional).
+   * `AudioSource.dopplerLevel = 0.0f`: Desativação total do Doppler para evitar distorções de afinação (*pitch wobble*) quando o paciente move a cabeça ou as mãos rapidamente no VR.
+   * `AudioSource.rolloffMode = AudioRolloffMode.Linear`, com alcance máximo calibrado para ambientes fechados ($10.0\text{m}$).
+4. **Proibição de Loops Não-Supervisionados:**
+   * Sons de aproximação ou presença de criaturas (ex: pássaro da floresta) devem conter travas de evento (`hasTriggered`) e tempo de espera rígido ($\ge 15\text{s}$), tocando no máximo um pio melódico curto de $0.5\text{s}$ por aproximação.
+
+---
+
+## 6. Orçamento Rigoroso de Otimização VR (Meta: 90 FPS Cúbicos)
+
+1. **GPU Instancing & SRP Batcher:**
+   * Todos os materiais gerados no pipeline via `MaterialShaderHelper` devem definir expressamente `material.enableInstancing = true`.
+   * **Proibido o uso de `renderer.material` em runtime.** Toda alteração de cor, brilho emissivo ou destaque visual durante o *hover* de interactables deve ocorrer via `MaterialPropertyBlock` (`Renderer.SetPropertyBlock`), evitando alocações e quebra de instancing.
+2. **Física Leve e Dinâmica:**
+   * **Zero `MeshCollider` em objetos dinâmicos móveis.** Todos os objetos interativos com `Rigidbody` devem utilizar colisores primitivos (`SphereCollider` ou `BoxCollider`).
+   * Configuração de detecção de colisão sob demanda: repouso em `CollisionDetectionMode.Discrete`; alteração para `ContinuousDynamic` apenas enquanto o objeto estiver sendo segurado pelo jogador (`OnSelectEntered`), retornando a `Discrete` após o repouso.
+3. **Throttling de Distância (`sqrMagnitude`):**
+   * Objetos com scripts de animação ou verificação no cenário amplo da `Floresta_e_Rio` devem abortar rotinas pesadas se `(playerPos - transform.position).sqrMagnitude > activeRadiusSqr`.
+4. **Iluminação Segura para VR:**
+   * Fontes de luz pontuais adicionadas em pedestais ou lanternas devem ter `light.shadows = LightShadows.None`. Em renderização VR estéreo, sombras dinâmicas pontuais duplicam passes de renderização em cada olho, consumindo a taxa de quadros.
+
+---
+
+## 7. Próximos Passos Imediatos para a TASK-01
+Com esta especificação analítica concluída e aprovada pelo Subagente [A]:
+1. **Micro-Passo [B]:** Tech Artist gera/valida os clipes de áudio suaves calibrados em `-8 dB` (`ui_hover_soft.wav`, `grab_pop.wav`, `socket_snap.wav`, etc.).
+2. **Micro-Passo [C]:** Senior Unity C# Engineer ajusta `MaterialShaderHelper.cs` (garantindo `enableInstancing = true`), `VRFeedbackManager.cs` (calibrando volumes e Doppler zero) e neutraliza de imediato o teleporte em `PortalWorldSphere.cs` e `PortalPedestalSocket.cs`.
+3. **Micro-Passo [D]:** Automation Engineer implementa `SceneDuplicateAndOriginPurger.cs` e `SpatialAuditUtility.cs`, executa a varredura e expurgo no Unity Editor aberto e gera os primeiros prints e JSONs de telemetria.
+4. **Micro-Passo [E]:** Visual QA & VR Auditor inspeciona as evidências geradas e assina o primeiro veredito `PASS`.

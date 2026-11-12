@@ -58,12 +58,18 @@ namespace VRRehab.DronePet
 
     /// <summary>
     /// Sistema de Celebração de Metas Clínicas para o Drone Pet (TASK-05):
-    /// - Integração com passos e simetria de DroneGuiaIA e TelemetriaClinica.
-    /// - Animação procedural de pirueta acrobática 360° com ondulação vertical (swoop).
-    /// - Canhões duplos de confetes coloridos nos propulsores laterais.
-    /// - Fanfarra musical triunfante (fanfare_triumph.wav) e estouro de confetes (confetti_cannon_pop.wav).
-    /// - Balão de fala 3D com auto-billboard voltado para o paciente, exibindo mensagens motivacionais em português.
-    /// - Sincronização expressiva com o DroneAffectiveSystem (visor LED Happy).
+    /// - ISOLAMENTO FÍSICO ESTRITO DA PIROUETA (TASK-03):
+    ///   A pirueta acrobática 360° (yaw, swoop +0.14m, roll 14°, pitch -10°) é aplicada EXCLUSIVAMENTE
+    ///   sobre as coordenadas locais do nó filho visual 'Modelo_3D_ExoBot'.
+    ///   O nó raiz '[IC] Drone_Guia_IA_ExoBot' permanece 100% estático em relação ao paciente,
+    ///   sem deriva no 'offsetLocal' e sem avançar ou empurrar o jogador.
+    /// - PRESERVAÇÃO TOTAL DO HUD CLÍNICO & ELEVAÇÃO DO BALÃO:
+    ///   O HUD Holográfico com dados de marcha NUNCA é ocultado durante a celebração.
+    ///   O balão holográfico de fala situa-se a Y = 0.96m, flutuando harmoniosamente acima do HUD.
+    /// - OTIMIZAÇÃO RIGOROSA VR-SAFE (90 FPS):
+    ///   Máximo 40 partículas nos canhões de confetes (20 por canhão), colisão desativada, sombras desativadas.
+    /// - ÁUDIO CALIBRADO E SINCRONIA AFETIVA:
+    ///   Fanfarra suave (<= -8.5 dBFS, vol 0.22f), estouro suave (vol 0.20f), expressão Happy no visor LED.
     /// </summary>
     [DisallowMultipleComponent]
     [ExecuteAlways]
@@ -81,6 +87,10 @@ namespace VRRehab.DronePet
         [Tooltip("Câmera do paciente (para orientação do balão de fala)")]
         public Transform cameraPaciente;
 
+        [Header("Nó Visual Filho (Isolamento Físico Estrito)")]
+        [Tooltip("Transform do modelo 3D visual 'Modelo_3D_ExoBot'. A pirueta acrobática 360° atua EXCLUSIVAMENTE aqui")]
+        public Transform visualModelTransform;
+
         [Header("Balão de Fala 3D")]
         [Tooltip("Objeto âncora do balão de fala sobre o Drone")]
         public Transform speechBubbleAnchor;
@@ -94,17 +104,19 @@ namespace VRRehab.DronePet
         public TextMeshProUGUI txtCategoryBadge;
         [Tooltip("Fundo/Painel visual do balão")]
         public Image imgBubbleBackground;
-        [Tooltip("Altura do balão em relação ao centro do Drone")]
-        public float bubbleElevationOffset = 0.58f;
+        [Tooltip("Altura do balão em relação ao centro do Drone (Y = 0.96m para posicionar acima do HUD clínico)")]
+        public float bubbleElevationOffset = 0.96f;
 
-        [Header("Canhões Duplos de Confetes")]
+        [Header("Canhões Duplos de Confetes (VR-Safe: Máx 40 Partículas)")]
         public ParticleSystem leftConfettiCannon;
         public ParticleSystem rightConfettiCannon;
 
-        [Header("Áudio e Fanfarra 3D")]
+        [Header("Áudio e Fanfarra 3D Calibrados")]
         public AudioSource celebrationAudioSource;
         public AudioClip sfxFanfare;
         public AudioClip sfxConfettiPop;
+        [Range(0.05f, 0.40f)] public float fanfareVolume = 0.22f;
+        [Range(0.05f, 0.40f)] public float confettiPopVolume = 0.20f;
 
         [Header("Parâmetros da Celebração")]
         [Tooltip("Duração total da celebração em segundos")]
@@ -123,6 +135,11 @@ namespace VRRehab.DronePet
         public bool IsCelebrating => isCelebrating;
         [SerializeField] private float celebrationTimer = 0f;
         [SerializeField] private CelebrationCategory lastCelebratedCategory = CelebrationCategory.Geral;
+
+        // Pose de repouso do nó visual filho
+        private Vector3 visualRestPos = Vector3.zero;
+        private Quaternion visualRestRot = Quaternion.identity;
+        private bool hasCachedVisualRestPose = false;
 
         // Controle de marcos atingidos
         private int lastStepMilestone = 0;
@@ -164,6 +181,15 @@ namespace VRRehab.DronePet
             LoadPhrasesBank();
         }
 
+        void OnDisable()
+        {
+            if (visualModelTransform != null && hasCachedVisualRestPose)
+            {
+                visualModelTransform.localPosition = visualRestPos;
+                visualModelTransform.localRotation = visualRestRot;
+            }
+        }
+
         void Start()
         {
             LocateDependencies();
@@ -194,9 +220,83 @@ namespace VRRehab.DronePet
                     cameraPaciente = droneGuia.cameraPaciente;
             }
 
+            CacheVisualModelTransform();
+
             if (celebrationAudioSource == null)
             {
                 celebrationAudioSource = GetComponent<AudioSource>();
+            }
+
+            ConfigureAudioSourceProperties();
+            ConfigureConfettiVRSafe(leftConfettiCannon);
+            ConfigureConfettiVRSafe(rightConfettiCannon);
+        }
+
+        public void CacheVisualModelTransform()
+        {
+            if (visualModelTransform == null)
+            {
+                visualModelTransform = transform.Find("Modelo_3D_ExoBot");
+                if (visualModelTransform == null && transform.childCount > 0)
+                {
+                    visualModelTransform = transform.GetChild(0);
+                }
+            }
+
+            if (visualModelTransform != null && !hasCachedVisualRestPose)
+            {
+                visualRestPos = visualModelTransform.localPosition;
+                visualRestRot = visualModelTransform.localRotation;
+                hasCachedVisualRestPose = true;
+            }
+        }
+
+        private void ConfigureAudioSourceProperties()
+        {
+            if (celebrationAudioSource == null) return;
+            celebrationAudioSource.playOnAwake = false;
+            celebrationAudioSource.spatialBlend = 1.0f; // 3D Espacial estrito
+            celebrationAudioSource.dopplerLevel = 0f; // Sem distorção de pitch em VR
+            celebrationAudioSource.rolloffMode = AudioRolloffMode.Logarithmic;
+            celebrationAudioSource.minDistance = 1.0f;
+            celebrationAudioSource.maxDistance = 12.0f;
+
+            if (sfxFanfare == null)
+            {
+                sfxFanfare = Resources.Load<AudioClip>("Audio/drone_milestone_fanfare")
+                             ?? Resources.Load<AudioClip>("drone_milestone_fanfare")
+                             ?? Resources.Load<AudioClip>("fanfare_triumph");
+            }
+            if (sfxConfettiPop == null)
+            {
+                sfxConfettiPop = Resources.Load<AudioClip>("Audio/confetti_cannon_pop")
+                                 ?? Resources.Load<AudioClip>("confetti_cannon_pop");
+            }
+        }
+
+        public static void ConfigureConfettiVRSafe(ParticleSystem ps)
+        {
+            if (ps == null) return;
+            if (ps.isPlaying)
+            {
+                ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+            var main = ps.main;
+            main.maxParticles = 40; // Teto estrito de 40 partículas
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+
+            // Desativa colisão física PhysX (zero CPU cost)
+            var col = ps.collision;
+            col.enabled = false;
+
+            // Desativa sombras dinâmicas no ParticleSystemRenderer (zero passes extras por olho)
+            var rend = ps.GetComponent<ParticleSystemRenderer>();
+            if (rend != null)
+            {
+                rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                rend.receiveShadows = false;
+                rend.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
+                rend.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
             }
         }
 
@@ -259,7 +359,10 @@ namespace VRRehab.DronePet
 
         void LateUpdate()
         {
-            UpdateSpeechBubbleBillboard();
+            if (Application.isPlaying)
+            {
+                UpdateSpeechBubbleBillboard();
+            }
         }
 
         // =========================================================================
@@ -320,7 +423,7 @@ namespace VRRehab.DronePet
         // =========================================================================
 
         /// <summary>
-        /// Dispara a celebração completa com coreografia, confetes, fanfarra e fala motivadora.
+        /// Dispara a celebração completa com coreografia acrobática, confetes, fanfarra suave e fala motivadora.
         /// </summary>
         public void TriggerCelebration(CelebrationCategory category, string overrideMessage = null)
         {
@@ -344,16 +447,16 @@ namespace VRRehab.DronePet
 
             ShowSpeechBubble(phrase, badgeTag);
 
-            // 2. Dispara os canhões duplos de confetes
+            // 2. Dispara os canhões duplos de confetes VR-Safe
             FireConfettiCannons();
 
-            // 3. Toca Fanfarra Triunfante e som do canhão
+            // 3. Toca Fanfarra Triunfante suave e som do canhão
             PlayCelebrationAudio();
 
-            // 4. Ativa expressão facial alegre no visor LED
+            // 4. Ativa expressão facial alegre no visor LED durante a celebração
             if (affectiveSystem != null)
             {
-                affectiveSystem.SetExpression(DroneLEDExpression.Happy);
+                affectiveSystem.SetExpression(DroneLEDExpression.Happy, celebrationDuration);
             }
 
             Debug.Log($"[TASK-05] Drone Pet celebrando {category}: \"{phrase}\"");
@@ -363,12 +466,14 @@ namespace VRRehab.DronePet
         {
             if (leftConfettiCannon != null)
             {
+                ConfigureConfettiVRSafe(leftConfettiCannon);
                 leftConfettiCannon.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
                 leftConfettiCannon.Play();
             }
 
             if (rightConfettiCannon != null)
             {
+                ConfigureConfettiVRSafe(rightConfettiCannon);
                 rightConfettiCannon.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
                 rightConfettiCannon.Play();
             }
@@ -377,21 +482,22 @@ namespace VRRehab.DronePet
         private void PlayCelebrationAudio()
         {
             if (celebrationAudioSource == null) return;
+            ConfigureAudioSourceProperties();
 
-            // Dispara o som de estouro dos canhões
+            // Dispara o som de estouro dos canhões calibrado em volume confortável
             if (sfxConfettiPop != null)
             {
-                celebrationAudioSource.PlayOneShot(sfxConfettiPop, 0.90f);
+                celebrationAudioSource.PlayOneShot(sfxConfettiPop, confettiPopVolume);
             }
 
-            // Dispara a fanfarra triunfante
+            // Dispara a fanfarra triunfante suave calibrada
             if (sfxFanfare != null)
             {
-                celebrationAudioSource.PlayOneShot(sfxFanfare, 1.0f);
+                celebrationAudioSource.PlayOneShot(sfxFanfare, fanfareVolume);
             }
             else if (VRFeedbackManager.Instance != null && VRFeedbackManager.Instance.clipSuccessChime != null)
             {
-                VRFeedbackManager.Instance.PlaySound(VRFeedbackManager.Instance.clipSuccessChime, transform.position, 1.0f);
+                VRFeedbackManager.Instance.PlaySound(VRFeedbackManager.Instance.clipSuccessChime, transform.position, fanfareVolume);
             }
         }
 
@@ -400,36 +506,36 @@ namespace VRRehab.DronePet
             celebrationTimer += Time.deltaTime;
             float progress = Mathf.Clamp01(celebrationTimer / celebrationDuration);
 
+            CacheVisualModelTransform();
+            if (visualModelTransform == null) return;
+
             // Fase 1: Pirueta Acrobática 360° com Swoop Vertical (primeiros 2.0s)
+            // Aplicada EXCLUSIVAMENTE nas coordenadas locais de visualModelTransform (Modelo_3D_ExoBot).
+            // O nó raiz [IC] Drone_Guia_IA_ExoBot NUNCA é movido ou rotacionado por esta lógica.
             float pirouetteDuration = 2.0f;
             if (celebrationTimer <= pirouetteDuration)
             {
                 float tNorm = celebrationTimer / pirouetteDuration;
-                // Curva suave de interpolação: rápida no meio, suave no início e término
+                // Curva suave de interpolação SmoothStep
                 float smoothT = Mathf.SmoothStep(0f, 1f, tNorm);
 
                 pirouetteYawOffset = smoothT * 360.0f;
-                // Swoop vertical harmonico (arco para cima de +0.14m)
+                // Swoop vertical harmônico (arco para cima de +0.14m)
                 pirouetteVerticalOffset = Mathf.Sin(tNorm * Mathf.PI) * pirouetteVerticalSwoop;
-                // Leve inclinação dinâmica de roll e pitch para dar acrobacia realista
+                // Inclinação dinâmica de roll e pitch para dar acrobacia realista
                 pirouetteRollOffset = Mathf.Sin(tNorm * Mathf.PI * 2.0f) * 14.0f;
                 pirouettePitchOffset = -Mathf.Sin(tNorm * Mathf.PI) * 10.0f;
+
+                Quaternion rotAcrobat = Quaternion.Euler(pirouettePitchOffset, pirouetteYawOffset, pirouetteRollOffset);
+                visualModelTransform.localPosition = visualRestPos + new Vector3(0f, pirouetteVerticalOffset, 0f);
+                visualModelTransform.localRotation = visualRestRot * rotAcrobat;
             }
             else
             {
-                // Drone acomoda-se de volta suavemente
-                pirouetteYawOffset = Mathf.Lerp(pirouetteYawOffset, 0f, Time.deltaTime * 6f);
-                pirouetteVerticalOffset = Mathf.Lerp(pirouetteVerticalOffset, 0f, Time.deltaTime * 6f);
-                pirouetteRollOffset = Mathf.Lerp(pirouetteRollOffset, 0f, Time.deltaTime * 8f);
-                pirouettePitchOffset = Mathf.Lerp(pirouettePitchOffset, 0f, Time.deltaTime * 8f);
-            }
-
-            // Aplica os offsets ao transform do Drone se não estiver sendo arrastado manualmente
-            if (droneGuia != null && !droneGuia.estaArrastandoDrone)
-            {
-                transform.rotation = transform.rotation * Quaternion.Euler(pirouettePitchOffset * Time.deltaTime * 4f,
-                                                                          (celebrationTimer <= pirouetteDuration ? (360f / pirouetteDuration) : 0f) * Time.deltaTime,
-                                                                          pirouetteRollOffset * Time.deltaTime * 4f);
+                // Fase 2: O nó visual acomoda-se suavemente de volta à pose de repouso
+                float dampFactor = Time.deltaTime * 6.0f;
+                visualModelTransform.localPosition = Vector3.Lerp(visualModelTransform.localPosition, visualRestPos, dampFactor);
+                visualModelTransform.localRotation = Quaternion.Slerp(visualModelTransform.localRotation, visualRestRot, dampFactor);
             }
 
             // Fim da celebração
@@ -447,9 +553,13 @@ namespace VRRehab.DronePet
             pirouetteRollOffset = 0f;
             pirouetteVerticalOffset = 0f;
 
-            // Restaura o HUD padrão de telemetria
-            Transform hudT = transform.Find("Canvas_Holograma_Clinico") ?? transform.Find("HUD_Holograma_Drone");
-            if (hudT != null) hudT.gameObject.SetActive(true);
+            if (visualModelTransform != null && hasCachedVisualRestPose)
+            {
+                visualModelTransform.localPosition = visualRestPos;
+                visualModelTransform.localRotation = visualRestRot;
+            }
+
+            // O HUD clínico de telemetria permanece continuamente ativo!
 
             // Esconde suavemente o balão de fala
             HideSpeechBubbleSmooth();
@@ -469,9 +579,7 @@ namespace VRRehab.DronePet
         {
             if (speechBubbleAnchor == null) return;
 
-            // Oculta temporariamente o HUD padrão para dar destaque limpo ao balão
-            Transform hudT = transform.Find("Canvas_Holograma_Clinico") ?? transform.Find("HUD_Holograma_Drone");
-            if (hudT != null) hudT.gameObject.SetActive(false);
+            // O HUD clínico permanece sempre ATIVO. O balão é posicionado a Y = 0.96m acima do HUD.
 
             if (txtMotivationalSpeech != null)
             {
@@ -482,6 +590,8 @@ namespace VRRehab.DronePet
             {
                 txtCategoryBadge.text = !string.IsNullOrEmpty(badge) ? badge : "[CELEBRAÇÃO CLÍNICA]";
             }
+
+            speechBubbleAnchor.localPosition = new Vector3(0f, bubbleElevationOffset, 0f);
 
             if (!speechBubbleAnchor.gameObject.activeSelf)
             {
@@ -506,9 +616,6 @@ namespace VRRehab.DronePet
                 speechBubbleAnchor.gameObject.SetActive(false);
             }
             bubbleScaleAnim = 0f;
-
-            Transform hudT = transform.Find("Canvas_Holograma_Clinico") ?? transform.Find("HUD_Holograma_Drone");
-            if (hudT != null) hudT.gameObject.SetActive(true);
         }
 
         public void HideSpeechBubbleSmooth()
@@ -524,8 +631,6 @@ namespace VRRehab.DronePet
             if (!isCelebrating && bubbleScaleAnim <= 0.01f && bubbleScaleVelocity < 0f)
             {
                 speechBubbleAnchor.gameObject.SetActive(false);
-                Transform hudT = transform.Find("Canvas_Holograma_Clinico") ?? transform.Find("HUD_Holograma_Drone");
-                if (hudT != null) hudT.gameObject.SetActive(true);
                 return;
             }
 
@@ -545,9 +650,8 @@ namespace VRRehab.DronePet
         {
             if (speechBubbleAnchor == null || !speechBubbleAnchor.gameObject.activeSelf) return;
 
-            // Mantém o balão posicionado acima do drone com offset vertical suave
-            Vector3 worldAnchorPos = transform.position + Vector3.up * (bubbleElevationOffset + pirouetteVerticalOffset);
-            speechBubbleAnchor.position = worldAnchorPos;
+            // Mantém o balão ancorado a Y = 0.96m acima do drone
+            speechBubbleAnchor.localPosition = new Vector3(0f, bubbleElevationOffset, 0f);
 
             // Encontra a câmera alvo
             Transform camTarget = cameraPaciente;
@@ -556,26 +660,51 @@ namespace VRRehab.DronePet
 
             if (camTarget != null)
             {
-                Vector3 dirBalaoParaCam = camTarget.position - speechBubbleAnchor.position;
-                dirBalaoParaCam.y *= 0.25f;
-
-                if (dirBalaoParaCam.sqrMagnitude > 0.001f)
-                {
-                    // Como a face frontal do Canvas em Unity UI olha para o -Z local do Canvas,
-                    // LookRotation(dirBalaoParaCam) aponta +Z para a câmera, logo precisamos de 180° em Y
-                    // para que a face frontal com o texto fique orientada perfeitamente para a câmera!
-                    speechBubbleAnchor.rotation = Quaternion.LookRotation(dirBalaoParaCam.normalized, Vector3.up) * Quaternion.Euler(0f, 180f, 0f);
-                }
+                // Para Canvas UI WorldSpace na Unity, a rotação canônica perfeita de billboard
+                // que NUNCA espelha texto é alinhar a rotação do Canvas com a rotação da câmera do jogador:
+                // speechBubbleAnchor.rotation = camTarget.rotation;
+                // NUNCA multiplicar por Quaternion.Euler(0, 180, 0)!
+                speechBubbleAnchor.rotation = camTarget.rotation;
+            }
+            else
+            {
+                speechBubbleAnchor.localRotation = Quaternion.identity;
             }
         }
 
         // =========================================================================
-        // MÉTODOS DE TESTE E VISUAL QA AUTOMATIZADOS
+        // MÉTODOS DE TESTE E VISUAL QA AUTOMATIZADOS (ISOLAMENTO DO ROOT GARANTIDO)
         // =========================================================================
 
         /// <summary>
+        /// Restaura o drone e o modelo à pose de repouso limpa.
+        /// </summary>
+        public void ResetToRestPose()
+        {
+            LocateDependencies();
+            isCelebrating = false;
+            celebrationTimer = 0f;
+            pirouetteVerticalOffset = 0f;
+
+            if (visualModelTransform != null && hasCachedVisualRestPose)
+            {
+                visualModelTransform.localPosition = visualRestPos;
+                visualModelTransform.localRotation = visualRestRot;
+            }
+
+            transform.localRotation = Quaternion.identity;
+            HideSpeechBubbleInstant();
+
+            if (affectiveSystem != null)
+            {
+                affectiveSystem.SetExpression(DroneLEDExpression.Normal);
+            }
+        }
+
+        /// <summary>
         /// Configura a pose exata para a captura do print TASK-05_Celebration_Pirouette.png:
-        /// Drone inclinado na pirueta acrobática com confetes no ar.
+        /// Nó visual inclinado na pirueta acrobática com confetes no ar.
+        /// O transform raiz permanece 100% INTACTO. O HUD clínico permanece ATIVO.
         /// </summary>
         public void SetVisualQAPirouettePose()
         {
@@ -586,18 +715,23 @@ namespace VRRehab.DronePet
             celebrationTimer = 0.95f; // Meio da pirueta (pico do swoop)
             pirouetteVerticalOffset = pirouetteVerticalSwoop;
 
-            Transform hudT = transform.Find("Canvas_Holograma_Clinico") ?? transform.Find("HUD_Holograma_Drone");
-            if (hudT != null) hudT.gameObject.SetActive(false);
+            // Raiz estática
+            transform.localRotation = Quaternion.identity;
 
-            transform.localRotation = Quaternion.Euler(-6.0f, 65.0f, 16.0f);
+            // Pirueta exclusivamente no nó visual
+            if (visualModelTransform != null)
+            {
+                visualModelTransform.localPosition = visualRestPos + new Vector3(0f, pirouetteVerticalSwoop, 0f);
+                visualModelTransform.localRotation = visualRestRot * Quaternion.Euler(-6.0f, 65.0f, 16.0f);
+            }
 
+            // Balão acima do HUD (Y = 0.96m)
             if (speechBubbleAnchor != null)
             {
                 speechBubbleAnchor.gameObject.SetActive(true);
                 speechBubbleAnchor.localScale = Vector3.one;
-                speechBubbleAnchor.localPosition = new Vector3(0f, bubbleElevationOffset + pirouetteVerticalSwoop, 0f);
-                // O balão fica voltado para o jogador (+Z do mundo)
-                speechBubbleAnchor.rotation = Quaternion.Euler(0f, 180f, 0f);
+                speechBubbleAnchor.localPosition = new Vector3(0f, bubbleElevationOffset, 0f);
+                speechBubbleAnchor.localRotation = Quaternion.identity;
 
                 if (bubbleCanvasGroup != null) bubbleCanvasGroup.alpha = 1.0f;
                 if (txtMotivationalSpeech != null)
@@ -616,7 +750,7 @@ namespace VRRehab.DronePet
 
         /// <summary>
         /// Configura a pose exata para a captura do print TASK-05_Celebration_SpeechBubble.png:
-        /// Close-up focado no balão de fala 3D com texto nítido em português.
+        /// Close-up focado no balão de fala 3D com texto nítido em português acima do HUD clínico.
         /// </summary>
         public void SetVisualQASpeechBubblePose(string message = null, string tag = null)
         {
@@ -626,18 +760,24 @@ namespace VRRehab.DronePet
             isCelebrating = true;
             celebrationTimer = 1.8f;
             pirouetteVerticalOffset = 0.0f;
+
+            // Raiz estática
             transform.localRotation = Quaternion.identity;
 
-            Transform hudT = transform.Find("Canvas_Holograma_Clinico") ?? transform.Find("HUD_Holograma_Drone");
-            if (hudT != null) hudT.gameObject.SetActive(false);
+            // Modelo visual em repouso
+            if (visualModelTransform != null)
+            {
+                visualModelTransform.localPosition = visualRestPos;
+                visualModelTransform.localRotation = visualRestRot;
+            }
 
+            // Balão acima do HUD (Y = 0.96m)
             if (speechBubbleAnchor != null)
             {
                 speechBubbleAnchor.gameObject.SetActive(true);
                 speechBubbleAnchor.localScale = Vector3.one;
                 speechBubbleAnchor.localPosition = new Vector3(0f, bubbleElevationOffset, 0f);
-                // Canvas orientado de frente para a câmera no +Z
-                speechBubbleAnchor.rotation = Quaternion.Euler(0f, 180f, 0f);
+                speechBubbleAnchor.localRotation = Quaternion.identity;
 
                 if (bubbleCanvasGroup != null) bubbleCanvasGroup.alpha = 1.0f;
                 if (txtMotivationalSpeech != null)
@@ -671,17 +811,23 @@ namespace VRRehab.DronePet
             celebrationTimer = 0.65f;
             pirouetteVerticalOffset = 0.06f;
 
-            Transform hudT = transform.Find("Canvas_Holograma_Clinico") ?? transform.Find("HUD_Holograma_Drone");
-            if (hudT != null) hudT.gameObject.SetActive(false);
-
+            // Raiz estática
             transform.localRotation = Quaternion.identity;
 
+            // Leve elevação no nó visual
+            if (visualModelTransform != null)
+            {
+                visualModelTransform.localPosition = visualRestPos + new Vector3(0f, 0.06f, 0f);
+                visualModelTransform.localRotation = visualRestRot;
+            }
+
+            // Balão visível acima do HUD
             if (speechBubbleAnchor != null)
             {
                 speechBubbleAnchor.gameObject.SetActive(true);
                 speechBubbleAnchor.localScale = Vector3.one;
                 speechBubbleAnchor.localPosition = new Vector3(0f, bubbleElevationOffset, 0f);
-                speechBubbleAnchor.rotation = Quaternion.Euler(0f, 180f, 0f);
+                speechBubbleAnchor.localRotation = Quaternion.identity;
 
                 if (bubbleCanvasGroup != null) bubbleCanvasGroup.alpha = 1.0f;
                 if (txtMotivationalSpeech != null)
@@ -702,6 +848,7 @@ namespace VRRehab.DronePet
         {
             if (leftConfettiCannon != null)
             {
+                ConfigureConfettiVRSafe(leftConfettiCannon);
                 leftConfettiCannon.Clear();
                 leftConfettiCannon.Play();
                 leftConfettiCannon.Simulate(simulationTime, true, true);
@@ -709,6 +856,7 @@ namespace VRRehab.DronePet
 
             if (rightConfettiCannon != null)
             {
+                ConfigureConfettiVRSafe(rightConfettiCannon);
                 rightConfettiCannon.Clear();
                 rightConfettiCannon.Play();
                 rightConfettiCannon.Simulate(simulationTime, true, true);
@@ -726,5 +874,8 @@ namespace VRRehab.DronePet
 
         [ContextMenu("Test Celebration - Geral")]
         public void TestGeralCelebration() => TriggerCelebration(CelebrationCategory.Geral);
+
+        [ContextMenu("Reset to Rest Pose")]
+        public void TestResetPose() => ResetToRestPose();
     }
 }

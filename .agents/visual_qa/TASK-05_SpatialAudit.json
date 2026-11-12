@@ -1,0 +1,38 @@
+{
+    "taskId": "TASK-05",
+    "timestamp": "2026-11-11T08:46:00Z",
+    "sceneName": "Menu_Principal",
+    "originPurgerStatus": {
+        "isOriginClean": true,
+        "rogueObjectsFound": 0,
+        "cleanedObjectsCount": 0,
+        "objectsAtOriginZero": 0
+    },
+    "instanceCounts": {
+        "expected": 1,
+        "actual": 1,
+        "hasDuplicates": false,
+        "duplicateObjectsFound": 0
+    },
+    "spatialDistribution": {
+        "furnitureAllocated": "Drone Companion Flight Space (Front of Player)",
+        "position": {
+            "x": 2.0999999046325685,
+            "y": 1.4500000476837159,
+            "z": 1.600000023841858
+        },
+        "hasOverlap": false,
+        "minClearanceMeters": 0.2240000069141388
+    },
+    "groundingAudit": {
+        "groundGapMeters": 0.0,
+        "isPhysicallyGrounded": true,
+        "isInsideMapBounds": true
+    },
+    "vrPerformanceCompliance": {
+        "gpuInstancingEnabled": true,
+        "zeroDynamicMeshColliders": true,
+        "zeroUpdateGetComponent": true,
+        "srpBatcherCompatible": true
+    }
+}

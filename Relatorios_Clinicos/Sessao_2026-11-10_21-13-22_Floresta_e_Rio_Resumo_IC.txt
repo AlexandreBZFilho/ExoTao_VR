@@ -1,0 +1,29 @@
+﻿======================================================================
+   RELATÓRIO BIOMECÂNICO DE SESSÃO - EXOTAO VR REHAB (ReRobLab / IC)  
+======================================================================
+Data/Hora Início     : 10/11/2026 21:13:22
+Data/Hora Término    : 10/11/2026 21:14:24
+Ambiente Virtual     : Floresta_e_Rio
+Modo de Reabilitação : Integrado
+Fonte de Sinais      : Aguardando...
+----------------------------------------------------------------------
+1. DESEMPENHO ESPAÇO-TEMPORAL DA MARCHA
+   - Duração Total da Sessão : 58.8 s (1.0 min)
+   - Distância Percorrida    : 0.00 m
+   - Velocidade Média        : 0.00 m/s (0.00 km/h)
+   - Total de Passos         : 0 (Direita: 0 | Esquerda: 0)
+   - Cadência Média Global   : 0.0 passos/min (SPM)
+----------------------------------------------------------------------
+2. AMPLITUDE DE MOVIMENTO ARTICULAR MÁXIMA (ROM)
+   - Quadril Direito (Máx)   : 0.0°
+   - Quadril Esquerdo (Máx)  : 0.0°
+   - Joelho Direito (Máx)    : 0.0°
+   - Joelho Esquerdo (Máx)   : 0.0°
+----------------------------------------------------------------------
+3. ANÁLISE DE SIMETRIA MOTORA BILATERAL (Índice Robinson ASI)
+   - Simetria Média da Sessão: 100.0%
+   - Simetria Final          : 100.0%
+   - Classificação Clínica   : Simétrico
+----------------------------------------------------------------------
+Arquivo CSV Bruto: Sessao_2026-11-10_21-13-22_Floresta_e_Rio_Telemetria.csv
+======================================================================

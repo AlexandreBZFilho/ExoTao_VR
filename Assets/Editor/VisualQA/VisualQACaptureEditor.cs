@@ -23,6 +23,71 @@ namespace VRRehab.EditorTools
             EditorUtility.DisplayDialog("Visual QA Capture", "Capturas concluídas com sucesso!\n" + results, "OK");
         }
 
+        [MenuItem("VRRehab/VisualQA/Capture TASK-01 Views")]
+        public static void CaptureTask01ViewsMenu()
+        {
+            string results = CaptureTask01Views();
+            Debug.Log($"[VisualQA] Capturas da TASK-01 concluídas:\n{results}");
+            EditorUtility.DisplayDialog("Visual QA Capture - TASK-01", "Capturas da TASK-01 concluídas!\n" + results, "OK");
+        }
+
+        /// <summary>
+        /// Captura os 3 ângulos canônicos da TASK-01 conforme especificado em TASK-01_Spec.md:
+        /// View 1: Frontal Ampla
+        /// View 2: Lateral Grounding & Zero Lixo na Origem
+        /// View 3: Closeup Macro dos Interactables
+        /// </summary>
+        public static string CaptureTask01Views()
+        {
+            string baseDir = Path.GetFullPath(OutputDirectory);
+            if (!Directory.Exists(baseDir))
+            {
+                Directory.CreateDirectory(baseDir);
+            }
+
+            var log = new System.Text.StringBuilder();
+            string originalScenePath = EditorSceneManager.GetActiveScene().path;
+
+            try
+            {
+                if (!originalScenePath.EndsWith("Menu_Principal.unity"))
+                {
+                    EditorSceneManager.OpenScene("Assets/Scenes/Menu_Principal.unity", OpenSceneMode.Single);
+                }
+
+                // 1. View 1: Frontal Ampla da Estação Limpa
+                string pathView1 = Path.Combine(baseDir, "TASK-01_View1_Front.png");
+                Vector3 view1CamPos = new Vector3(2.30f, 1.50f, 0.40f);
+                Vector3 view1CamLookAt = new Vector3(0.66f, 0.95f, 0.05f);
+                CaptureCameraView(pathView1, view1CamPos, view1CamLookAt, 1920, 1080);
+                log.AppendLine($"Capturado View 1: {pathView1}");
+
+                // 2. View 2: Lateral Rente ao Solo/Mesa (Zero Flutuação & Zero Lixo no (0,0,0))
+                string pathView2 = Path.Combine(baseDir, "TASK-01_View2_Side_Grounding.png");
+                Vector3 view2CamPos = new Vector3(0.68f, 1.05f, -1.05f);
+                Vector3 view2CamLookAt = new Vector3(0.66f, 0.95f, 0.25f);
+                CaptureCameraView(pathView2, view2CamPos, view2CamLookAt, 1920, 1080);
+                log.AppendLine($"Capturado View 2: {pathView2}");
+
+                // 3. View 3: Closeup Macro dos Interactables e Affordances (Shader Instanciado)
+                string pathView3 = Path.Combine(baseDir, "TASK-01_View3_Closeup.png");
+                Vector3 view3CamPos = new Vector3(1.10f, 1.15f, 0.15f);
+                Vector3 view3CamLookAt = new Vector3(0.67f, 0.96f, 0.14f);
+                CaptureCameraView(pathView3, view3CamPos, view3CamLookAt, 1920, 1080);
+                log.AppendLine($"Capturado View 3: {pathView3}");
+            }
+            finally
+            {
+                if (!string.IsNullOrEmpty(originalScenePath) && EditorSceneManager.GetActiveScene().path != originalScenePath)
+                {
+                    EditorSceneManager.SaveOpenScenes();
+                    EditorSceneManager.OpenScene(originalScenePath, OpenSceneMode.Single);
+                }
+            }
+
+            return log.ToString();
+        }
+
         /// <summary>
         /// Executa o lote completo de capturas de teste do Menu e da Floresta.
         /// Retorna resumo em texto dos arquivos gerados.
@@ -108,6 +173,75 @@ namespace VRRehab.EditorTools
             }
 
             return pathFloresta;
+        }
+
+        /// <summary>
+        /// Renderiza offscreen (Camera.Render → RenderTexture) e devolve a imagem como Texture2D (o chamador destrói).
+        /// Não usa a janela do Editor nem captura de desktop.
+        /// </summary>
+        public static Texture2D RenderCameraToTexture(Vector3 cameraPos, Vector3 lookAtTarget, int width, int height, float fov = 60f, float nearClip = 0.02f)
+        {
+            GameObject camGo = null, lightGo = null;
+            RenderTexture rt = null;
+            try
+            {
+                camGo = new GameObject("__VisualQA_Temp_Camera__");
+                var cam = camGo.AddComponent<Camera>();
+                cam.transform.position = cameraPos;
+                cam.transform.LookAt(lookAtTarget);
+                cam.fieldOfView = fov;
+                cam.nearClipPlane = nearClip;
+                cam.farClipPlane = 200f;
+                cam.clearFlags = CameraClearFlags.Skybox;
+
+                lightGo = new GameObject("__VisualQA_Temp_Light__");
+                var fill = lightGo.AddComponent<Light>();
+                fill.type = LightType.Directional;
+                fill.intensity = 0.5f;
+                fill.shadows = LightShadows.None;
+                lightGo.transform.rotation = cam.transform.rotation;
+
+                rt = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32) { antiAliasing = 8, useMipMap = false };
+                cam.targetTexture = rt;
+                cam.Render();
+
+                RenderTexture.active = rt;
+                var tex = new Texture2D(width, height, TextureFormat.RGB24, false);
+                tex.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+                tex.Apply();
+                RenderTexture.active = null;
+                cam.targetTexture = null;
+                return tex;
+            }
+            finally
+            {
+                if (rt != null) { rt.Release(); UnityEngine.Object.DestroyImmediate(rt); }
+                if (camGo != null) UnityEngine.Object.DestroyImmediate(camGo);
+                if (lightGo != null) UnityEngine.Object.DestroyImmediate(lightGo);
+            }
+        }
+
+        /// <summary>Captura offscreen com FOV configurável.</summary>
+        public static bool CaptureCameraView(string outputPath, Vector3 cameraPos, Vector3 lookAtTarget, int width, int height, float fov)
+        {
+            Texture2D tex = null;
+            try
+            {
+                tex = RenderCameraToTexture(cameraPos, lookAtTarget, width, height, fov);
+                string dir = Path.GetDirectoryName(outputPath);
+                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                File.WriteAllBytes(outputPath, tex.EncodeToPNG());
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[VisualQA] Erro ao capturar view em {outputPath}: {ex.Message}");
+                return false;
+            }
+            finally
+            {
+                if (tex != null) UnityEngine.Object.DestroyImmediate(tex);
+            }
         }
 
         /// <summary>

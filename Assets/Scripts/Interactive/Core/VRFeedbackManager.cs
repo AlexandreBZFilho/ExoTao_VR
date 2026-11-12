@@ -6,7 +6,8 @@ namespace VRRehab.Core
 {
     /// <summary>
     /// Gerenciador Central de Feedback Multissensorial (Áudio 3D Espacializado e Hápticos VR).
-    /// Possui pool de 16 AudioSources 3D reciclados com variação de pitch orgânica
+    /// Possui pool de 16 AudioSources 3D reciclados com variação de pitch orgânica,
+    /// zero alocação de memória (GC Alloc = 0 em runtime), doppler zerado para VR
     /// e integração nativa com o XR Interaction Toolkit (XRBaseControllerInteractor).
     /// </summary>
     [DisallowMultipleComponent]
@@ -31,10 +32,10 @@ namespace VRRehab.Core
             }
         }
 
-        [Header("Pool de Áudio 3D")]
+        [Header("Pool de Áudio 3D (Calibrado para VR Confortável)")]
         [SerializeField] private int poolSize = 16;
         [SerializeField] private float minDistance = 0.5f;
-        [SerializeField] private float maxDistance = 20.0f;
+        [SerializeField] private float maxDistance = 10.0f;
         [SerializeField] private AudioRolloffMode rolloffMode = AudioRolloffMode.Linear;
 
         [Header("Clipes Procedurais Core")]
@@ -45,9 +46,9 @@ namespace VRRehab.Core
         public AudioClip clipSocketSnap;
         public AudioClip clipSuccessChime;
 
-        [Header("Parâmetros Padrão")]
+        [Header("Parâmetros de Conforto VR")]
         [Range(0f, 1f)] public float masterSFXVolume = 0.85f;
-        public Vector2 pitchVariationRange = new Vector2(0.94f, 1.06f);
+        public Vector2 pitchVariationRange = new Vector2(0.96f, 1.04f);
 
         private readonly List<AudioSource> audioPool = new List<AudioSource>();
         private int currentPoolIndex = 0;
@@ -79,7 +80,7 @@ namespace VRRehab.Core
         }
 
         /// <summary>
-        /// Inicializa o pool de AudioSources 3D.
+        /// Inicializa o pool de AudioSources 3D pré-alocados sem GC Alloc em runtime.
         /// </summary>
         private void InitializeAudioPool()
         {
@@ -105,11 +106,11 @@ namespace VRRehab.Core
 
                 AudioSource src = poolItem.AddComponent<AudioSource>();
                 src.playOnAwake = false;
-                src.spatialBlend = 1.0f; // Totalmente 3D
+                src.spatialBlend = 1.0f; // Totalmente 3D espacializado
                 src.minDistance = minDistance;
                 src.maxDistance = maxDistance;
                 src.rolloffMode = rolloffMode;
-                src.dopplerLevel = 0.0f; // Evita artefatos de pitch em movimentos rápidos de VR
+                src.dopplerLevel = 0.0f; // Zero distorção/artefatos de pitch em movimentos rápidos no VR
 
                 audioPool.Add(src);
             }
@@ -137,9 +138,10 @@ namespace VRRehab.Core
         }
 
         /// <summary>
-        /// Toca um som 3D na posição especificada, utilizando o pool de AudioSources com variação de pitch.
+        /// Toca um som 3D na posição especificada, utilizando o pool circular de AudioSources
+        /// com variação orgânica de pitch e zero alocação de memória (GC Alloc = 0).
         /// </summary>
-        public AudioSource PlaySound(AudioClip clip, Vector3 position, float volume = 1.0f, float minPitch = 0.94f, float maxPitch = 1.06f)
+        public AudioSource PlaySound(AudioClip clip, Vector3 position, float volume = 1.0f, float minPitch = 0.95f, float maxPitch = 1.05f)
         {
             if (clip == null) return null;
 
@@ -180,7 +182,7 @@ namespace VRRehab.Core
         /// <summary>
         /// Envia um pulso háptico tátil para o controlador XR associado ao interactor.
         /// </summary>
-        public void TriggerHaptic(IXRInteractor interactor, float amplitude = 0.4f, float duration = 0.08f)
+        public void TriggerHaptic(IXRInteractor interactor, float amplitude = 0.35f, float duration = 0.08f)
         {
             if (interactor is XRBaseControllerInteractor controllerInteractor && controllerInteractor.xrController != null)
             {
@@ -191,7 +193,7 @@ namespace VRRehab.Core
         /// <summary>
         /// Dispara vibração háptica nos controles que estiverem interagindo com este interactable.
         /// </summary>
-        public void TriggerHaptic(XRBaseInteractable interactable, float amplitude = 0.4f, float duration = 0.08f)
+        public void TriggerHaptic(XRBaseInteractable interactable, float amplitude = 0.35f, float duration = 0.08f)
         {
             if (interactable == null) return;
 
@@ -204,57 +206,75 @@ namespace VRRehab.Core
             {
                 foreach (var interactor in interactable.interactorsHovering)
                 {
-                    TriggerHaptic(interactor, amplitude * 0.5f, duration * 0.7f);
+                    TriggerHaptic(interactor, amplitude * 0.4f, duration * 0.6f);
                 }
             }
         }
         #endregion
 
-        #region Métodos de Atalho para Microinterações
+        #region Métodos de Atalho para Microinterações (Volumes Calibrados para VR Confortável)
+        /// <summary>
+        /// Som de Hover suave (volume 0.20f) + micro-pulso háptico.
+        /// </summary>
         public void PlayHover(Vector3 position, IXRInteractor interactor = null)
         {
-            PlaySound(clipUIHover, position, 0.6f, 0.98f, 1.05f);
+            PlaySound(clipUIHover, position, 0.20f, 0.98f, 1.05f);
             if (interactor != null)
             {
                 TriggerHaptic(interactor, 0.15f, 0.04f);
             }
         }
 
+        /// <summary>
+        /// Som de Agarre pop tátil (volume 0.35f) + pulso háptico moderado.
+        /// </summary>
         public void PlayGrab(Vector3 position, IXRInteractor interactor = null)
         {
-            PlaySound(clipGrabPop, position, 0.9f, 0.92f, 1.05f);
+            PlaySound(clipGrabPop, position, 0.35f, 0.94f, 1.05f);
             if (interactor != null)
             {
-                TriggerHaptic(interactor, 0.55f, 0.12f);
+                TriggerHaptic(interactor, 0.50f, 0.10f);
             }
         }
 
+        /// <summary>
+        /// Som de Soltura woosh suave (volume 0.25f).
+        /// </summary>
         public void PlayRelease(Vector3 position)
         {
-            PlaySound(clipReleaseWoosh, position, 0.7f, 0.95f, 1.05f);
+            PlaySound(clipReleaseWoosh, position, 0.25f, 0.95f, 1.05f);
         }
 
+        /// <summary>
+        /// Som mecânico de clique de botão (volume 0.35f) + pulso háptico nítido.
+        /// </summary>
         public void PlayButtonClick(Vector3 position, IXRInteractor interactor = null)
         {
-            PlaySound(clipButtonClick, position, 0.85f, 0.96f, 1.04f);
+            PlaySound(clipButtonClick, position, 0.35f, 0.96f, 1.04f);
             if (interactor != null)
             {
-                TriggerHaptic(interactor, 0.4f, 0.06f);
+                TriggerHaptic(interactor, 0.40f, 0.06f);
             }
         }
 
+        /// <summary>
+        /// Som de encaixe em soquete magnético (volume 0.40f) + pulso firme de confirmação.
+        /// </summary>
         public void PlaySocketSnap(Vector3 position, IXRInteractor interactor = null)
         {
-            PlaySound(clipSocketSnap, position, 0.95f, 0.98f, 1.03f);
+            PlaySound(clipSocketSnap, position, 0.40f, 0.98f, 1.03f);
             if (interactor != null)
             {
-                TriggerHaptic(interactor, 0.7f, 0.15f);
+                TriggerHaptic(interactor, 0.65f, 0.12f);
             }
         }
 
+        /// <summary>
+        /// Som de sino de sucesso / meta clínica (volume 0.40f).
+        /// </summary>
         public void PlaySuccess(Vector3 position)
         {
-            PlaySound(clipSuccessChime, position, 1.0f, 1.0f, 1.02f);
+            PlaySound(clipSuccessChime, position, 0.40f, 1.0f, 1.02f);
         }
         #endregion
     }

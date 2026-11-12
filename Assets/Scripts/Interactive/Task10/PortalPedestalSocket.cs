@@ -6,9 +6,11 @@ using VRRehab.Core;
 namespace VRRehab.Interactive.Task10
 {
     /// <summary>
-    /// Pedestal Tecnológico com Berço Magnético (XRSocketInteractor) para a Esfera de Portal (TASK-10).
+    /// Pedestal Tecnológico com Berço Magnético (XRSocketInteractor) para a Esfera de Diorama (TASK-10).
     /// Detecta o encaixe da PortalWorldSphere, aciona estalo magnético com haptics,
-    /// projeta feixe vertical de partículas luminosas ascendentes e inicia a transição dimensional para o mapa.
+    /// projeta feixe vertical de partículas luminosas ascendentes e mantém brilho agradável.
+    /// HOTFIX PLAYTEST #1: NÃO CARREGA CENA nem teletransporta o jogador. O pedestal é puramente
+    /// uma estação de suporte e exibição tecnológica para o diorama da floresta.
     /// </summary>
     [DisallowMultipleComponent]
     [SelectionBase]
@@ -22,7 +24,7 @@ namespace VRRehab.Interactive.Task10
         [Tooltip("Renderer do anel emissivo no topo do pedestal.")]
         [SerializeField] private Renderer emissiveRingRenderer;
 
-        [Tooltip("Luz pontual centralizada no berço do pedestal.")]
+        [Tooltip("Luz pontual centralizada no berço do pedestal (shadows = None para VR).")]
         [SerializeField] private Light socketGlowLight;
 
         [Tooltip("Cor do anel em estado de espera (standby).")]
@@ -32,10 +34,10 @@ namespace VRRehab.Interactive.Task10
         [SerializeField] private Color activeFlareColor = new Color(0.20f, 0.95f, 1.0f);
 
         [Tooltip("Intensidade emissiva normal em standby.")]
-        [SerializeField] private float standbyEmissionIntensity = 1.8f;
+        [SerializeField] private float standbyEmissionIntensity = 1.5f;
 
-        [Tooltip("Intensidade emissiva máxima no encaixe/ativação.")]
-        [SerializeField] private float activeEmissionIntensity = 4.5f;
+        [Tooltip("Intensidade emissiva máxima no encaixe.")]
+        [SerializeField] private float activeEmissionIntensity = 3.5f;
 
         [Header("Efeitos Visuais de Partículas")]
         [Tooltip("Sistema de partículas do feixe vertical de luz ascendente.")]
@@ -48,8 +50,8 @@ namespace VRRehab.Interactive.Task10
         [Tooltip("Som de encaixe magnético ressonante da esfera.")]
         [SerializeField] private AudioClip sfxSocketSnap;
 
-        [Tooltip("Tempo de celebração visual com feixe de luz antes de carregar o mapa (segundos).")]
-        [SerializeField] private float celebrationDuration = 1.2f;
+        [Tooltip("Tempo de celebração visual com feixe de luz ao encaixar (segundos).")]
+        [SerializeField] private float celebrationDuration = 1.0f;
 
         private MaterialPropertyBlock propBlock;
         private Coroutine celebrationCoroutine;
@@ -78,11 +80,19 @@ namespace VRRehab.Interactive.Task10
             }
             socketAudioSource.spatialBlend = 1.0f;
             socketAudioSource.playOnAwake = false;
+            socketAudioSource.dopplerLevel = 0.0f;
+            socketAudioSource.maxDistance = 6.0f;
+
+            // Otimização VR: Luz de destaque sem projeção de sombras dinâmicas extras
+            if (socketGlowLight != null)
+            {
+                socketGlowLight.shadows = LightShadows.None;
+            }
 
             propBlock = new MaterialPropertyBlock();
 
             // Estado inicial de iluminação
-            ApplyRingVisuals(standbyColor, standbyEmissionIntensity, 0.6f);
+            ApplyRingVisuals(standbyColor, standbyEmissionIntensity, 0.5f);
 
             if (verticalBeamParticles != null && verticalBeamParticles.isPlaying)
             {
@@ -122,19 +132,23 @@ namespace VRRehab.Interactive.Task10
                 currentOrb = orb;
                 orb.SetSocketedState(true);
 
-                // Feedback sonoro de encaixe magnético
+                // Feedback sonoro de encaixe magnético calibrado (volume 0.40f)
                 if (sfxSocketSnap != null && socketAudioSource != null)
                 {
-                    socketAudioSource.PlayOneShot(sfxSocketSnap, 1.0f);
+                    socketAudioSource.PlayOneShot(sfxSocketSnap, 0.40f);
+                }
+                else
+                {
+                    VRFeedbackManager.Instance.PlaySocketSnap(transform.position);
                 }
 
                 // Haptics no interactor que soltou a esfera no socket
                 if (args.interactorObject != null)
                 {
-                    VRFeedbackManager.Instance.TriggerHaptic(args.interactorObject, 0.7f, 0.25f);
+                    VRFeedbackManager.Instance.TriggerHaptic(args.interactorObject, 0.65f, 0.15f);
                 }
 
-                // Dispara celebração e transição do portal
+                // Dispara celebração puramente visual (sem teleporte)
                 if (celebrationCoroutine != null)
                 {
                     StopCoroutine(celebrationCoroutine);
@@ -156,7 +170,7 @@ namespace VRRehab.Interactive.Task10
                 orb.SetSocketedState(false);
             }
 
-            // Cancela celebração se o jogador retirar a esfera antes da transição
+            // Cancela animação se a esfera for retirada
             if (celebrationCoroutine != null)
             {
                 StopCoroutine(celebrationCoroutine);
@@ -164,7 +178,7 @@ namespace VRRehab.Interactive.Task10
             }
 
             // Retorna ao estado de standby
-            ApplyRingVisuals(standbyColor, standbyEmissionIntensity, 0.6f);
+            ApplyRingVisuals(standbyColor, standbyEmissionIntensity, 0.5f);
 
             if (verticalBeamParticles != null)
             {
@@ -174,7 +188,7 @@ namespace VRRehab.Interactive.Task10
 
         private IEnumerator SocketCelebrationRoutine(PortalWorldSphere orb)
         {
-            Debug.Log("[TASK-10] Esfera encaixada no pedestal! Ativando feixe de portal e celebração...");
+            Debug.Log("[TASK-10 Diorama] Esfera encaixada no pedestal! Ativando feixe de partículas e brilho.");
 
             // 1. Ativa partículas do feixe de luz ascendente
             if (verticalBeamParticles != null)
@@ -190,19 +204,17 @@ namespace VRRehab.Interactive.Task10
                 float progress = Mathf.Clamp01(elapsed / celebrationDuration);
 
                 // Pulso senoidal suave com pico
-                float pulse = 0.5f + 0.5f * Mathf.Sin(progress * Mathf.PI * 3f);
+                float pulse = 0.5f + 0.5f * Mathf.Sin(progress * Mathf.PI * 2f);
                 float currentIntensity = Mathf.Lerp(standbyEmissionIntensity, activeEmissionIntensity, pulse);
-                float currentLight = Mathf.Lerp(0.8f, 2.5f, pulse);
+                float currentLight = Mathf.Lerp(0.6f, 1.8f, pulse);
 
                 ApplyRingVisuals(activeFlareColor, currentIntensity, currentLight);
                 yield return null;
             }
 
-            // 3. Conclui acionando a rotina de teletransporte da esfera
-            if (orb != null)
-            {
-                orb.InitiateTeleportSequence("Pedestal Socket Celebration");
-            }
+            // 3. Mantém estado de encaixe ativo agradável e estável enquanto a esfera estiver presente
+            ApplyRingVisuals(activeFlareColor, standbyEmissionIntensity * 1.5f, 1.0f);
+            celebrationCoroutine = null;
         }
     }
 }

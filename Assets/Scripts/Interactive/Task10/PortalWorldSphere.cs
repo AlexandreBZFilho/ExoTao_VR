@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.XR.Interaction.Toolkit;
 using VRRehab.Core;
 using VRRehab.Ergonomics;
@@ -8,21 +7,24 @@ using VRRehab.Ergonomics;
 namespace VRRehab.Interactive.Task10
 {
     /// <summary>
-    /// Esfera de Portal Interativa para Seleção de Mapas 3D no VR (TASK-10).
+    /// Esfera de Mini-Diorama 3D Interativa para o Menu Principal (TASK-10).
     /// Herda de ErgonomicGrabInteractable para Force Grab assistido e Auto-Respawn.
-    /// Possui rotação suave contínua do mini-diorama interno e suporte a ativação dupla:
-    /// 1. Por encaixe no pedestal magnético (PortalPedestalSocket);
-    /// 2. Por aproximação do visor VR (Headset Proximity Teleport, estilo The Lab).
+    /// HOTFIX PLAYTEST #1: Funciona PURAMENTE como uma peça de diorama 3D decorativa e tátil.
+    /// O paciente pode pegar, puxar com o laser, inspecionar a mini-floresta girando dentro e
+    /// encaixar no pedestal tecnológico para emitir iluminação suave e partículas.
+    /// TERMINANTEMENTE PROIBIDO qualquer carregamento de cena (SceneManager.LoadScene) ou
+    /// teleporte automático por proximidade do headset. A transição de cena é responsabilidade
+    /// exclusiva do Canvas 2D da clínica (Canvas Menu Principal).
     /// </summary>
     [DisallowMultipleComponent]
     [SelectionBase]
     public class PortalWorldSphere : ErgonomicGrabInteractable
     {
-        [Header("Configuração de Destino")]
-        [Tooltip("Nome da cena Unity de destino para este portal.")]
+        [Header("Configuração de Exibição")]
+        [Tooltip("Identificador do mapa representado neste diorama (apenas informativo para a UI).")]
         [SerializeField] private string targetSceneName = "Floresta_e_Rio";
 
-        [Tooltip("Tempo de espera de celebração antes de iniciar o carregamento (segundos).")]
+        [Tooltip("Tempo de exibição / celebração visual.")]
         [SerializeField] private float transitionDelay = 0.8f;
 
         [Header("Diorama Interno")]
@@ -32,35 +34,26 @@ namespace VRRehab.Interactive.Task10
         [Tooltip("Velocidade de rotação contínua no eixo Y (graus por segundo).")]
         [SerializeField] private float dioramaRotationSpeed = 20.0f;
 
-        [Header("Detecção de Proximidade com o Headset (VR HMD)")]
-        [Tooltip("Câmera do jogador (Headset). Se nula, utiliza Camera.main.")]
-        [SerializeField] private Camera headsetCamera;
-
-        [Tooltip("Distância máxima a partir da qual o áudio de proximidade começa a subir (metros).")]
+        [Header("Parâmetros Suaves de Interação")]
         [SerializeField] private float proximityNoticeDistance = 0.50f;
-
-        [Tooltip("Distância mínima para acionar o teletransporte ao encostar a esfera no rosto/visor (metros).")]
         [SerializeField] private float proximityTriggerDistance = 0.22f;
 
-        [Header("Áudio Espacializado")]
-        [Tooltip("Fonte de áudio em loop para o zumbido místico ambiente da esfera.")]
+        [Header("Áudio Espacializado Suave")]
+        [Tooltip("Fonte de áudio em loop para o zumbido místico sutil do diorama.")]
         [SerializeField] private AudioSource ambientAudioSource;
 
-        [Tooltip("Fonte de áudio para o efeito sonoro de aproximação do headset.")]
+        [Tooltip("Fonte de áudio opcional de ressonância.")]
         [SerializeField] private AudioSource proximityAudioSource;
 
-        [Tooltip("Som de transição dimensional ao acionar o teletransporte.")]
+        [Tooltip("Efeito sonoro suave de ressonância.")]
         [SerializeField] private AudioClip sfxTeleportWhoosh;
 
-        [Header("Estado do Portal")]
+        [Header("Estado do Diorama")]
         [SerializeField] private bool isSocketed = false;
-
-        private bool isTeleporting = false;
-        private Coroutine teleportCoroutine;
 
         public string TargetSceneName => targetSceneName;
         public bool IsSocketed => isSocketed;
-        public bool IsTeleporting => isTeleporting;
+        public bool IsTeleporting => false; // Sempre falso (zero teleporte automático)
 
         protected override void Awake()
         {
@@ -73,11 +66,6 @@ namespace VRRehab.Interactive.Task10
                                         transform.Find("Visual_Model/PortalOrbDiorama_Forest/Orb_Inner_Diorama");
             }
 
-            if (headsetCamera == null)
-            {
-                headsetCamera = Camera.main;
-            }
-
             EnsureAudioSources();
         }
 
@@ -87,150 +75,38 @@ namespace VRRehab.Interactive.Task10
             {
                 ambientAudioSource.Play();
             }
-
-            if (proximityAudioSource != null)
-            {
-                proximityAudioSource.volume = 0f;
-                if (!proximityAudioSource.isPlaying)
-                {
-                    proximityAudioSource.Play();
-                }
-            }
         }
 
         private void Update()
         {
-            // 1. Rotação contínua suave do diorama interno no eixo Y
+            // Rotação contínua suave e relaxante do mini-diorama interno no eixo Y
             if (innerDioramaTransform != null)
             {
                 innerDioramaTransform.Rotate(Vector3.up, dioramaRotationSpeed * Time.deltaTime, Space.Self);
             }
-
-            // 2. Detecção dinâmica de aproximação do headset quando o paciente estiver segurando a esfera
-            if (!isTeleporting && !isSocketed && isSelected)
-            {
-                CheckHeadsetProximity();
-            }
-            else
-            {
-                // Silencia áudio de proximidade se não estiver na mão do paciente
-                if (proximityAudioSource != null && proximityAudioSource.volume > 0.001f)
-                {
-                    proximityAudioSource.volume = Mathf.MoveTowards(proximityAudioSource.volume, 0f, Time.deltaTime * 3.0f);
-                }
-            }
         }
 
         /// <summary>
-        /// Monitora a distância entre a esfera na mão do jogador e o visor VR (HMD).
-        /// </summary>
-        private void CheckHeadsetProximity()
-        {
-            if (headsetCamera == null)
-            {
-                headsetCamera = Camera.main;
-                if (headsetCamera == null) return;
-            }
-
-            Vector3 headPos = headsetCamera.transform.position;
-            float dist = Vector3.Distance(transform.position, headPos);
-
-            if (dist < proximityNoticeDistance)
-            {
-                // Gradiente de volume proporcional à proximidade (0 no limiar distante, 1 no rosto)
-                float t = Mathf.Clamp01(1.0f - ((dist - proximityTriggerDistance) / (proximityNoticeDistance - proximityTriggerDistance)));
-                if (proximityAudioSource != null)
-                {
-                    proximityAudioSource.volume = Mathf.Lerp(0.05f, 0.95f, t);
-                }
-
-                // Disparo da transição estilo The Lab ao aproximar a menos de 0.22m
-                if (dist <= proximityTriggerDistance)
-                {
-                    InitiateTeleportSequence("Headset Proximity");
-                }
-            }
-            else
-            {
-                if (proximityAudioSource != null)
-                {
-                    proximityAudioSource.volume = Mathf.MoveTowards(proximityAudioSource.volume, 0f, Time.deltaTime * 2.5f);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Dispara o teletransporte com transição audiovisual suave e carregamento da cena de destino.
+        /// Mantido para compatibilidade com chamadas existentes, mas com TELEPORTE REMOVIDO.
+        /// A navegação ocorre estritamente via Canvas 2D original do projeto.
         /// </summary>
         public void InitiateTeleportSequence(string sourceTrigger)
         {
-            if (isTeleporting) return;
-            isTeleporting = true;
-
-            Debug.Log($"[TASK-10] Ativando teletransporte para '{targetSceneName}' via {sourceTrigger}!");
-
-            if (teleportCoroutine != null)
+            // HOTFIX #1: Zero teleporte ou carregamento de cena.
+            Debug.Log($"[TASK-10 Diorama] Esfera interagida via '{sourceTrigger}'. Teleporte desativado para garantir controle clínico pelo Canvas 2D.");
+            
+            if (sfxTeleportWhoosh != null && ambientAudioSource != null)
             {
-                StopCoroutine(teleportCoroutine);
-            }
-            teleportCoroutine = StartCoroutine(TeleportRoutine());
-        }
-
-        private IEnumerator TeleportRoutine()
-        {
-            // Toca som de woosh dimensional
-            if (sfxTeleportWhoosh != null)
-            {
-                if (ambientAudioSource != null)
-                {
-                    ambientAudioSource.PlayOneShot(sfxTeleportWhoosh, 1.0f);
-                }
-                else
-                {
-                    VRFeedbackManager.Instance.PlaySound(sfxTeleportWhoosh, transform.position, 1.0f);
-                }
-            }
-
-            // Haptics nos controles que estiverem segurando
-            if (firstInteractorSelecting != null)
-            {
-                VRFeedbackManager.Instance.TriggerHaptic(firstInteractorSelecting, 0.8f, 0.4f);
-            }
-
-            // Aguarda fração de tempo para o efeito sonoro expandir
-            yield return new WaitForSeconds(transitionDelay);
-
-            // Carrega cena via CenaDeLoading ou SceneManager
-            ExecuteSceneTransition();
-        }
-
-        private void ExecuteSceneTransition()
-        {
-            // Salva na variável global do projeto
-            ControladorInterface.mapaFuturo = targetSceneName;
-
-            // Se a cena CenaDeLoading existir nas Build Settings, utiliza o fluxo canônico do projeto
-            bool hasLoadingScene = Application.CanStreamedLevelBeLoaded("CenaDeLoading");
-            if (hasLoadingScene)
-            {
-                SceneManager.LoadScene("CenaDeLoading");
-            }
-            else
-            {
-                SceneManager.LoadScene(targetSceneName);
+                ambientAudioSource.PlayOneShot(sfxTeleportWhoosh, 0.35f);
             }
         }
 
         public void SetSocketedState(bool socketed)
         {
             isSocketed = socketed;
-            if (isSocketed)
+            if (isSocketed && proximityAudioSource != null)
             {
-                // Silencia som de headset se encaixado
-                if (proximityAudioSource != null)
-                {
-                    proximityAudioSource.volume = 0f;
-                }
+                proximityAudioSource.volume = 0f;
             }
         }
 
@@ -252,25 +128,27 @@ namespace VRRehab.Interactive.Task10
                 }
             }
 
+            // Calibração de conforto VR: sem estridência, doppler zerado, volume suave
             ambientAudioSource.spatialBlend = 1.0f;
             ambientAudioSource.loop = true;
             ambientAudioSource.playOnAwake = false;
-            ambientAudioSource.volume = 0.45f;
-            ambientAudioSource.minDistance = 0.5f;
-            ambientAudioSource.maxDistance = 5.0f;
+            ambientAudioSource.volume = 0.15f;
+            ambientAudioSource.minDistance = 0.3f;
+            ambientAudioSource.maxDistance = 3.0f;
+            ambientAudioSource.dopplerLevel = 0.0f;
 
             proximityAudioSource.spatialBlend = 1.0f;
-            proximityAudioSource.loop = true;
+            proximityAudioSource.loop = false;
             proximityAudioSource.playOnAwake = false;
             proximityAudioSource.volume = 0.0f;
             proximityAudioSource.minDistance = 0.2f;
-            proximityAudioSource.maxDistance = 3.0f;
+            proximityAudioSource.maxDistance = 2.0f;
+            proximityAudioSource.dopplerLevel = 0.0f;
         }
 
         protected override void OnSelectEntered(SelectEnterEventArgs args)
         {
             base.OnSelectEntered(args);
-            // Ao ser pega na mão, não está mais encaixada
             SetSocketedState(false);
         }
 

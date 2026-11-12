@@ -103,7 +103,8 @@ namespace VRRehab.DronePet
 
         public bool CanAcceptFetch()
         {
-            return currentState == DroneFetchState.Idle;
+            // Neutralizado: o Drone é companheiro do paciente e nunca busca maçãs/itens
+            return false;
         }
 
         public void EnsurePatientAnchor()
@@ -228,15 +229,12 @@ namespace VRRehab.DronePet
         }
 
         /// <summary>
-        /// Inicia a missão de busca para o alvo indicado.
+        /// Inicia a missão de busca para o alvo indicado (Neutralizado para TASK-03).
         /// </summary>
         public void RequestFetch(DroneFetchTarget target)
         {
-            if (target == null || currentState != DroneFetchState.Idle) return;
-
-            currentTarget = target;
-            if (fetchRoutine != null) StopCoroutine(fetchRoutine);
-            fetchRoutine = StartCoroutine(FetchRoutine(target));
+            // Neutralizado: o Drone é companheiro do paciente e nunca busca maçãs nem se afasta para pegar objetos.
+            return;
         }
 
         private IEnumerator FetchRoutine(DroneFetchTarget target)

@@ -1,0 +1,264 @@
+=== TASK-06 FURNITURE SCOUT === 2026-11-11 21:59:43 scene=Assets/Scenes/Menu_Principal.unity playing=False
+
+--- ROOTS ---
+[on] 'Canvas Menu Principal' pos=(4.520, 1.635, 3.943) rotY=0.0 scale=(0.001, 0.001, 0.001) children=7 no-renderer
+[on] 'Gerenciador_HUD' pos=(0.000, 0.000, 0.000) rotY=0.0 scale=(1.000, 1.000, 1.000) children=0 no-renderer
+[on] 'Canvas Menu Pause' pos=(12.100, 1.539, 2.930) rotY=0.0 scale=(0.001, 0.001, 0.001) children=1 no-renderer
+[on] 'Canvas Load Screen Text' pos=(15.790, 1.539, 2.930) rotY=0.0 scale=(0.001, 0.001, 0.001) children=1 no-renderer
+[on] 'GerenciadorPause' pos=(0.000, 0.000, 0.000) rotY=0.0 scale=(1.000, 1.000, 1.000) children=0 no-renderer
+[on] 'Building' pos=(0.000, 0.000, 0.000) rotY=0.0 scale=(1.000, 1.000, 1.000) children=89 bounds c=(5.000, 2.981, 1.988) size=(10.200, 6.038, 12.250) min.y=-0.038
+[on] 'Directional Light' pos=(14.500, 27.250, -1.500) rotY=330.0 scale=(1.000, 1.000, 1.000) children=0 no-renderer
+[off] 'XR Device Simulator' pos=(5.070, 0.660, 1.970) rotY=0.0 scale=(1.000, 1.000, 1.000) children=0 no-renderer
+[off] 'HTC Vive Controller' pos=(12.194, 1.413, 2.194) rotY=0.0 scale=(1.000, 1.000, 1.000) children=1 bounds c=(12.194, 1.379, 2.130) size=(0.117, 0.084, 0.219) min.y=1.337
+[on] 'EventSystem' pos=(0.000, 0.000, 0.000) rotY=0.0 scale=(1.000, 1.000, 1.000) children=0 no-renderer
+[on] 'Pessoa_Virtual_sem3D' pos=(4.500, -0.026, 2.310) rotY=0.0 scale=(1.000, 1.000, 1.000) children=3 bounds c=(4.500, 0.841, 2.327) size=(0.813, 1.876, 0.399) min.y=-0.097
+[on] '[IC] Estacao_Holograma_Drone_SciFi' pos=(7.050, 0.000, 1.850) rotY=75.0 scale=(1.000, 1.000, 1.000) children=3 bounds c=(7.050, 1.300, 1.850) size=(1.705, 2.600, 1.847) min.y=0.000
+[on] '[IC] Audio_Ambiente_E_SFX_ReRobLab' pos=(0.000, 0.000, 0.000) rotY=0.0 scale=(1.000, 1.000, 1.000) children=3 no-renderer
+[on] '[IC] Radio_Menu_3D' pos=(0.660, 0.952, 0.360) rotY=75.0 scale=(1.150, 1.150, 1.150) children=1 bounds c=(0.628, 1.231, 0.366) size=(0.362, 0.559, 0.447) min.y=0.952
+[on] '[IC] Drone_Guia_IA_ExoBot' pos=(2.100, 1.450, 1.600) rotY=0.0 scale=(1.000, 1.000, 1.000) children=8 bounds c=(2.101, 1.470, 1.602) size=(0.561, 0.436, 0.514) min.y=1.252
+[on] 'BalloonGunDispenser_Instance' pos=(0.780, 0.976, 0.480) rotY=40.0 scale=(1.000, 1.000, 1.000) children=1 bounds c=(0.779, 0.990, 0.450) size=(0.161, 0.077, 0.249) min.y=0.951
+[on] 'Demo_Balloon_Red' pos=(1.100, 1.480, 0.650) rotY=0.0 scale=(0.270, 0.270, 0.270) children=2 bounds c=(1.100, 1.520, 0.650) size=(0.062, 0.081, 0.062) min.y=1.480
+[on] 'Demo_Balloon_Cyan' pos=(1.420, 1.750, 0.100) rotY=0.0 scale=(0.290, 0.290, 0.290) children=2 bounds c=(1.420, 1.793, 0.100) size=(0.066, 0.087, 0.066) min.y=1.750
+[on] 'Demo_Balloon_Yellow' pos=(0.950, 1.950, -0.300) rotY=0.0 scale=(0.280, 0.280, 0.280) children=2 bounds c=(0.950, 1.992, -0.300) size=(0.064, 0.084, 0.064) min.y=1.950
+[on] 'ArcadeBasketballHoop_Instance' pos=(0.120, 1.850, 2.700) rotY=270.0 scale=(1.000, 1.000, 1.000) children=7 bounds c=(0.384, 1.830, 2.700) size=(0.588, 0.926, 0.735) min.y=1.367
+[on] 'ArcadeBallSpawner_Instance' pos=(0.800, 0.955, 0.150) rotY=75.0 scale=(1.000, 1.000, 1.000) children=3 bounds c=(0.801, 0.989, 0.150) size=(0.150, 0.068, 0.148) min.y=0.955
+[on] 'Demo_Basketball_Table' pos=(0.640, 1.045, -0.020) rotY=30.0 scale=(1.000, 1.000, 1.000) children=1 bounds c=(0.640, 1.045, -0.020) size=(0.274, 0.227, 0.289) min.y=0.931
+[on] 'EnvironmentControlLever_Instance' pos=(0.660, 0.955, 0.620) rotY=75.0 scale=(1.000, 1.000, 1.000) children=1 bounds c=(0.660, 1.045, 0.620) size=(0.157, 0.181, 0.186) min.y=0.955
+[on] 'FireworksLaunchButton_Instance' pos=(0.790, 0.955, 0.600) rotY=75.0 scale=(1.000, 1.000, 1.000) children=2 bounds c=(0.790, 0.987, 0.600) size=(0.156, 0.065, 0.156) min.y=0.955
+[on] 'ExoMascotBobblehead_Instance' pos=(0.730, 0.955, 0.720) rotY=200.0 scale=(1.000, 1.000, 1.000) children=2 bounds c=(0.730, 1.035, 0.720) size=(0.123, 0.160, 0.123) min.y=0.955
+[on] 'Room_Fireworks_Launcher' pos=(0.790, 0.955, 0.600) rotY=0.0 scale=(1.000, 1.000, 1.000) children=3 no-renderer
+[on] '[VRRehab] ProgressionSaveSystem' pos=(-3.390, 0.000, 0.000) rotY=0.0 scale=(1.000, 1.000, 1.000) children=0 no-renderer
+[on] 'TrophyDisplayStand_Instance' pos=(0.680, 0.952, -0.380) rotY=75.0 scale=(1.000, 1.000, 1.000) children=9 bounds c=(0.688, 0.976, -0.380) size=(0.287, 0.928, 0.539) min.y=0.512
+[on] '[IC] Ergonomic_Toy_Demo' pos=(0.580, 1.025, -0.280) rotY=0.0 scale=(1.000, 1.000, 1.000) children=3 bounds c=(0.580, 1.025, -0.280) size=(0.144, 0.140, 0.144) min.y=0.955
+[on] '[IC] AimAssist_Target_Demo' pos=(2.100, 1.150, 0.400) rotY=0.0 scale=(1.000, 1.000, 1.000) children=2 bounds c=(2.100, 0.713, 0.400) size=(0.545, 1.367, 0.481) min.y=0.030
+[on] 'RadioCassetteDeck_Instance' pos=(0.660, 0.952, 0.140) rotY=75.0 scale=(1.000, 1.000, 1.000) children=4 bounds c=(0.660, 0.996, 0.140) size=(0.197, 0.088, 0.232) min.y=0.952
+[on] 'CassetteOrganizerRack_Instance' pos=(0.700, 0.952, -0.080) rotY=75.0 scale=(1.000, 1.000, 1.000) children=9 bounds c=(0.700, 0.990, -0.080) size=(0.171, 0.075, 0.171) min.y=0.952
+[on] 'Tape_CyberHorizon_Active' pos=(0.670, 1.034, 0.143) rotY=75.0 scale=(1.000, 1.000, 1.000) children=1 bounds c=(0.670, 1.034, 0.143) size=(0.056, 0.065, 0.105) min.y=1.002
+[on] 'Tape_LunaCantina_Rack' pos=(0.691, 1.002, -0.082) rotY=75.0 scale=(1.000, 1.000, 1.000) children=1 bounds c=(0.691, 1.002, -0.082) size=(0.056, 0.065, 0.105) min.y=0.970
+[on] 'Tape_NeonSunset_Rack' pos=(0.716, 1.010, -0.076) rotY=75.0 scale=(1.000, 1.000, 1.000) children=1 bounds c=(0.716, 1.010, -0.076) size=(0.056, 0.065, 0.105) min.y=0.978
+[on] 'Tape_EmeraldZen_Rack' pos=(0.742, 1.018, -0.069) rotY=75.0 scale=(1.000, 1.000, 1.000) children=1 bounds c=(0.742, 1.018, -0.069) size=(0.056, 0.065, 0.105) min.y=0.986
+
+--- FURNITURE (any depth) ---
+FURN 'Building/Structure/wall_standard_door_frame (1)' pos=(3.000, 0.000, 8.000) rotY=0.0 bounds min=(1.000, 0.000, 7.888) max=(3.000, 3.000, 8.112)
+     rayHits(center,+x,-x,+z,-z)=[3.000:wall_standard_door_frame (1) | 2.101:door_frame | 2.020:door_1 | 0.019:floor_tile (8)] [3.000:wall_standard_door_frame (1) | 0.019:floor_tile (8)] [3.000:wall_standard_door_frame (1) | 0.019:floor_tile (8)] [3.000:wall_standard_door_frame (1) | 2.101:door_frame] [3.000:wall_standard_door_frame (1) | 2.101:door_frame | 2.020:door_1 | 0.019:floor_tile (8)]
+FURN 'Building/Structure/wall_standard_door_frame (2)' pos=(4.000, 0.000, -4.000) rotY=0.0 bounds min=(2.000, 0.000, -4.112) max=(4.000, 3.000, -3.888)
+     rayHits(center,+x,-x,+z,-z)=[3.000:wall_standard_door_frame (2) | 2.101:door_frame | 2.020:door_2 (1) | 0.019:floor_tile (8)] [3.000:wall_standard_door_frame (2) | 0.019:floor_tile (8)] [3.000:wall_standard_door_frame (2) | 0.019:floor_tile (8)] [3.000:wall_standard_door_frame (2) | 2.101:door_frame | 0.019:floor_tile (8)] [3.000:wall_standard_door_frame (2) | 2.101:door_frame]
+FURN 'Building/coffee_table' pos=(7.150, 0.000, -1.751) rotY=1.1 bounds min=(6.288, 0.000, -2.097) max=(8.012, 0.381, -1.405)
+     rayHits(center,+x,-x,+z,-z)=[0.395:notepad | 0.381:coffee_table | 0.019:floor_tile (8)] [0.641:deco_variant_2 | 0.381:coffee_table | 0.019:floor_tile (8)] [0.429:plate (1) | 0.381:coffee_table | 0.019:floor_tile (8)] [0.381:coffee_table | 0.019:floor_tile (8)] [0.381:coffee_table | 0.019:floor_tile (8)]
+FURN 'Building/counter_1' pos=(0.591, 0.000, 4.466) rotY=90.0 bounds min=(0.194, 0.000, 3.966) max=(1.199, 0.949, 4.966)
+     rayHits(center,+x,-x,+z,-z)=[0.998:Laptop Screen | 0.982:laptop_variant (1) | 0.949:counter_1 | 0.019:floor_tile (8)] [0.942:Ac | 0.876:Door | 0.019:floor_tile (8)] [0.949:counter_1 | 0.019:floor_tile (8)] [0.949:counter_1 | 0.019:floor_tile (8)] [0.949:counter_1 | 0.019:floor_tile (8)]
+FURN 'Building/counter_2_b' pos=(9.260, 0.000, -1.925) rotY=269.4 bounds min=(8.894, 0.000, -2.429) max=(9.668, 0.949, -1.420)
+     rayHits(center,+x,-x,+z,-z)=[0.949:counter_2_b | 0.019:floor_tile (8)] [0.949:counter_2_b | 0.019:floor_tile (8)] [0.949:counter_2_b | 0.019:floor_tile (8)] [1.011:deco_variant_3 | 0.949:counter_2_b | 0.019:floor_tile (8)] [0.949:counter_2_b | 0.019:floor_tile (8)]
+FURN 'Building/counter_3_a' pos=(9.356, 0.000, 4.617) rotY=89.9 bounds min=(8.973, 0.905, 4.116) max=(9.738, 0.949, 5.118)
+     rayHits(center,+x,-x,+z,-z)=[0.949:counter_3_a] [0.949:counter_3_a] [0.949:counter_3_a] [0.949:counter_3_a] [0.949:counter_3_a]
+FURN 'Building/counter_3_a (1)' pos=(5.170, 0.000, 7.443) rotY=359.6 bounds min=(4.667, 0.905, 7.058) max=(5.673, 0.949, 7.828)
+     rayHits(center,+x,-x,+z,-z)=[0.949:counter_3_a (1)] [1.276:Top | 0.949:counter_3_a (1)] [0.949:counter_3_a (1)] [0.949:counter_3_a (1)] [0.949:counter_3_a (1)]
+FURN 'Building/counter_3_c' pos=(9.358, 0.000, 3.617) rotY=269.9 bounds min=(8.976, 0.000, 3.116) max=(9.740, 0.949, 4.118)
+     rayHits(center,+x,-x,+z,-z)=[0.949:counter_3_c | 0.019:floor_tile (8)] [0.949:counter_3_c | 0.019:floor_tile (8)] [0.965:pc_keyboard (1) | 0.949:counter_3_c | 0.019:floor_tile (8)] [1.311:pc_monitor (1) | 0.949:counter_3_c | 0.019:floor_tile (8)] [1.377:pc_case | 0.949:counter_3_c | 0.019:floor_tile (8)]
+FURN 'Building/counter_3_c (1)' pos=(9.353, 0.000, 5.617) rotY=89.9 bounds min=(8.971, 0.000, 5.116) max=(9.736, 0.949, 6.118)
+     rayHits(center,+x,-x,+z,-z)=[0.949:counter_3_c (1) | 0.019:floor_tile (8)] [0.949:counter_3_c (1) | 0.019:floor_tile (8)] [0.974:pc_keyboard | 0.949:counter_3_c (1) | 0.019:floor_tile (8)] [0.960:pc_mouse_pad (1) | 0.949:counter_3_c (1) | 0.019:floor_tile (8)] [0.949:counter_3_c (1) | 0.019:floor_tile (8)]
+FURN 'Building/counter_3_c (2)' pos=(4.170, 0.000, 7.436) rotY=359.6 bounds min=(3.667, 0.000, 7.051) max=(4.673, 0.949, 7.820)
+     rayHits(center,+x,-x,+z,-z)=[0.949:counter_3_c (2) | 0.019:floor_tile (8)] [0.949:counter_3_c (2) | 0.019:floor_tile (8)] [0.949:counter_3_c (2) | 0.019:floor_tile (8)] [0.949:counter_3_c (2) | 0.019:floor_tile (8)] [0.949:counter_3_c (2) | 0.019:floor_tile (8)]
+FURN 'Building/counter_3_c (3)' pos=(6.170, 0.000, 7.450) rotY=179.6 bounds min=(5.667, 0.000, 7.065) max=(6.673, 0.949, 7.835)
+     rayHits(center,+x,-x,+z,-z)=[0.984:laptop_variant | 0.949:counter_3_c (3) | 0.019:floor_tile (8)] [0.949:counter_3_c (3) | 0.019:floor_tile (8)] [0.949:counter_3_c (3) | 0.019:floor_tile (8)] [0.949:counter_3_c (3) | 0.019:floor_tile (8)] [0.949:counter_3_c (3) | 0.639:chair_1 (3) | 0.019:floor_tile (8)]
+FURN 'Building/drawer_simple' pos=(0.584, 0.000, 5.355) rotY=88.8 bounds min=(0.330, 0.001, 5.070) max=(0.834, 0.918, 5.640)
+     rayHits(center,+x,-x,+z,-z)=[1.093:deco_variant_2 | 0.918:drawer_simple | 0.725:Drawer Acc | 0.019:floor_tile (8)] [0.918:drawer_simple | 0.725:Drawer Acc | 0.019:floor_tile (8)] [0.918:drawer_simple | 0.725:Drawer Acc | 0.019:floor_tile (8)] [0.918:drawer_simple | 0.725:Drawer Acc | 0.019:floor_tile (8)] [0.918:drawer_simple | 0.725:Drawer Acc | 0.019:floor_tile (8)]
+FURN 'Building/drawer_simple (1)' pos=(0.584, 0.000, 6.016) rotY=92.7 bounds min=(0.322, 0.001, 5.725) max=(1.025, 0.918, 6.307)
+     rayHits(center,+x,-x,+z,-z)=[0.918:drawer_simple (1) | 0.725:Drawer Acc | 0.019:floor_tile (8)] [0.725:Drawer Acc | 0.019:floor_tile (8)] [0.918:drawer_simple (1) | 0.019:floor_tile (8)] [0.918:drawer_simple (1) | 0.725:Drawer Acc | 0.019:floor_tile (8)] [0.918:drawer_simple (1) | 0.725:Drawer Acc | 0.019:floor_tile (8)]
+FURN 'Building/full_desk_3 (1)' pos=(0.630, 0.000, -0.020) rotY=90.0 bounds min=(0.244, -0.002, -0.802) max=(1.135, 1.406, 0.762)
+     rayHits(center,+x,-x,+z,-z)=[1.120:Demo_Basketball_Table | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac | 0.019:floor_tile (8)] [0.949:full_desk_3 (1) | 0.848:Ac | 0.019:floor_tile (8)] [1.379:pc_monitor | 0.949:full_desk_3 (1) | 0.019:floor_tile (8)] [1.182:[IC] Radio_Menu_3D | 0.949:full_desk_3 (1) | 0.848:Ac | 0.418:pc_case | 0.019:floor_tile (8)] [1.207:TrophyItem_StarCup | 1.097:TrophyItem_DroneCrown | 0.997:TrophyDisplayStand_Instance | 0.949:full_desk_3 (1) | 0.848:Ac | 0.019:floor_tile (8)]
+FURN 'Building/modern_shelves_3 (1)' pos=(9.611, 0.000, 0.027) rotY=270.0 bounds min=(9.473, 0.002, -0.595) max=(9.749, 2.289, 0.649)
+     rayHits(center,+x,-x,+z,-z)=[2.289:modern_shelves_3 (1) | 1.776:book_pile_2 (8) | 0.346:book_pile_2 (13) | 0.019:floor_tile (8)] [2.289:modern_shelves_3 (1) | 1.732:book_pile_2 (8) | 0.304:book_pile_2 (13) | 0.019:floor_tile (8)] [2.289:modern_shelves_3 (1) | 1.764:book_pile_2 (8) | 0.346:book_pile_2 (13) | 0.019:floor_tile (8)] [2.289:modern_shelves_3 (1) | 1.442:book_pile_2 (9) | 0.690:book_pile_2 (10) | 0.346:book_pile_2_alt (2) | 0.019:floor_tile (8)] [2.289:modern_shelves_3 (1) | 0.992:book_pile_1_alt (2) | 0.711:book_pile_2 (11) | 0.346:book_pile_2 (12) | 0.019:floor_tile (8)]
+FURN 'Building/table_lamp' pos=(9.588, 0.949, 4.355) rotY=261.0 bounds min=(9.436, 0.947, 4.267) max=(9.664, 1.318, 4.442)
+     rayHits(center,+x,-x,+z,-z)=[1.236:Top | 1.069:table_lamp | 0.949:counter_3_a] [1.092:table_lamp | 0.949:counter_3_a] [1.300:Top | 0.949:counter_3_a] [0.961:table_lamp | 0.949:counter_3_a] [0.962:table_lamp | 0.949:counter_3_a]
+FURN 'Building/table_lamp (1)' pos=(5.375, 0.949, 7.448) rotY=127.0 bounds min=(5.281, 0.947, 7.297) max=(5.528, 1.318, 7.542)
+     rayHits(center,+x,-x,+z,-z)=[1.239:Top | 1.056:table_lamp (1) | 0.949:counter_3_a (1)] [1.296:Top | 0.949:counter_3_a (1)] [1.008:table_lamp (1) | 0.949:counter_3_a (1)] [1.004:table_lamp (1) | 0.949:counter_3_a (1)] [1.282:Top | 0.949:counter_3_a (1)]
+FURN 'CassetteOrganizerRack_Instance' pos=(0.700, 0.952, -0.080) rotY=75.0 bounds min=(0.614, 0.952, -0.166) max=(0.786, 1.027, 0.006)
+     rayHits(center,+x,-x,+z,-z)=[1.075:Demo_Basketball_Table | 0.994:Tape_LunaCantina_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.017:Tape_EmeraldZen_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.112:Demo_Basketball_Table | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.112:Demo_Basketball_Table | 1.041:Tape_NeonSunset_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.034:Tape_LunaCantina_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac]
+FURN 'CassetteOrganizerRack_Instance/Visual_Model/Rack_Base' pos=(0.700, 0.970, -0.080) rotY=75.0 bounds min=(0.614, 0.952, -0.166) max=(0.786, 0.987, 0.006)
+     rayHits(center,+x,-x,+z,-z)=[1.075:Demo_Basketball_Table | 0.994:Tape_LunaCantina_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.017:Tape_EmeraldZen_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.112:Demo_Basketball_Table | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.112:Demo_Basketball_Table | 1.041:Tape_NeonSunset_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.034:Tape_LunaCantina_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac]
+FURN 'Demo_Basketball_Table' pos=(0.640, 1.045, -0.020) rotY=30.0 bounds min=(0.503, 0.931, -0.165) max=(0.777, 1.159, 0.125)
+     rayHits(center,+x,-x,+z,-z)=[1.135:Demo_Basketball_Table | 0.949:full_desk_3 (1) | 0.848:Ac] [1.082:Demo_Basketball_Table | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.268:pc_monitor | 1.082:Demo_Basketball_Table | 0.949:full_desk_3 (1)] [1.069:Demo_Basketball_Table | 1.027:RadioCassetteDeck_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.069:Demo_Basketball_Table | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac]
+FURN 'Tape_EmeraldZen_Rack' pos=(0.742, 1.018, -0.069) rotY=75.0 bounds min=(0.714, 0.986, -0.121) max=(0.770, 1.050, -0.017)
+     rayHits(center,+x,-x,+z,-z)=[1.037:Tape_EmeraldZen_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [0.999:Tape_NeonSunset_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.012:Tape_EmeraldZen_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.049:Tape_EmeraldZen_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac]
+FURN 'Tape_LunaCantina_Rack' pos=(0.691, 1.002, -0.082) rotY=75.0 bounds min=(0.663, 0.970, -0.135) max=(0.719, 1.034, -0.030)
+     rayHits(center,+x,-x,+z,-z)=[1.085:Demo_Basketball_Table | 1.021:Tape_LunaCantina_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.040:Tape_NeonSunset_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.100:Demo_Basketball_Table | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.112:Demo_Basketball_Table | 0.996:Tape_LunaCantina_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.033:Tape_LunaCantina_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac]
+FURN 'Tape_NeonSunset_Rack' pos=(0.716, 1.010, -0.076) rotY=75.0 bounds min=(0.688, 0.978, -0.128) max=(0.744, 1.042, -0.023)
+     rayHits(center,+x,-x,+z,-z)=[1.029:Tape_NeonSunset_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.048:Tape_EmeraldZen_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.083:Demo_Basketball_Table | 0.991:Tape_LunaCantina_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.086:Demo_Basketball_Table | 1.004:Tape_NeonSunset_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac] [1.041:Tape_NeonSunset_Rack | 0.987:CassetteOrganizerRack_Instance | 0.949:full_desk_3 (1) | 0.848:Ac]
+FURN 'TrophyDisplayStand_Instance' pos=(0.680, 0.952, -0.380) rotY=75.0 bounds min=(0.545, 0.512, -0.649) max=(0.832, 1.440, -0.111)
+     rayHits(center,+x,-x,+z,-z)=[1.207:TrophyItem_StarCup | 0.997:TrophyDisplayStand_Instance | 0.949:full_desk_3 (1) | 0.848:Ac | 0.019:floor_tile (8)] [0.949:full_desk_3 (1) | 0.848:Ac | 0.019:floor_tile (8)] [1.405:pc_monitor | 0.949:full_desk_3 (1) | 0.019:floor_tile (8)] [1.167:TrophyItem_GoldenApple | 0.997:TrophyDisplayStand_Instance | 0.949:full_desk_3 (1) | 0.848:Ac | 0.019:floor_tile (8)] [1.097:TrophyItem_DroneCrown | 0.997:TrophyDisplayStand_Instance | 0.978:Table Lamp | 0.949:full_desk_3 (1) | 0.848:Ac | 0.019:floor_tile (8)]
+
+--- ITEMS ABOVE FURNITURE (non-furniture renderers' top-most non-furniture ancestor, inside furniture XZ footprint) ---
+ON 'Building/Structure/wall_standard_door_frame (1)':
+   #1015048:1016240 'Building/Structure' pos=(0.000, 0.000, 0.000) rotY=0.0 bounds min=(-0.100, -0.038, -4.137) max=(10.100, 6.000, 8.112)
+ON 'Building/Structure/wall_standard_door_frame (2)':
+   #1016484:1016240 'Building/Structure' pos=(0.000, 0.000, 0.000) rotY=0.0 bounds min=(-0.100, -0.038, -4.137) max=(10.100, 6.000, 8.112)
+ON 'Building/coffee_table':
+   #1014700:1014858 'Building/deco_variant_2' pos=(7.640, 0.381, -1.770) rotY=358.2 bounds min=(7.518, 0.378, -1.892) max=(7.762, 0.659, -1.648)
+   #1014700:1014678 'Building/simple_donut (1)' pos=(6.836, 0.420, -1.775) rotY=82.4 bounds min=(6.750, 0.387, -1.859) max=(6.924, 0.459, -1.706)
+   #1014700:1014476 'Building/simple_donut_alt (1)' pos=(6.710, 0.420, -1.726) rotY=46.1 bounds min=(6.599, 0.390, -1.832) max=(6.818, 0.456, -1.617)
+   #1014700:1016204 'Building/notepad' pos=(7.210, 0.381, -1.761) rotY=198.5 bounds min=(7.058, 0.381, -1.952) max=(7.355, 0.395, -1.591)
+   #1014700:1015986 'Building/plate (1)' pos=(6.772, 0.377, -1.755) rotY=46.2 bounds min=(6.525, 0.382, -2.002) max=(7.019, 0.429, -1.508)
+ON 'Building/counter_1':
+   #1016288:1016478 'Building/laptop_variant (1)' pos=(0.575, 0.949, 4.415) rotY=108.5 bounds min=(0.335, 0.949, 4.148) max=(0.785, 0.998, 4.692)
+ON 'Building/counter_2_b':
+   #1016362:1016356 'Building/tv' pos=(9.396, 0.949, -1.888) rotY=271.4 bounds min=(9.298, 0.946, -2.385) max=(9.502, 1.593, -1.391)
+   #1016362:1015188 'Building/deco_variant_3' pos=(9.289, 0.949, -1.578) rotY=356.4 bounds min=(9.233, 0.947, -1.634) max=(9.345, 1.062, -1.522)
+ON 'Building/counter_3_a':
+   #1014974:1014310 'Building/table_lamp' pos=(9.588, 0.949, 4.355) rotY=261.0 bounds min=(9.436, 0.947, 4.267) max=(9.664, 1.318, 4.442)
+   #1014974:1015044 'Building/pc_mouse (2)' pos=(9.187, 0.963, 4.272) rotY=266.1 bounds min=(9.130, 0.963, 4.227) max=(9.282, 1.006, 4.319)
+   #1014974:1014862 'Building/pc_mouse_pad (2)' pos=(9.151, 0.949, 4.256) rotY=272.7 bounds min=(9.000, 0.949, 4.119) max=(9.304, 0.971, 4.393)
+   #1014974:1016028 'Building/pc_case (1)' pos=(9.395, 0.949, 4.823) rotY=270.9 bounds min=(9.209, 0.947, 4.739) max=(9.580, 1.391, 4.906)
+   #1014974:-1405140 'Building/table_lamp/Top' pos=(9.586, 1.181, 4.363) rotY=261.0 bounds min=(9.436, 1.139, 4.267) max=(9.635, 1.318, 4.442)
+ON 'Building/counter_3_a (1)':
+   #1015368:1015072 'Building/pc_mouse_pad' pos=(4.938, 0.949, 7.235) rotY=173.7 bounds min=(4.793, 0.949, 7.077) max=(5.084, 0.971, 7.396)
+   #1015368:1015026 'Building/pc_mouse' pos=(4.922, 0.963, 7.272) rotY=167.0 bounds min=(4.861, 0.963, 7.209) max=(4.975, 1.006, 7.371)
+   #1015368:-1406602 'Building/table_lamp (1)/Top' pos=(5.370, 1.181, 7.442) rotY=127.0 bounds min=(5.296, 1.139, 7.297) max=(5.528, 1.318, 7.524)
+   #1015368:1015968 'Building/table_lamp (1)' pos=(5.375, 0.949, 7.448) rotY=127.0 bounds min=(5.281, 0.947, 7.297) max=(5.528, 1.318, 7.542)
+ON 'Building/counter_3_c':
+   #1015096:1016098 'Building/pc_case' pos=(9.429, 0.949, 3.357) rotY=275.7 bounds min=(9.237, 0.947, 3.257) max=(9.620, 1.391, 3.454)
+   #1015096:1014978 'Building/pc_keyboard (1)' pos=(9.173, 0.949, 3.827) rotY=269.8 bounds min=(9.076, 0.947, 3.616) max=(9.248, 0.983, 4.037)
+   #1015096:1014382 'Building/pc_monitor (1)' pos=(9.453, 0.949, 3.847) rotY=268.9 bounds min=(9.328, 0.945, 3.644) max=(9.636, 1.406, 4.050)
+ON 'Building/counter_3_c (1)':
+   #1015954:1014338 'Building/pc_keyboard' pos=(9.169, 0.949, 5.455) rotY=266.8 bounds min=(9.062, 0.947, 5.240) max=(9.255, 0.983, 5.669)
+   #1015954:1014742 'Building/pc_mouse_pad (1)' pos=(9.290, 0.949, 5.860) rotY=269.4 bounds min=(9.144, 0.949, 5.728) max=(9.439, 0.971, 5.992)
+   #1015954:1014330 'Building/pc_mouse (1)' pos=(9.327, 0.963, 5.847) rotY=276.8 bounds min=(9.267, 0.963, 5.795) max=(9.423, 1.006, 5.895)
+   #1015954:1015920 'Building/pc_monitor (2)' pos=(9.478, 0.949, 5.428) rotY=269.3 bounds min=(9.355, 0.945, 5.226) max=(9.659, 1.406, 5.630)
+ON 'Building/counter_3_c (2)':
+   #1015214:1015646 'Building/pc_case (2)' pos=(3.970, 0.949, 7.474) rotY=176.1 bounds min=(3.878, 0.947, 7.285) max=(4.064, 1.391, 7.663)
+   #1015214:1014588 'Building/pc_keyboard (2)' pos=(4.501, 0.949, 7.253) rotY=178.7 bounds min=(4.290, 0.947, 7.153) max=(4.714, 0.983, 7.332)
+   #1015214:1016076 'Building/pc_monitor' pos=(4.549, 0.949, 7.558) rotY=184.8 bounds min=(4.340, 0.945, 7.422) max=(4.763, 1.406, 7.754)
+ON 'Building/counter_3_c (3)':
+   #1015856:1016440 'Building/laptop_variant' pos=(6.156, 0.949, 7.390) rotY=176.4 bounds min=(5.912, 0.949, 7.231) max=(6.399, 1.290, 7.587)
+ON 'Building/drawer_simple':
+   #1014736:1014854 'Building/deco_variant_2' pos=(0.570, 0.918, 5.372) rotY=357.9 bounds min=(0.491, 0.916, 5.293) max=(0.649, 1.097, 5.451)
+ON 'Building/drawer_simple (1)':
+ON 'Building/full_desk_3 (1)':
+   #1014708:-1404896 'FireworksLaunchButton_Instance' pos=(0.790, 0.955, 0.600) rotY=75.0 bounds min=(0.712, 0.955, 0.522) max=(0.868, 1.020, 0.678)
+   #1014708:-1417592 'Tape_EmeraldZen_Rack/Visual_Model' pos=(0.742, 1.018, -0.069) rotY=75.0 bounds min=(0.714, 0.986, -0.121) max=(0.770, 1.050, -0.017)
+   #1014708:-1409098 'BalloonGunDispenser_Instance' pos=(0.780, 0.976, 0.480) rotY=40.0 bounds min=(0.699, 0.951, 0.325) max=(0.860, 1.028, 0.574)
+   #1014708:-1417520 'Tape_NeonSunset_Rack/Visual_Model' pos=(0.716, 1.010, -0.076) rotY=75.0 bounds min=(0.688, 0.978, -0.128) max=(0.744, 1.042, -0.023)
+   #1014708:-1417180 'RadioCassetteDeck_Instance' pos=(0.660, 0.952, 0.140) rotY=75.0 bounds min=(0.562, 0.952, 0.024) max=(0.758, 1.040, 0.256)
+   #1014708:1016770 'TrophyDisplayStand_Instance/Label_DroneCrown' pos=(0.658, 0.976, -0.572) rotY=255.0 bounds min=(0.644, 0.512, -0.627) max=(0.673, 1.440, -0.519)
+   #1014708:1016796 'TrophyDisplayStand_Instance/Label_StarCup' pos=(0.627, 0.976, -0.456) rotY=255.0 bounds min=(0.613, 0.633, -0.514) max=(0.642, 1.318, -0.404)
+   #1014708:-1417280 'CassetteOrganizerRack_Instance/Visual_Model' pos=(0.700, 0.952, -0.080) rotY=75.0 bounds min=(0.614, 0.952, -0.166) max=(0.786, 1.027, 0.006)
+   #1014708:1016828 'TrophyDisplayStand_Instance/SlotAnchor_1_LuminousBonsai' pos=(0.672, 0.997, -0.320) rotY=75.0 bounds min=(0.603, 0.994, -0.384) max=(0.741, 1.179, -0.253)
+   #1014708:-1408360 'ExoMascotBobblehead_Instance' pos=(0.730, 0.955, 0.720) rotY=200.0 bounds min=(0.668, 0.955, 0.658) max=(0.792, 1.115, 0.782)
+   #1014708:-1406620 'EnvironmentControlLever_Instance' pos=(0.660, 0.955, 0.620) rotY=75.0 bounds min=(0.581, 0.955, 0.527) max=(0.739, 1.136, 0.713)
+   #1014708:1016570 'TrophyDisplayStand_Instance/Visual' pos=(0.680, 0.952, -0.380) rotY=75.0 bounds min=(0.545, 0.931, -0.649) max=(0.815, 1.000, -0.111)
+   #1014708:1016696 'TrophyDisplayStand_Instance/SlotAnchor_0_GoldenApple' pos=(0.641, 0.997, -0.204) rotY=75.0 bounds min=(0.577, 0.990, -0.268) max=(0.705, 1.143, -0.140)
+   #1014708:1016404 '[IC] Radio_Menu_3D' pos=(0.660, 0.952, 0.360) rotY=75.0 bounds min=(0.447, 0.952, 0.142) max=(0.809, 1.511, 0.589)
+   #1014708:-1407112 'ArcadeBallSpawner_Instance' pos=(0.800, 0.955, 0.150) rotY=75.0 bounds min=(0.727, 0.955, 0.077) max=(0.876, 1.023, 0.224)
+   #1014708:1016814 'TrophyDisplayStand_Instance/SlotAnchor_3_DroneCrown' pos=(0.734, 0.997, -0.552) rotY=75.0 bounds min=(0.637, 0.988, -0.648) max=(0.832, 1.102, -0.456)
+   #1014708:-1417366 'Tape_CyberHorizon_Active' pos=(0.670, 1.034, 0.143) rotY=75.0 bounds min=(0.642, 1.002, 0.090) max=(0.698, 1.066, 0.195)
+   #1014708:-1417448 'Tape_LunaCantina_Rack/Visual_Model' pos=(0.691, 1.002, -0.082) rotY=75.0 bounds min=(0.663, 0.970, -0.135) max=(0.719, 1.034, -0.030)
+   #1014708:1016642 'TrophyDisplayStand_Instance/SlotAnchor_2_StarCup' pos=(0.703, 0.997, -0.436) rotY=75.0 bounds min=(0.634, 0.987, -0.522) max=(0.772, 1.195, -0.350)
+   #1014708:-1405930 '[IC] Ergonomic_Toy_Demo' pos=(0.580, 1.025, -0.280) rotY=0.0 bounds min=(0.508, 0.955, -0.352) max=(0.652, 1.095, -0.208)
+   #1014708:-1408902 'Demo_Balloon_Red' pos=(1.100, 1.480, 0.650) rotY=0.0 bounds min=(1.069, 1.480, 0.619) max=(1.131, 1.561, 0.681)
+   #1014708:1016808 'TrophyDisplayStand_Instance/Label_LuminousBonsai' pos=(0.596, 0.976, -0.340) rotY=255.0 bounds min=(0.582, 0.512, -0.395) max=(0.610, 1.439, -0.287)
+   #1014708:-1405884 'Demo_Balloon_Yellow' pos=(0.950, 1.950, -0.300) rotY=0.0 bounds min=(0.918, 1.950, -0.332) max=(0.982, 2.034, -0.268)
+   #1014708:-1407792 'Demo_Basketball_Table/Visual_Model' pos=(0.640, 1.045, -0.020) rotY=30.0 bounds min=(0.503, 0.931, -0.165) max=(0.777, 1.159, 0.125)
+   #1014708:1016842 'TrophyDisplayStand_Instance/Label_GoldenApple' pos=(0.565, 0.976, -0.225) rotY=255.0 bounds min=(0.551, 0.573, -0.279) max=(0.579, 1.378, -0.172)
+ON 'Building/modern_shelves_3 (1)':
+   #1015914:1014674 'Building/book_pile_2 (13)' pos=(9.610, 0.098, -0.010) rotY=268.3 bounds min=(9.460, 0.097, -0.175) max=(9.749, 0.346, 0.158)
+   #1015914:1015410 'Building/book_pile_2 (8)' pos=(9.605, 1.559, -0.052) rotY=179.4 bounds min=(9.441, 1.557, -0.199) max=(9.767, 1.807, 0.085)
+   #1015914:1014590 'Building/book_pile_1_alt (2)' pos=(9.620, 0.828, -0.266) rotY=305.4 bounds min=(9.379, 0.827, -0.498) max=(9.877, 1.035, 0.007)
+   #1015914:1014500 'Building/book_pile_2 (10)' pos=(9.590, 0.463, 0.464) rotY=355.7 bounds min=(9.420, 0.462, 0.318) max=(9.764, 0.711, 0.622)
+   #1015914:1015172 'Building/book_pile_2 (12)' pos=(9.591, 0.098, -0.406) rotY=0.0 bounds min=(9.431, 0.097, -0.540) max=(9.755, 0.346, -0.260)
+   #1015914:1015726 'Building/book_pile_2 (11)' pos=(9.583, 0.463, -0.437) rotY=84.2 bounds min=(9.433, 0.462, -0.614) max=(9.744, 0.711, -0.263)
+   #1015914:1014478 'Building/book_pile_2_alt (2)' pos=(9.581, 0.098, 0.419) rotY=169.2 bounds min=(9.395, 0.097, 0.245) max=(9.766, 0.346, 0.581)
+   #1015914:1015922 'Building/book_pile_2 (9)' pos=(9.601, 1.194, 0.401) rotY=0.0 bounds min=(9.440, 1.192, 0.266) max=(9.764, 1.442, 0.546)
+ON 'Building/table_lamp':
+ON 'Building/table_lamp (1)':
+ON 'CassetteOrganizerRack_Instance':
+   #-1417272:-1417592 'Tape_EmeraldZen_Rack/Visual_Model' pos=(0.742, 1.018, -0.069) rotY=75.0 bounds min=(0.714, 0.986, -0.121) max=(0.770, 1.050, -0.017)
+   #-1417272:-1417520 'Tape_NeonSunset_Rack/Visual_Model' pos=(0.716, 1.010, -0.076) rotY=75.0 bounds min=(0.688, 0.978, -0.128) max=(0.744, 1.042, -0.023)
+   #-1417272:-1417448 'Tape_LunaCantina_Rack/Visual_Model' pos=(0.691, 1.002, -0.082) rotY=75.0 bounds min=(0.663, 0.970, -0.135) max=(0.719, 1.034, -0.030)
+   #-1417272:-1407792 'Demo_Basketball_Table/Visual_Model' pos=(0.640, 1.045, -0.020) rotY=30.0 bounds min=(0.503, 0.931, -0.165) max=(0.777, 1.159, 0.125)
+ON 'CassetteOrganizerRack_Instance/Visual_Model/Rack_Base':
+   #-1417324:-1417592 'Tape_EmeraldZen_Rack/Visual_Model' pos=(0.742, 1.018, -0.069) rotY=75.0 bounds min=(0.714, 0.986, -0.121) max=(0.770, 1.050, -0.017)
+   #-1417324:-1417520 'Tape_NeonSunset_Rack/Visual_Model' pos=(0.716, 1.010, -0.076) rotY=75.0 bounds min=(0.688, 0.978, -0.128) max=(0.744, 1.042, -0.023)
+   #-1417324:-1417280 'CassetteOrganizerRack_Instance/Visual_Model' pos=(0.700, 0.952, -0.080) rotY=75.0 bounds min=(0.614, 0.952, -0.166) max=(0.786, 1.027, 0.006)
+   #-1417324:-1417448 'Tape_LunaCantina_Rack/Visual_Model' pos=(0.691, 1.002, -0.082) rotY=75.0 bounds min=(0.663, 0.970, -0.135) max=(0.719, 1.034, -0.030)
+   #-1417324:-1407792 'Demo_Basketball_Table/Visual_Model' pos=(0.640, 1.045, -0.020) rotY=30.0 bounds min=(0.503, 0.931, -0.165) max=(0.777, 1.159, 0.125)
+ON 'Demo_Basketball_Table':
+   #-1407778:-1417592 'Tape_EmeraldZen_Rack/Visual_Model' pos=(0.742, 1.018, -0.069) rotY=75.0 bounds min=(0.714, 0.986, -0.121) max=(0.770, 1.050, -0.017)
+   #-1407778:-1417520 'Tape_NeonSunset_Rack/Visual_Model' pos=(0.716, 1.010, -0.076) rotY=75.0 bounds min=(0.688, 0.978, -0.128) max=(0.744, 1.042, -0.023)
+   #-1407778:-1417280 'CassetteOrganizerRack_Instance/Visual_Model' pos=(0.700, 0.952, -0.080) rotY=75.0 bounds min=(0.614, 0.952, -0.166) max=(0.786, 1.027, 0.006)
+   #-1407778:-1417448 'Tape_LunaCantina_Rack/Visual_Model' pos=(0.691, 1.002, -0.082) rotY=75.0 bounds min=(0.663, 0.970, -0.135) max=(0.719, 1.034, -0.030)
+   #-1407778:-1417366 'Tape_CyberHorizon_Active' pos=(0.670, 1.034, 0.143) rotY=75.0 bounds min=(0.642, 1.002, 0.090) max=(0.698, 1.066, 0.195)
+   #-1407778:-1417180 'RadioCassetteDeck_Instance' pos=(0.660, 0.952, 0.140) rotY=75.0 bounds min=(0.562, 0.952, 0.024) max=(0.758, 1.040, 0.256)
+ON 'Tape_EmeraldZen_Rack':
+   #-1417582:-1417520 'Tape_NeonSunset_Rack/Visual_Model' pos=(0.716, 1.010, -0.076) rotY=75.0 bounds min=(0.688, 0.978, -0.128) max=(0.744, 1.042, -0.023)
+   #-1417582:-1417280 'CassetteOrganizerRack_Instance/Visual_Model' pos=(0.700, 0.952, -0.080) rotY=75.0 bounds min=(0.614, 0.952, -0.166) max=(0.786, 1.027, 0.006)
+ON 'Tape_LunaCantina_Rack':
+   #-1417438:-1417280 'CassetteOrganizerRack_Instance/Visual_Model' pos=(0.700, 0.952, -0.080) rotY=75.0 bounds min=(0.614, 0.952, -0.166) max=(0.786, 1.027, 0.006)
+   #-1417438:-1417520 'Tape_NeonSunset_Rack/Visual_Model' pos=(0.716, 1.010, -0.076) rotY=75.0 bounds min=(0.688, 0.978, -0.128) max=(0.744, 1.042, -0.023)
+ON 'Tape_NeonSunset_Rack':
+   #-1417510:-1417592 'Tape_EmeraldZen_Rack/Visual_Model' pos=(0.742, 1.018, -0.069) rotY=75.0 bounds min=(0.714, 0.986, -0.121) max=(0.770, 1.050, -0.017)
+   #-1417510:-1417280 'CassetteOrganizerRack_Instance/Visual_Model' pos=(0.700, 0.952, -0.080) rotY=75.0 bounds min=(0.614, 0.952, -0.166) max=(0.786, 1.027, 0.006)
+   #-1417510:-1417448 'Tape_LunaCantina_Rack/Visual_Model' pos=(0.691, 1.002, -0.082) rotY=75.0 bounds min=(0.663, 0.970, -0.135) max=(0.719, 1.034, -0.030)
+ON 'TrophyDisplayStand_Instance':
+   #1016572:1015884 'Building/full_desk_3 (1)/Table Lamp' pos=(0.747, 0.950, -0.557) rotY=33.5 bounds min=(0.654, 0.948, -0.650) max=(0.894, 1.320, -0.403)
+   #1016572:-1405930 '[IC] Ergonomic_Toy_Demo' pos=(0.580, 1.025, -0.280) rotY=0.0 bounds min=(0.508, 0.955, -0.352) max=(0.652, 1.095, -0.208)
+   #1016572:-1408066 'Building/full_desk_3 (1)/Table Lamp/Top' pos=(0.754, 1.183, -0.561) rotY=33.5 bounds min=(0.671, 1.140, -0.634) max=(0.894, 1.320, -0.403)
+
+--- KEY ITEMS (by name) ---
+[on] 'ExoMascotBobblehead_Instance/Visual_Model/Bobble_Torso' pos=(0.730, 1.003, 0.720) rotY=200.0 lossy=(1.000, 1.000, 1.000) min=(0.699, 0.975, 0.692) max=(0.761, 1.031, 0.748) colliders=0 prefab=Assets/Prefabs/Interactive/ExoMascotBobblehead.prefab
+[on] 'EnvironmentControlLever_Instance/Visual_Model/Lever_Slot_Guide' pos=(0.660, 1.003, 0.620) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.634, 0.998, 0.564) max=(0.686, 1.008, 0.676) colliders=0 prefab=Assets/Prefabs/Interactive/EnvironmentControlLever.prefab
+[on] '[IC] AimAssist_Target_Demo/Target_HoopVisual' pos=(2.100, 1.150, 0.400) rotY=325.0 lossy=(0.500, 0.035, 0.500) min=(1.827, 0.903, 0.160) max=(2.373, 1.397, 0.640) colliders=0 prefab=
+[on] '[IC] Estacao_Holograma_Drone_SciFi' pos=(7.050, 0.000, 1.850) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(6.197, 0.000, 0.927) max=(7.903, 2.600, 2.773) colliders=0 prefab=
+[on] '[IC] Radio_Menu_3D' pos=(0.660, 0.952, 0.360) rotY=75.0 lossy=(1.150, 1.150, 1.150) min=(0.447, 0.952, 0.142) max=(0.809, 1.511, 0.589) colliders=1 prefab=
+[on] 'TrophyDisplayStand_Instance/SlotAnchor_3_DroneCrown/TrophyItem_DroneCrown/Visual/CrownRubies' pos=(0.734, 0.997, -0.552) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.674, 1.007, -0.632) max=(0.832, 1.020, -0.461) colliders=0 prefab=
+[on] 'RadioCassetteDeck_Instance' pos=(0.660, 0.952, 0.140) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.562, 0.952, 0.024) max=(0.758, 1.040, 0.256) colliders=3 prefab=Assets/Prefabs/Interactive/RadioCassetteDeck.prefab
+[on] 'Demo_Balloon_Yellow/Visual_Model/Balloon_Body' pos=(0.950, 1.950, -0.300) rotY=0.0 lossy=(0.280, 0.280, 0.280) min=(0.918, 1.950, -0.332) max=(0.982, 2.034, -0.268) colliders=0 prefab=Assets/Prefabs/Interactive/InflatableBalloon.prefab
+[on] 'Demo_Balloon_Red' pos=(1.100, 1.480, 0.650) rotY=0.0 lossy=(0.270, 0.270, 0.270) min=(1.069, 1.480, 0.619) max=(1.131, 1.561, 0.681) colliders=1 prefab=Assets/Prefabs/Interactive/InflatableBalloon.prefab
+[on] 'ExoMascotBobblehead_Instance/Visual_Model/Bobble_Arm_R' pos=(0.758, 0.997, 0.710) rotY=200.0 lossy=(1.000, 1.000, 1.000) min=(0.745, 0.980, 0.699) max=(0.771, 1.014, 0.720) colliders=0 prefab=Assets/Prefabs/Interactive/ExoMascotBobblehead.prefab
+[on] '[IC] Ergonomic_Toy_Demo' pos=(0.580, 1.025, -0.280) rotY=0.0 lossy=(1.000, 1.000, 1.000) min=(0.508, 0.955, -0.352) max=(0.652, 1.095, -0.208) colliders=1 prefab=Assets/Prefabs/Interactive/ErgonomicInteractiveToy.prefab
+[on] 'EnvironmentControlLever_Instance/Visual_Model/Lever_Chassis' pos=(0.660, 0.980, 0.620) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.581, 0.955, 0.527) max=(0.739, 1.005, 0.713) colliders=0 prefab=Assets/Prefabs/Interactive/EnvironmentControlLever.prefab
+[on] 'TrophyDisplayStand_Instance/SlotAnchor_3_DroneCrown/TrophyItem_DroneCrown/Visual/CrownSapphires' pos=(0.734, 0.997, -0.552) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.637, 1.007, -0.642) max=(0.795, 1.020, -0.471) colliders=0 prefab=
+[on] 'FireworksLaunchButton_Instance' pos=(0.790, 0.955, 0.600) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.712, 0.955, 0.522) max=(0.868, 1.020, 0.678) colliders=2 prefab=Assets/Prefabs/Interactive/FireworksLaunchButton.prefab
+[on] 'Room_Fireworks_Launcher' pos=(0.790, 0.955, 0.600) rotY=0.0 lossy=(1.000, 1.000, 1.000) no-renderer colliders=0 prefab=
+[on] 'ExoMascotBobblehead_Instance/Visual_Model/Bobble_Pedestal_Ring' pos=(0.730, 0.967, 0.720) rotY=200.0 lossy=(1.000, 1.000, 1.000) min=(0.668, 0.965, 0.658) max=(0.792, 0.969, 0.782) colliders=0 prefab=Assets/Prefabs/Interactive/ExoMascotBobblehead.prefab
+[on] 'ExoMascotBobblehead_Instance/Visual_Model/Bobble_Pedestal' pos=(0.730, 0.964, 0.720) rotY=200.0 lossy=(1.000, 1.000, 1.000) min=(0.672, 0.955, 0.662) max=(0.788, 0.973, 0.778) colliders=0 prefab=Assets/Prefabs/Interactive/ExoMascotBobblehead.prefab
+[on] 'ExoMascotBobblehead_Instance' pos=(0.730, 0.955, 0.720) rotY=200.0 lossy=(1.000, 1.000, 1.000) min=(0.668, 0.955, 0.658) max=(0.792, 1.115, 0.782) colliders=2 prefab=Assets/Prefabs/Interactive/ExoMascotBobblehead.prefab
+[on] 'Demo_Balloon_Cyan' pos=(1.420, 1.750, 0.100) rotY=0.0 lossy=(0.290, 0.290, 0.290) min=(1.387, 1.750, 0.067) max=(1.453, 1.837, 0.133) colliders=1 prefab=Assets/Prefabs/Interactive/InflatableBalloon.prefab
+[on] 'TrophyDisplayStand_Instance/SlotAnchor_2_StarCup/TrophyItem_StarCup' pos=(0.703, 0.997, -0.436) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.634, 0.987, -0.522) max=(0.772, 1.195, -0.350) colliders=1 prefab=
+[on] 'CassetteOrganizerRack_Instance' pos=(0.700, 0.952, -0.080) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.614, 0.952, -0.166) max=(0.786, 1.027, 0.006) colliders=1 prefab=Assets/Prefabs/Interactive/CassetteOrganizerRack.prefab
+[on] 'Demo_Balloon_Red/Visual_Model/Balloon_Body' pos=(1.100, 1.480, 0.650) rotY=0.0 lossy=(0.270, 0.270, 0.270) min=(1.069, 1.480, 0.619) max=(1.131, 1.561, 0.681) colliders=0 prefab=Assets/Prefabs/Interactive/InflatableBalloon.prefab
+[on] 'TrophyDisplayStand_Instance' pos=(0.680, 0.952, -0.380) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.545, 0.512, -0.649) max=(0.832, 1.440, -0.111) colliders=5 prefab=
+[on] 'TrophyDisplayStand_Instance/SlotAnchor_0_GoldenApple/TrophyItem_GoldenApple/Visual/Pedestal' pos=(0.641, 0.997, -0.204) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.577, 0.997, -0.268) max=(0.705, 1.047, -0.140) colliders=0 prefab=
+[on] 'Demo_Balloon_Cyan/Visual_Model/Balloon_Body' pos=(1.420, 1.750, 0.100) rotY=0.0 lossy=(0.290, 0.290, 0.290) min=(1.387, 1.750, 0.067) max=(1.453, 1.837, 0.133) colliders=0 prefab=Assets/Prefabs/Interactive/InflatableBalloon.prefab
+[on] 'EnvironmentControlLever_Instance/Visual_Model/Lever_Indicator_Night' pos=(0.615, 1.006, 0.652) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.608, 1.003, 0.644) max=(0.623, 1.009, 0.659) colliders=0 prefab=Assets/Prefabs/Interactive/EnvironmentControlLever.prefab
+[on] 'Tape_EmeraldZen_Rack' pos=(0.742, 1.018, -0.069) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.714, 0.986, -0.121) max=(0.770, 1.050, -0.017) colliders=1 prefab=Assets/Prefabs/Interactive/CassetteTape_EmeraldZen.prefab
+[on] '[IC] Drone_Guia_IA_ExoBot' pos=(2.100, 1.450, 1.600) rotY=0.0 lossy=(1.000, 1.000, 1.000) min=(1.820, 1.252, 1.345) max=(2.381, 1.688, 1.859) colliders=4 prefab=
+[on] 'BalloonGunDispenser_Instance' pos=(0.780, 0.976, 0.480) rotY=40.0 lossy=(1.000, 1.000, 1.000) min=(0.699, 0.951, 0.325) max=(0.860, 1.028, 0.574) colliders=1 prefab=Assets/Prefabs/Interactive/BalloonGunDispenser.prefab
+[on] 'ExoMascotBobblehead_Instance/Visual_Model/Bobble_Neck_Spring' pos=(0.730, 1.039, 0.720) rotY=200.0 lossy=(1.000, 1.000, 1.000) min=(0.718, 1.030, 0.708) max=(0.742, 1.048, 0.732) colliders=0 prefab=Assets/Prefabs/Interactive/ExoMascotBobblehead.prefab
+[on] 'EnvironmentControlLever_Instance/Visual_Model/Lever_Indicator_Sunset' pos=(0.626, 1.006, 0.611) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.619, 1.003, 0.604) max=(0.634, 1.009, 0.618) colliders=0 prefab=Assets/Prefabs/Interactive/EnvironmentControlLever.prefab
+[on] 'TrophyDisplayStand_Instance/SlotAnchor_1_LuminousBonsai/TrophyItem_LuminousBonsai' pos=(0.672, 0.997, -0.320) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.603, 0.994, -0.384) max=(0.741, 1.179, -0.253) colliders=1 prefab=
+[on] 'ArcadeBallSpawner_Instance' pos=(0.800, 0.955, 0.150) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.727, 0.955, 0.077) max=(0.876, 1.023, 0.224) colliders=2 prefab=Assets/Prefabs/Interactive/ArcadeBallSpawnerButton.prefab
+[on] 'Demo_Basketball_Table' pos=(0.640, 1.045, -0.020) rotY=30.0 lossy=(1.000, 1.000, 1.000) min=(0.503, 0.931, -0.165) max=(0.777, 1.159, 0.125) colliders=1 prefab=Assets/Prefabs/Interactive/MiniBasketball.prefab
+[on] 'Demo_Balloon_Yellow' pos=(0.950, 1.950, -0.300) rotY=0.0 lossy=(0.280, 0.280, 0.280) min=(0.918, 1.950, -0.332) max=(0.982, 2.034, -0.268) colliders=1 prefab=Assets/Prefabs/Interactive/InflatableBalloon.prefab
+[on] 'TrophyDisplayStand_Instance/SlotAnchor_0_GoldenApple/TrophyItem_GoldenApple' pos=(0.641, 0.997, -0.204) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.577, 0.990, -0.268) max=(0.705, 1.143, -0.140) colliders=1 prefab=
+[on] 'Tape_NeonSunset_Rack' pos=(0.716, 1.010, -0.076) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.688, 0.978, -0.128) max=(0.744, 1.042, -0.023) colliders=1 prefab=Assets/Prefabs/Interactive/CassetteTape_NeonSunset.prefab
+[on] 'ExoMascotBobblehead_Instance/Visual_Model/Bobble_Head_Pivot' pos=(0.730, 1.043, 0.720) rotY=200.0 lossy=(1.000, 1.000, 1.000) min=(0.671, 1.047, 0.667) max=(0.788, 1.115, 0.770) colliders=0 prefab=Assets/Prefabs/Interactive/ExoMascotBobblehead.prefab
+[on] 'EnvironmentControlLever_Instance/Visual_Model/Lever_Indicator_Day' pos=(0.637, 1.006, 0.570) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.630, 1.003, 0.563) max=(0.644, 1.009, 0.578) colliders=0 prefab=Assets/Prefabs/Interactive/EnvironmentControlLever.prefab
+[on] 'EnvironmentControlLever_Instance/Visual_Model/Lever_Handle_Pivot' pos=(0.660, 0.990, 0.620) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.615, 0.980, 0.591) max=(0.691, 1.136, 0.703) colliders=0 prefab=Assets/Prefabs/Interactive/EnvironmentControlLever.prefab
+[on] 'EnvironmentControlLever_Instance' pos=(0.660, 0.955, 0.620) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.581, 0.955, 0.527) max=(0.739, 1.136, 0.713) colliders=2 prefab=Assets/Prefabs/Interactive/EnvironmentControlLever.prefab
+[on] 'TrophyDisplayStand_Instance/SlotAnchor_3_DroneCrown/TrophyItem_DroneCrown/Visual/CrownGoldBand' pos=(0.734, 0.997, -0.552) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.640, 0.988, -0.648) max=(0.828, 1.102, -0.456) colliders=0 prefab=
+[on] 'Tape_CyberHorizon_Active' pos=(0.670, 1.034, 0.143) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.642, 1.002, 0.090) max=(0.698, 1.066, 0.195) colliders=1 prefab=Assets/Prefabs/Interactive/CassetteTape_CyberHorizon.prefab
+[on] 'Tape_LunaCantina_Rack' pos=(0.691, 1.002, -0.082) rotY=75.0 lossy=(1.000, 1.000, 1.000) min=(0.663, 0.970, -0.135) max=(0.719, 1.034, -0.030) colliders=1 prefab=Assets/Prefabs/Interactive/CassetteTape_LunaCantina.prefab
+[on] 'ArcadeBasketballHoop_Instance' pos=(0.120, 1.850, 2.700) rotY=270.0 lossy=(1.000, 1.000, 1.000) min=(0.090, 1.367, 2.333) max=(0.678, 2.293, 3.068) colliders=11 prefab=Assets/Prefabs/Interactive/ArcadeBasketballHoop.prefab
+[on] 'ExoMascotBobblehead_Instance/Visual_Model/Bobble_Chest_Reactor' pos=(0.723, 1.007, 0.700) rotY=200.0 lossy=(1.000, 1.000, 1.000) min=(0.712, 0.997, 0.694) max=(0.733, 1.017, 0.707) colliders=0 prefab=Assets/Prefabs/Interactive/ExoMascotBobblehead.prefab
+[on] 'ExoMascotBobblehead_Instance/Visual_Model/Bobble_Arm_L' pos=(0.702, 0.997, 0.730) rotY=200.0 lossy=(1.000, 1.000, 1.000) min=(0.689, 0.980, 0.720) max=(0.715, 1.014, 0.741) colliders=0 prefab=Assets/Prefabs/Interactive/ExoMascotBobblehead.prefab
+[on] '[IC] Estacao_Holograma_Drone_SciFi/Canvas_Display_Wall_SciFi/Painel_Esquerdo_Blueprint/Imagem_Blueprint_Drone' pos=(6.979, 1.929, 2.711) rotY=57.0 lossy=(0.001, 0.001, 0.001) no-renderer colliders=0 prefab=
+[on] '[IC] Drone_Guia_IA_ExoBot/Canvas_Holograma_Clinico/Zona_Arraste_Corpo_Drone' pos=(2.100, 1.777, 1.600) rotY=0.0 lossy=(0.002, 0.002, 0.002) no-renderer colliders=0 prefab=
+[on] '[IC] Estacao_Holograma_Drone_SciFi/Canvas_Display_Wall_SciFi/Painel_Central_Info/Txt_Titulo_Drone' pos=(7.301, 2.130, 1.917) rotY=75.0 lossy=(0.001, 0.001, 0.001) no-renderer colliders=0 prefab=
+[on] '[IC] Estacao_Holograma_Drone_SciFi/Canvas_Display_Wall_SciFi/Painel_Esquerdo_Blueprint/Txt_Specs_Drone' pos=(6.979, 1.693, 2.711) rotY=57.0 lossy=(0.001, 0.001, 0.001) no-renderer colliders=0 prefab=
+
+--- ORIGIN (r<1.0m) roots/interactables ---
+  'EventSystem' pos=(0.000, 0.000, 0.000)
+  '[IC] Audio_Ambiente_E_SFX_ReRobLab' pos=(0.000, 0.000, 0.000)
+  'Building' pos=(0.000, 0.000, 0.000)
+  'GerenciadorPause' pos=(0.000, 0.000, 0.000)
+  'Gerenciador_HUD' pos=(0.000, 0.000, 0.000)

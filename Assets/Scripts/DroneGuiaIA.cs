@@ -95,9 +95,13 @@ public class DroneGuiaIA : MonoBehaviour
     private float distanciaRaioArraste = 2.7f;
     private Vector3 offsetPontoPegadaMundo = Vector3.zero;
     private BoxCollider colisorInteracaoEspacial;
+    private VRRehab.DronePet.DroneCompanionFollowAndGrab companionFollow;
 
     void Awake()
     {
+        ConfigurarFisicaEImunidadeColisao();
+        GarantirCompanionFollow();
+
         if (Application.isPlaying)
         {
             if (Instancia != null && Instancia != this)
@@ -109,11 +113,87 @@ public class DroneGuiaIA : MonoBehaviour
         }
     }
 
+    public void GarantirCompanionFollow()
+    {
+        if (companionFollow == null)
+        {
+            companionFollow = GetComponent<VRRehab.DronePet.DroneCompanionFollowAndGrab>();
+            if (companionFollow == null)
+            {
+                companionFollow = gameObject.AddComponent<VRRehab.DronePet.DroneCompanionFollowAndGrab>();
+            }
+        }
+    }
+
+    public void ConfigurarFisicaEImunidadeColisao()
+    {
+        // 1. Rigidbody estritamente cinemático sem gravidade
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb == null) rb = gameObject.AddComponent<Rigidbody>();
+        rb.isKinematic = true;
+        rb.useGravity = false;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+        // 2. Colisor Trigger na fuselagem do Drone para permitir Raycast/Interação sem colisão física
+        colisorInteracaoEspacial = GetComponent<BoxCollider>();
+        if (colisorInteracaoEspacial == null)
+            colisorInteracaoEspacial = gameObject.AddComponent<BoxCollider>();
+        colisorInteracaoEspacial.isTrigger = true;
+        colisorInteracaoEspacial.center = new Vector3(0f, 0.25f, 0f);
+        colisorInteracaoEspacial.size = new Vector3(1.10f, 0.95f, 0.45f);
+
+        // 3. Ignora colisão com todos os colisores do Player / CharacterController
+        IgnorarColisoesComJogador();
+    }
+
+    public void IgnorarColisoesComJogador()
+    {
+        Collider[] droneColliders = GetComponentsInChildren<Collider>(true);
+
+        // A) CharacterController
+        CharacterController[] ccs = FindObjectsByType<CharacterController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (CharacterController cc in ccs)
+        {
+            if (cc == null) continue;
+            foreach (Collider dCol in droneColliders)
+            {
+                if (dCol != null) Physics.IgnoreCollision(dCol, cc, true);
+            }
+        }
+
+        // B) Colisores do corpo do paciente
+        if (corpoPaciente != null)
+        {
+            foreach (Collider pCol in corpoPaciente.GetComponentsInChildren<Collider>(true))
+            {
+                if (pCol == null) continue;
+                foreach (Collider dCol in droneColliders)
+                {
+                    if (dCol != null) Physics.IgnoreCollision(dCol, pCol, true);
+                }
+            }
+        }
+
+        // C) Colisores no Headset / Camera
+        if (cameraPaciente != null)
+        {
+            foreach (Collider camCol in cameraPaciente.GetComponentsInChildren<Collider>(true))
+            {
+                if (camCol == null) continue;
+                foreach (Collider dCol in droneColliders)
+                {
+                    if (dCol != null) Physics.IgnoreCollision(dCol, camCol, true);
+                }
+            }
+        }
+    }
+
     void OnEnable()
     {
         if (!Application.isPlaying)
         {
             LocalizarReferencias();
+            ConfigurarFisicaEImunidadeColisao();
             ConstruirVisualProceduralSeNecessario();
             ConstruirHUDHolografico(false);
             GarantirOrientacaoCorretaCanvas();
@@ -123,6 +203,8 @@ public class DroneGuiaIA : MonoBehaviour
     void Start()
     {
         LocalizarReferencias();
+        ConfigurarFisicaEImunidadeColisao();
+        GarantirCompanionFollow();
         GarantirEventSystemXR();
         ConstruirVisualProceduralSeNecessario();
         ConstruirHUDHolografico(false);
@@ -133,7 +215,10 @@ public class DroneGuiaIA : MonoBehaviour
             if (offsetLocalPaciente.sqrMagnitude < 0.1f)
                 offsetLocalPaciente = new Vector3(0f, 0f, distanciaIdealFrente);
 
-            PosicionarInicialmenteNaFrenteDoPaciente();
+            if (companionFollow == null)
+            {
+                PosicionarInicialmenteNaFrenteDoPaciente();
+            }
             MudarEstado(EstadoDrone.SaudacaoInicial);
         }
     }
@@ -189,6 +274,13 @@ public class DroneGuiaIA : MonoBehaviour
                 else if (cameraPaciente != null) corpoPaciente = cameraPaciente;
             }
         }
+
+        IgnorarColisoesComJogador();
+        if (companionFollow != null)
+        {
+            companionFollow.EnsurePatientReference();
+            companionFollow.IgnorePlayerCollisions();
+        }
     }
 
     private void PosicionarInicialmenteNaFrenteDoPaciente()
@@ -219,10 +311,10 @@ public class DroneGuiaIA : MonoBehaviour
 
         if (canvasHolograma != null)
         {
-            // Como o Drone raiz (+Z) olha PARA o paciente, o Canvas WorldSpace precisa de 180 graus em Y
-            // para que a sua face frontal (-Z) fique virada para a câmera e o texto nunca fique espelhado!
+            // O Canvas WorldSpace tem orientação frontal canônica (localRotation = Quaternion.identity),
+            // garantindo que o texto nunca fique espelhado!
             canvasHolograma.transform.localPosition = new Vector3(0f, 0.58f, 0f);
-            canvasHolograma.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+            canvasHolograma.transform.localRotation = Quaternion.identity;
         }
     }
 
@@ -240,8 +332,14 @@ public class DroneGuiaIA : MonoBehaviour
             Quaternion rotBase = Quaternion.LookRotation(dirParaPaciente.normalized, Vector3.up);
             if (Application.isPlaying && estadoAtual == EstadoDrone.CelebrandoMeta && !estaArrastandoDrone)
             {
-                anguloPiruetaCelebracao += Time.deltaTime * 360f;
-                rotBase *= Quaternion.Euler(0f, anguloPiruetaCelebracao, 0f);
+                // Se o componente especializado DroneMilestoneCelebration estiver presente,
+                // a pirueta acrobática 360° é executada exclusivamente no nó visual Modelo_3D_ExoBot (TASK-05),
+                // mantendo o transform raiz 100% estável e preservando a ancoragem/offset da TASK-03!
+                if (GetComponent<VRRehab.DronePet.DroneMilestoneCelebration>() == null)
+                {
+                    anguloPiruetaCelebracao += Time.deltaTime * 360f;
+                    rotBase *= Quaternion.Euler(0f, anguloPiruetaCelebracao, 0f);
+                }
             }
 
             transform.rotation = instantaneo
@@ -251,16 +349,14 @@ public class DroneGuiaIA : MonoBehaviour
 
         if (canvasHolograma != null)
         {
-            // Mantém o Canvas sempre de frente para os olhos do paciente (vetor da câmera PARA o canvas = +Z do Canvas)
-            Vector3 dirCamParaCanvas = canvasHolograma.transform.position - posOlhos;
-            dirCamParaCanvas.y *= 0.30f;
-            if (dirCamParaCanvas.sqrMagnitude > 0.001f)
+            // Mantém o Canvas sempre alinhado com a orientação da câmera do paciente para leitura confortável sem espelhamento
+            if (cameraPaciente != null)
             {
-                canvasHolograma.transform.rotation = Quaternion.LookRotation(dirCamParaCanvas.normalized, Vector3.up);
+                canvasHolograma.transform.rotation = cameraPaciente.rotation;
             }
             else
             {
-                canvasHolograma.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+                canvasHolograma.transform.localRotation = Quaternion.identity;
             }
         }
     }
@@ -287,15 +383,24 @@ public class DroneGuiaIA : MonoBehaviour
         else
             tempoSemCaminhar += Time.deltaTime;
 
-        ProcessarInteracaoEspacialRaycast();
-        AtualizarMaquinaDeEstados(caminhandoAgora);
+        if (companionFollow == null)
+        {
+            ProcessarInteracaoEspacialRaycast();
+            AtualizarMaquinaDeEstados(caminhandoAgora);
 
-        if (!estaArrastandoDrone && !sobControleFetch)
-        {
-            AtualizarLocomocaoEFlutuacao(caminhandoAgora);
+            if (!estaArrastandoDrone && !sobControleFetch)
+            {
+                AtualizarLocomocaoEFlutuacao(caminhandoAgora);
+            }
+            else if (estaArrastandoDrone)
+            {
+                OrientarDroneECanvasParaPaciente(false);
+            }
         }
-        else if (estaArrastandoDrone)
+        else
         {
+            // O companionFollow gerencia a locomoção, flutuação e manipulação por laser/scroll
+            AtualizarMaquinaDeEstados(caminhandoAgora);
             OrientarDroneECanvasParaPaciente(false);
         }
 
@@ -1004,8 +1109,15 @@ public class DroneGuiaIA : MonoBehaviour
         Transform tCanvasExistente = transform.Find("Canvas_Holograma_Clinico");
         if (tCanvasExistente != null)
         {
-            // Se for forçado ou se o Canvas antigo não tiver a Barra_Controle_Espacial, recria do zero
-            if (forcarRecriacao || tCanvasExistente.Find("Barra_Controle_Espacial") == null)
+            // Remove imediatamente qualquer resquício da barra inferior legada com botões - perto / + longe
+            Transform bControle = tCanvasExistente.Find("Barra_Controle_Espacial");
+            if (bControle != null)
+            {
+                if (Application.isPlaying) Destroy(bControle.gameObject);
+                else DestroyImmediate(bControle.gameObject);
+            }
+
+            if (forcarRecriacao)
             {
                 if (Application.isPlaying) Destroy(tCanvasExistente.gameObject);
                 else DestroyImmediate(tCanvasExistente.gameObject);
@@ -1034,20 +1146,14 @@ public class DroneGuiaIA : MonoBehaviour
                 Transform bf = f.Find("Fundo_Barra_Simetria/Fill_Barra_Simetria");
                 if (bf != null) imgBarraSimetria = bf.GetComponent<Image>();
             }
-            Transform bArr = canvasHolograma.transform.Find("Barra_Controle_Espacial/Btn_Pinch_Arraste");
-            if (bArr != null)
-            {
-                imgFundoBarraArraste = bArr.GetComponent<Image>();
-                txtBarraArraste = bArr.GetComponentInChildren<TextMeshProUGUI>();
-            }
             return;
         }
 
         GameObject goCanvas = new GameObject("Canvas_Holograma_Clinico");
         goCanvas.transform.SetParent(transform, false);
         goCanvas.transform.localPosition = new Vector3(0f, 0.58f, 0f);
-        // IMPORTANTE: 180 graus em Y para que a frente legível (-Z do Canvas) olhe diretamente para a Main Camera!
-        goCanvas.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+        // Orientação frontal canônica sem espelhamento
+        goCanvas.transform.localRotation = Quaternion.identity;
         goCanvas.transform.localScale = Vector3.one * 0.0022f;
 
         canvasHolograma = goCanvas.AddComponent<Canvas>();
@@ -1162,55 +1268,6 @@ public class DroneGuiaIA : MonoBehaviour
         imgBarraSimetria = goBarraFill.AddComponent<Image>();
         imgBarraSimetria.color = corGuiandoNormal;
         imgBarraSimetria.raycastTarget = false;
-
-        // 2. BARRA DE CONTROLE ESPACIAL (ESTILO META QUEST / STEAMVR HUB)
-        GameObject goBarraQuest = new GameObject("Barra_Controle_Espacial");
-        goBarraQuest.transform.SetParent(goCanvas.transform, false);
-        RectTransform rtBarraQuest = goBarraQuest.AddComponent<RectTransform>();
-        rtBarraQuest.anchorMin = new Vector2(0.02f, -0.20f);
-        rtBarraQuest.anchorMax = new Vector2(0.98f, -0.02f);
-        rtBarraQuest.offsetMin = Vector2.zero;
-        rtBarraQuest.offsetMax = Vector2.zero;
-
-        // Botão Esquerdo: [- Perto]
-        CriarBotaoEspacialHUD(goBarraQuest.transform, "Btn_Mais_Perto", "- Perto",
-            new Vector2(0.00f, 0.0f), new Vector2(0.17f, 1.0f), () => AjustarDistanciaDrone(-0.45f));
-
-        // Barra Central de Pinça / Arraste (Handle Bar estilo Meta Quest)
-        GameObject goHandle = new GameObject("Btn_Pinch_Arraste");
-        goHandle.transform.SetParent(goBarraQuest.transform, false);
-        RectTransform rtHandle = goHandle.AddComponent<RectTransform>();
-        rtHandle.anchorMin = new Vector2(0.185f, 0.0f);
-        rtHandle.anchorMax = new Vector2(0.655f, 1.0f);
-        rtHandle.offsetMin = Vector2.zero;
-        rtHandle.offsetMax = Vector2.zero;
-        imgFundoBarraArraste = goHandle.AddComponent<Image>();
-        imgFundoBarraArraste.color = new Color(0.05f, 0.16f, 0.26f, 0.88f);
-        imgFundoBarraArraste.raycastTarget = true;
-        AdicionarGatilhoArrasteUI(goHandle);
-
-        GameObject goTxtHandle = new GameObject("Txt_Handle");
-        goTxtHandle.transform.SetParent(goHandle.transform, false);
-        RectTransform rtTxtHandle = goTxtHandle.AddComponent<RectTransform>();
-        rtTxtHandle.anchorMin = Vector2.zero;
-        rtTxtHandle.anchorMax = Vector2.one;
-        rtTxtHandle.offsetMin = Vector2.zero;
-        rtTxtHandle.offsetMax = Vector2.zero;
-        txtBarraArraste = goTxtHandle.AddComponent<TextMeshProUGUI>();
-        txtBarraArraste.fontSize = 11.5f;
-        txtBarraArraste.fontStyle = FontStyles.Bold;
-        txtBarraArraste.alignment = TextAlignmentOptions.Center;
-        txtBarraArraste.color = Color.white;
-        txtBarraArraste.text = "[+] PINÇAR / ARRASTAR PARA MOVER O DRONE";
-        txtBarraArraste.raycastTarget = false;
-
-        // Botão Direito 1: [+ Longe]
-        CriarBotaoEspacialHUD(goBarraQuest.transform, "Btn_Mais_Longe", "+ Longe",
-            new Vector2(0.67f, 0.0f), new Vector2(0.83f, 1.0f), () => AjustarDistanciaDrone(+0.45f));
-
-        // Botão Direito 2: [Centro]
-        CriarBotaoEspacialHUD(goBarraQuest.transform, "Btn_Reset_Centro", "Centro",
-            new Vector2(0.845f, 0.0f), new Vector2(1.00f, 1.0f), () => ResetarPosicaoPadraoDrone());
     }
 
     private void GarantirComponentesInteracaoCanvas(GameObject goCanvas)
@@ -1224,44 +1281,6 @@ public class DroneGuiaIA : MonoBehaviour
 
         if (goCanvas.GetComponent<TrackedDeviceGraphicRaycaster>() == null)
             goCanvas.AddComponent<TrackedDeviceGraphicRaycaster>();
-    }
-
-    private void CriarBotaoEspacialHUD(Transform pai, string nome, string rotulo, Vector2 anchorMin, Vector2 anchorMax, UnityEngine.Events.UnityAction acao)
-    {
-        GameObject goBtn = new GameObject(nome);
-        goBtn.transform.SetParent(pai, false);
-        RectTransform rt = goBtn.AddComponent<RectTransform>();
-        rt.anchorMin = anchorMin;
-        rt.anchorMax = anchorMax;
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
-
-        Image img = goBtn.AddComponent<Image>();
-        img.color = new Color(0.08f, 0.26f, 0.38f, 0.92f);
-
-        Button btn = goBtn.AddComponent<Button>();
-        ColorBlock cb = btn.colors;
-        cb.normalColor = new Color(0.08f, 0.26f, 0.38f, 0.92f);
-        cb.highlightedColor = new Color(0.0f, 0.78f, 0.92f, 1.0f);
-        cb.pressedColor = new Color(0.0f, 0.98f, 0.85f, 1.0f);
-        btn.colors = cb;
-        btn.onClick.AddListener(acao);
-
-        GameObject goTxt = new GameObject("Txt");
-        goTxt.transform.SetParent(goBtn.transform, false);
-        RectTransform rtTxt = goTxt.AddComponent<RectTransform>();
-        rtTxt.anchorMin = Vector2.zero;
-        rtTxt.anchorMax = Vector2.one;
-        rtTxt.offsetMin = Vector2.zero;
-        rtTxt.offsetMax = Vector2.zero;
-
-        TextMeshProUGUI tmp = goTxt.AddComponent<TextMeshProUGUI>();
-        tmp.fontSize = 11.5f;
-        tmp.fontStyle = FontStyles.Bold;
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = new Color(0.85f, 0.98f, 1.0f, 1.0f);
-        tmp.text = rotulo;
-        tmp.raycastTarget = false;
     }
 
     private void AdicionarGatilhoArrasteUI(GameObject alvoUI)

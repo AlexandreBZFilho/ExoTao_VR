@@ -6,9 +6,9 @@ using VRRehab.Core;
 namespace VRRehab.Interactive.Task06
 {
     /// <summary>
-    /// Botão físico de ejeção mecânica de fita cassete.
-    /// Responde a interações do XRI (raio laser, toque direto com as mãos) e cliques de mouse,
-    /// animando o recuo do botão com mola amortecida e disparando a ejeção no RadioCassetteSocket.
+    /// Botão físico de ejeção mecânica de fita cassete (TASK-06).
+    /// Responde a interações do XRI (raio laser XRRayInteractor, toque direto com as mãos) e cliques de mouse,
+    /// animando o recuo do botão com mola amortecida de alta frequência e comandando a ejeção no RadioCassetteSocket.
     /// </summary>
     [SelectionBase]
     [DisallowMultipleComponent]
@@ -23,7 +23,7 @@ namespace VRRehab.Interactive.Task06
 
         [Header("Cinemática do Botão (Mola Amortecida)")]
         [Tooltip("Deslocamento local para dentro ao ser pressionado (em metros).")]
-        public Vector3 pressedLocalOffset = new Vector3(0f, 0f, 0.007f);
+        public Vector3 pressedLocalOffset = new Vector3(0f, 0f, -0.006f);
 
         [Tooltip("Rigidez do retorno elástico.")]
         public float springStiffness = 30f;
@@ -34,6 +34,7 @@ namespace VRRehab.Interactive.Task06
         private Vector3 initialLocalPos;
         private Vector3 targetLocalPos;
         private float holdTimer = 0f;
+        private bool isSettled = true;
 
         protected override void Awake()
         {
@@ -56,6 +57,9 @@ namespace VRRehab.Interactive.Task06
 
         private void Update()
         {
+            // Saída antecipada (custo ~zero): botão em repouso e já convergido
+            if (isSettled) return;
+
             if (holdTimer > 0f)
             {
                 holdTimer -= Time.deltaTime;
@@ -65,35 +69,52 @@ namespace VRRehab.Interactive.Task06
                 }
             }
 
-            // Interpolação suave elástica da malha do botão
-            if (buttonMeshTransform != null)
+            if (buttonMeshTransform == null)
             {
-                buttonMeshTransform.localPosition = Vector3.Lerp(
-                    buttonMeshTransform.localPosition,
-                    targetLocalPos,
-                    Time.deltaTime * springStiffness
-                );
+                isSettled = holdTimer <= 0f;
+                return;
             }
+
+            Vector3 currentLocalPos = buttonMeshTransform.localPosition;
+            if (holdTimer <= 0f && (targetLocalPos - currentLocalPos).sqrMagnitude < 1e-8f)
+            {
+                buttonMeshTransform.localPosition = targetLocalPos; // encaixe final exato
+                isSettled = true;
+                return;
+            }
+
+            // Interpolação elástica zero-GC da malha do botão
+            buttonMeshTransform.localPosition = Vector3.Lerp(
+                currentLocalPos,
+                targetLocalPos,
+                Time.deltaTime * springStiffness
+            );
         }
 
         public void PressButton(IXRInteractor interactor = null)
         {
-            // Animação de afundamento do botão
+            // Animação de afundamento do botão mecânico
             targetLocalPos = initialLocalPos + pressedLocalOffset;
             holdTimer = pressHoldDuration;
+            isSettled = false;
 
-            // Feedback háptico
+            // Feedback háptico tátil no controle
             if (interactor is XRBaseControllerInteractor controllerInteractor)
             {
-                controllerInteractor.SendHapticImpulse(0.7f, 0.15f);
+                controllerInteractor.SendHapticImpulse(0.70f, 0.15f);
+            }
+            else if (interactor != null && VRFeedbackManager.Instance != null)
+            {
+                VRFeedbackManager.Instance.TriggerHaptic(interactor, 0.70f, 0.15f);
             }
 
+            // Feedback de som de clique mecânico
             if (VRFeedbackManager.Instance != null)
             {
                 VRFeedbackManager.Instance.PlayButtonClick(transform.position);
             }
 
-            // Comanda a ejeção mecânica no socket
+            // Dispara a ejeção mecânica no socket
             if (deckSocket != null)
             {
                 deckSocket.EjectCurrentTape();

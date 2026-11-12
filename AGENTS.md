@@ -1,296 +1,489 @@
-# Orquestração Autônoma Multi-Agente & Visual QA — VR Rehab Gamification (Unity XRI)
+# Orquestração Autônoma de Micro-Subagentes, Correções de Playtest & Otimização VR — VR Rehab Gamification (Unity XRI)
 
-> **Instrução de Inicialização no Antigravity:**
-> 1. Salve este arquivo fisicamente na raiz do repositório em dois locais: `./AGENTS_IMPLEMENTATION_PLAN.md` e `./AGENTS.md` (para ativação contínua `always_on`).
-> 2. **Modo de Operação da Unity:** O **Unity Editor já está ABERTO** na máquina host. Utilize o **Unity CLI / Unity MCP Bridge** conectando diretamente à instância aberta do Editor (ou acionando `AssetDatabase.Refresh()` e menus de Editor) sem tentar abrir uma segunda instância concorrente que trave o `UnityLockfile`.
-> 3. **Recuperação Pós-Limite de Tokens (Auto-Resume):** Caso a sessão atinja o limite de contexto ou cota de tokens, basta iniciar um novo prompt ou digitar `/resume` com o comando:
->    *"Leia `@AGENTS_IMPLEMENTATION_PLAN.md`, verifique a tabela de estado na Seção 3 e retome o protocolo de subagentes a partir da tarefa marcada como `[~]` ou da primeira `[ ]`."*
-
----
-
-## 1. Ecossistema de Ferramentas Habilitadas para os Subagentes
-
-Cada subagente tem autonomia e obrigação de utilizar todo o arsenal de ferramentas disponíveis na máquina para entregar a funcionalidade **100% pronta, montada na cena, com modelos 3D, texturas, zero erros de compilação e visualmente inspecionada por captura de tela**:
-
-1. **Blender MCP (`blender-mcp` / Python `bpy`):**
-   * Sempre que uma tarefa exigir um objeto 3D inexistente no projeto (ex: *Fitas Cassete, Rádio Deck, Pistola de Balões, Maçãs Low-Poly, Cestas de Vime, Cogumelos Bioluminescentes, Totens de Checkpoint, Troféus, Esferas de Portal, Chapéu do Drone*), o subagente deve usar o **Blender MCP** (ou script Python no Blender) para modelar a malha 3D, aplicar materiais/cores base, configurar o ponto de pivô correto para pegada VR e exportar em `.fbx` diretamente para `Assets/Models/Generated/TaskXX/`.
-2. **Unity Editor Aberto + Unity CLI / MCP + `EditorApplication.ExecuteMenuItem`:**
-   * Como o Editor está aberto, o subagente deve criar scripts de automação em `Assets/Editor/AutoSetup/TaskXX_SceneAndPrefabBuilder.cs` contendo métodos estáticos com `[MenuItem("VRRehab/AutoBuild/Build and Verify TASK-XX")]`.
-   * O script de setup deve instanciar os modelos `.fbx`, configurar materiais compatíveis com o Render Pipeline atual do projeto (evitando qualquer shader quebrado/rosa), adicionar `Colliders`, `Rigidbodies`, componentes `XRGrabInteractable` / `XRSocketInteractor`, posicionar na cena e salvar o **Prefab** em `Assets/Prefabs/Interactive/`.
-3. **Sistema de Inspeção Visual Automatizada (`VisualQACaptureUtility`):**
-   * O subagente deve renderizar capturas de tela em alta resolução (`1920x1080`) da `Game View` e de câmeras de inspeção focadas diretamente no objeto recém-criado (usando `Camera.Render()` para um `RenderTexture` salvo em `.agents/visual_qa/TASK-XX_screenshot.png` ou `ScreenCapture.CaptureScreenshot`).
-   * O subagente **DEVE abrir e inspecionar visualmente a imagem `.png` gerada** usando sua capacidade multimodal (ou enviando para a Gemini API Vision) antes de concluir a tarefa.
-4. **Gemini API (`GEMINI_API_KEY` / Google GenAI SDK) & Python Audio:**
-   * Gerar texturas, ícones de UI para o visor do Drone, JSONs de frases motivacionais clínicas e sintetizar efeitos sonoros procedurais (`.wav`) salvos em `Assets/Audio/Generated/`.
+> **Instrução de Inicialização no Antigravity (Modo Deep Polish, Hotfix & VR Optimization):**
+>
+> 1. **PASSO ZERO OBRIGATÓRIO:** Salve este arquivo fisicamente na raiz do workspace em dois locais: `./AGENTS_IMPLEMENTATION_PLAN.md` e `./AGENTS.md` (para ativação contínua `always_on`).
+> 2. **Unidade Atômica de Execução (Regra Anti-Limite de Output):** Como o modelo opera com janela de *output* restrita por chamada, **É TERMINANTEMENTE PROIBIDO que um único subagente tente fazer uma Task inteira de uma vez**.
+> 3. **1 Subagente = 1 Única Coluna da Matriz (`[A]`, `[B]`, `[C]`, `[D]` ou `[E]`):** O Agente Orquestrador Principal deve chamar `invoke_subagent` para executar **apenas UM micro-passo por vez** (ex: primeiro invoca um subagente exclusivo para `TASK-01.A`, atualiza a tabela no disco; depois invoca outro subagente exclusivo para `TASK-01.B`, e assim por diante).
+> 4. **Modo de Operação da Unity:** O **Unity Editor JÁ ESTÁ ABERTO** na máquina. Conecte-se diretamente à instância aberta via **Unity MCP / CLI Bridge** e menus `[MenuItem]` (não abra instâncias concorrentes que travem o `UnityLockfile`).
+> 5. **Auto-Resume Pós-Limite de Tokens:** Se a sessão atingir o limite de contexto, basta enviar em um novo chat:
+>    *"Leia `@AGENTS_IMPLEMENTATION_PLAN.md`, verifique a Matriz de Micro-Checkpoints na Seção 4 e retome a invocação de micro-subagentes exatamente da primeira célula marcada como `[~]` ou `[ ]`."*
 
 ---
 
-## 2. Protocolo Rigoroso de Execução por Subagente (5 Estágios Obrigatórios)
+## 1. Arquitetura de 5 Micro-Subagentes por Tarefa (Com Loop de Retrabalho Visual e Performance VR)
 
-Para garantir que **todas as 16 tarefas recebam exatamente o mesmo nível de esforço profundo** de uma tarefa individual isolada, o Agente Orquestrador Principal deve executar **UMA ÚNICA TAREFA POR VEZ** exigindo que o subagente cumpra os 5 estágios abaixo:
+Para garantir qualidade máxima em cada linha de código C#, em cada malha 3D do Blender, na taxa de quadros do VR (72/90 FPS estáveis) e no posicionamento espacial das cenas (`Menu Principal` e `Floresta e Rio`), o Agente Orquestrador Principal gerencia **5 papéis de Subagentes Especialistas independentes**. Cada subagente dedica **100% do seu orçamento de tokens de saída** para uma única especialidade:
 
-### Estágio A: Pesquisa Profunda & Descoberta de Contexto (Research & Discovery)
-1. Inspecionar os arquivos atuais do projeto Unity (`Packages/manifest.json`, Render Pipeline ativo, scripts atuais do Drone, do Exoesqueleto e cenas do Menu e Floresta).
-2. Pesquisar as melhores práticas da API do `XR Interaction Toolkit` instalado no projeto.
-3. Redigir a especificação técnica em `.agents/specs/TASK-XX_Spec.md` definindo hierarquia, escala métrica real para VR (1 unidade Unity = 1 metro) e posicionamento espacial.
+```
+[Subagente A: Forensic Spec, Scene Furniture & Bug Scout]
+       │ (Inspeciona cenas, móveis existentes, bugs de playtest e gera .agents/specs/TASK-XX_Spec.md)
+       ▼
+[Subagente B: Blender 3D Low-Poly VR & Audio Tech Artist] ◄────────────┐
+       │ (Modela .fbx otimizados sem partes invisíveis + áudios suaves)│
+       ▼                                                               │ (Ordem de Correção de Arte/Áudio:
+[Subagente C: Senior Unity C# Gameplay & VR Physics Engineer] ◄────┐   │  ex: pássaro sem pernas, som estridente,
+       │ (Escreve scripts C# zero-GC, física de laser e lógica XRI)│   │  malha pesada, pivô errado)
+       ▼                                                           │   │
+[Subagente D: Multi-Furniture Layout, (0,0,0) Purger & Grounding]◄┐│   │
+       │ (Espalha nas mesas/estantes reais, limpa (0,0,0) e tira PNG)│   │
+       ▼                                                         ││   │
+[Subagente E: Ruthless Visual QA & VR Performance Auditor] ──────┴┴───┘
+       │ (Inspeciona PNGs + JSON de Bounds/Duplicatas/DrawCalls.
+       ▼  Só aprova [x] com 0 sobreposição, 0 lixo no (0,0,0), 0 flutuação e 0 bugs de playtest)
+```
 
-### Estágio B: Geração de Assets 3D (Blender MCP) & Áudio/Texturas (Gemini API / Python)
-1. Acionar o **Blender MCP** para modelar os objetos 3D estilizados com escala real de VR (ex: uma maçã deve ter `~0.08m` de diâmetro, uma fita cassete `~0.10m x 0.06m`, uma cesta `~0.45m`), aplicando cores e materiais limpos e exportando `.fbx` para `Assets/Models/Generated/TaskXX/`.
-2. Gerar os efeitos sonoros `.wav` e texturas necessárias em `Assets/Audio/Generated/TaskXX/`.
+### Detalhamento Rigoroso de Cada Micro-Subagente
 
-### Estágio C: Implementação C# Completa + Automação de Cena/Prefab (`Editor Script`)
-1. Escrever os scripts de runtime em `Assets/Scripts/Interactive/TaskXX/` com **zero placeholders**, tratamento completo de eventos XRI, *Object Pooling* e suporte a *Force Grab*.
-2. Escrever e executar o script de Editor `Assets/Editor/AutoSetup/TaskXX_SceneAndPrefabBuilder.cs` que monta automaticamente os Prefabs e os posiciona corretamente na cena ativa do Editor aberto.
-3. Verificar os logs do Console da Unity garantindo **0 erros de compilação (`CSXXXX`) e 0 exceções**.
+#### 1. Subagente `[A]` — `Forensic Spec, Furniture Mapper & Playtest Bug Scout`
+* **Escopo Exclusivo:** Não escreve código C# de produção nem modela no Blender.
+* **Missão:**
+  1. Inspecionar as cenas abertas/disponíveis (`Menu Principal` e `Floresta e Rio`), os scripts atuais em `Assets/` e os prints em `.agents/visual_qa/`.
+  2. Verificar se algum objeto necessário foi apagado acidentalmente durante a limpeza manual do usuário (para que seja recriado limpo) e mapear todas as duplicatas órfãs deixadas na coordenada `(0, 0, 0)` ou espalhadas em excesso.
+  3. Na sala do Menu Principal, **listar todas as mesas, bancadas e estantes (`Shelves`/`Tables`/`Desks`) já existentes na arquitetura da sala** para distribuir os brinquedos e minigames entre elas, em vez de amontoar tudo em uma única mesa.
+  4. Escrever `.agents/specs/TASK-XX_Spec.md` detalhando hierarquia, correções obrigatórias do playtest e orçamento de performance VR.
 
-### Estágio D: Loop Obrigatório de Verificação e Correção Visual (Visual QA Loop)
-**Nenhuma tarefa pode ser marcada como concluída sem aprovação visual por imagem:**
-1. O subagente deve acionar o utilitário de captura visual na Unity para gerar prints de **3 ângulos** do objeto/mecânica na cena (Frente/Perspectiva do Jogador VR, Perfil Lateral para checar contato com o chão/mesa, e Close-up de UI/Materiais) salvos em `.agents/visual_qa/TASK-XX_view1.png`, `view2.png`, `view3.png`.
-2. O subagente deve **analisar visualmente as imagens capturadas** verificando os seguintes critérios:
-   * **Checagem de Shader/Material:** Há algum objeto com cor magenta/rosa (*Missing/Broken Shader*) ou totalmente preto por falta de luz/normal invertida?
-   * **Checagem de Escala e Proporção VR:** O objeto tem tamanho coerente com as mãos do jogador, com a mesa do menu ou com as árvores da floresta? (Nem gigante, nem microscópico).
-   * **Checagem de Posicionamento e Flutuação (*Grounding/Clipping*):** O objeto está apoiado corretamente sobre a mesa/terreno ou está flutuando no ar / enterrado dentro da geometria?
-   * **Checagem de UI/Legibilidade:** Textos 3D (`TextMeshPro`), placares e visores do Drone estão legíveis, dentro do *Canvas* e não espelhados/invertidos?
-3. **Loop de Auto-Correção:** Se qualquer anomalia visual for detectada no print, o subagente **DEVE ajustar o modelo no Blender MCP ou corrigir o `Transform`/Shader no script da Unity, regerar o print e inspecionar novamente** até que a imagem esteja visualmente impecável.
+#### 2. Subagente `[B]` — `Blender MCP VR-Optimized 3D & Audio Tech Artist`
+* **Escopo Exclusivo:** Dedica 100% do *output budget* para modelagem 3D otimizada para VR no **Blender MCP** (ou script Python `bpy`) e síntese de áudio/texturas em Python/Gemini API. **Proibido gastar tokens escrevendo C# da Unity.**
+* **Regras de Qualidade Artística e Otimização VR Obrigatórias:**
+  1. **Anatomia e Geometria 100% Completas (Zero Partes Invisíveis):** Nenhum modelo pode ter partes faltando ou normais invertidas (`backface culling`). O `LowPolyForestBird.fbx` **DEVE** ter corpo, cabeça, bico, olhos, cauda, duas asas separadas **E DUAS PERNAS/PATAS VISÍVEIS E SÓLIDAS** conectadas do corpo até o ponto de pouso ($Y = 0$).
+  2. **Orçamento Rigoroso de Polígonos para VR (*Polycount Budget*):**
+     * Objetos pequenos de mão/coleta (maçãs, fitas cassete, moedas, pinhões, bolinhas): **máximo de $300$ a $600\text{ triângulos}$**.
+     * Objetos médios/estáticos (cestas, fidgets, pistola de balões, pássaro, troféus, totem): **máximo de $800$ a $1.800\text{ triângulos}$**.
+     * Aplicar sempre `Shade Smooth` com `Auto Smooth` / `Weighted Normals` e chanfros de 1 segmento para parecerem redondos e bonitos gastando pouquíssimos vértices.
+  3. **Áudio Confortável e Calibrado (Zero Sons Estridentes):** Nenhum efeito sonoro `.wav` pode ter pico de volume agressivo (`peak <= -6 dB`). O canto do pássaro (`forest_bird_chirp.wav`) deve ser suave, melódico, curto ($0.6\text{s}$), com filtro *low-pass* em $3.500\text{ Hz}$ para nunca irritar o ouvido do paciente.
 
-### Estágio E: Persistência de Checkpoint em Disco
-1. Atualizar a tabela da **Seção 3** neste arquivo (`./AGENTS_IMPLEMENTATION_PLAN.md` e `./AGENTS.md`) mudando de `[~]` para `[x]` e registrando o caminho dos prints aprovados em `.agents/visual_qa/`.
-2. Salvar as cenas modificadas (`EditorSceneManager.SaveOpenScenes()`) e realizar commit local (`git add . && git commit -m "feat(vr-task-XX): verified implementation and visual QA"`).
+#### 3. Subagente `[C]` — `Senior Unity C# Gameplay, Laser Physics & VR Performance Engineer`
+* **Escopo Exclusivo:** Dedica 100% do *output budget* para escrever ou refatorar os scripts C# de runtime em `Assets/Scripts/Interactive/TaskXX/`.
+* **Regras de Qualidade de Engenharia Obrigatórias:**
+  1. **Zero Placeholders ou `// TODO`:** Todos os mecanismos, fidgets, cestas, árvores sacudíveis, rádio, basquete e drone devem funcionar de ponta a ponta.
+  2. **Implementação Estrita dos Hotfixes do Playtest (Seção 2):** Garantir que o teleporte automático no Menu seja 100% removido, que o Drone funcione por arraste/scroll mantendo distância relativa sem empurrar o player e sem buscar maçãs, e que as maçãs tenham física real de arremesso ao balançar o raio laser.
+  3. **Disciplina de Código VR (90 FPS / Zero GC Alloc):** Seguir todas as diretrizes da Seção 3 (zero `FindObjectsOfType` ou `GetComponent` em `Update`, uso de `sqrMagnitude`, *Object Pooling*, desativação de física contínua em repouso).
 
----
+#### 4. Subagente `[D]` — `Multi-Furniture Layout, Origin (0,0,0) Purger & Grounding Engineer`
+* **Escopo Exclusivo:** Dedica 100% do *output budget* para criar e rodar o Editor Script (`Assets/Editor/AutoSetup/TaskXX_SceneAndPrefabBuilder.cs`) na instância aberta da Unity e gerar os prints e relatórios de auditoria.
+* **4 Leis Espaciais Inegociáveis:**
+  1. **Lei 1 — Varredura e Expurgo de Duplicatas e Lixo no `(0, 0, 0)` (`Origin & Duplicate Sweeper`):**
+     * Antes e depois de posicionar qualquer objeto na cena (`Menu Principal` ou `Floresta e Rio`), o script de Editor **DEVE varrer toda a hierarquia da cena** procurando:
+       * Qualquer instância duplicada de objetos interativos (garantindo que exista apenas a quantidade exata planejada e recriando apenas se algum objeto essencial tiver sido apagado por engano);
+       * Qualquer objeto interativo, prefab temporário ou malha órfã deixada próxima à origem da cena `Vector3.zero` (`Vector3.Distance(obj.transform.position, Vector3.zero) < 0.8f`) que já possua sua versão correta posicionada na sala ou na trilha, **deletando imediatamente a duplicata do `(0, 0, 0)`**!
+  2. **Lei 2 — Distribuição Inteligente pelas Mesas e Estantes Existentes da Sala (`Multi-Furniture Distribution`):**
+     * Na sala do Menu Principal, **NÃO amontoar todos os objetos em uma única mesa**. O script deve localizar as várias mesas, bancadas e estantes existentes na sala e espalhar cada estação interativa, minigame, brinquedo fidget e troféu em móveis diferentes com amplo espaço livre (mínimo de $0.25\text{m}$ entre itens no mesmo móvel, validado por `!boundsA.Intersects(boundsB)`).
+  3. **Lei 3 — Aterramento Físico Absoluto e Prevenção de Queda Fora do Mapa (`Zero Floating & Map Bounds Clamp`):**
+     * Na cena `Floresta e Rio`, todos os objetos (árvores, cestas, maçãs, cogumelos, lanternas, pássaros, totens) devem estar estritamente **dentro dos limites válidos do terreno/malha do mapa** (nunca fora da borda nem debaixo do chão) e perfeitamente aterrados via `Physics.Raycast` / `Terrain.SampleHeight`.
+  4. **Lei 4 — Exportação de Telemetria Espacial + 3 Screenshots HD:**
+     * Exportar `.agents/visual_qa/TASK-XX_SpatialAudit.json` (contendo contagem de instâncias para provar zero duplicatas, verificação de `(0,0,0)` vazio, `hasOverlap: false` e `groundGapMeters`) e renderizar 3 screenshots em `1920x1080` (`view1_front.png`, `view2_side_grounding.png`, `view3_closeup.png`).
 
-## 3. Tabela de Estado e Checkpoint (Persistência Anti-Token Limit)
-
-*O Agente Orquestrador deve atualizar esta tabela diretamente no arquivo a cada mudança de estado (`[ ]` Pendente, `[~]` Em Execução, `[x]` Concluído e Validado Visualmente).*
-
-| ID | Módulo | Tarefa | Status | Assets (Blender / Áudio / API) | Scripts & Prefabs | Visual QA (Screenshots Validados) |
-| :--- | :--- | :--- | :---: | :--- | :--- | :--- |
-| **TASK-01** | Core / Base | Infraestrutura Multissensorial + Utilitário de Captura de Tela Automática (`VisualQACapture`) | `[x]` | 6 Áudios Core (`.wav` em `Assets/Audio/Generated/Core/`) | `MaterialShaderHelper`, `VRFeedbackManager`, `InteractableHighlightFeedback`, `VisualQACaptureEditor` | `TASK-01_Menu_Overview.png`, `TASK-01_Menu_DeskZone.png`, `TASK-01_Floresta_Overview.png` |
-| **TASK-02** | Core / Base | Ergonomia Exoesqueleto: Force Grab Assistido, Auto-Respawn e Aim Assist Magnético | `[x]` | `ReticleTargetRing.fbx` + `M_Reticle_HoloCyan.mat` (Blender 5.1) | `IAimAssistTarget`, `ThrowAimAssist`, `TargetAimReticle`, `ErgonomicGrabInteractable`, `ErgonomicInteractiveToy.prefab` | `TASK-02_Reticle_Aim.png`, `TASK-02_ForceGrab_Preview.png`, `TASK-02_AutoRespawn_Zone.png` |
-| **TASK-03** | Drone Pet | Máquina de Estados do Drone + Mecânica de "Buscar" (*FetchBot* com Feixe Trator) | `[x]` | `TractorBeamEmitter.fbx`, `CyberFetchBaton.fbx`, 2 Áudios (`.wav` em `Assets/Audio/Generated/Task03/`) | `DroneFetchTarget`, `DroneFetchController`, `Task03_SceneAndPrefabBuilder`, `CyberFetchBaton.prefab` | `TASK-03_Drone_TractorBeam.png`, `TASK-03_Fetch_Presenting.png`, `TASK-03_FetchBaton_Desk.png` |
-| **TASK-04** | Drone Pet | Reatividade Afetiva (Carinho/Poke, Expressões LED e Dança no Ritmo do Rádio) | `[x]` | 5 Texturas LED + Sprite Coração + 4 Áudios (`.wav` em `Assets/Audio/Generated/Task04/`) + `M_Drone_LED_Visor.mat` | `DroneAffectiveSystem`, `Task04_LEDTextureGenerator`, `Task04_SceneAndPrefabBuilder`, Visor LED Mesh | `TASK-04_Drone_Visor_Happy.png`, `TASK-04_Drone_Petting_Feedback.png`, `TASK-04_Drone_Dancing_Pose.png` |
-| **TASK-05** | Drone Pet | Sistema de Celebração de Metas Clínicas (Pirueta, Confetes, Fanfarra e Frases) | `[x]` | 50 Frases Clínicas JSON (`DroneEncouragementPhrases.json`) + 2 Áudios (`fanfare_triumph.wav`, `confetti_cannon_pop.wav`) + 2 Texturas Bubble + `M_Confetti_Multicolor.mat` | `DroneMilestoneCelebration`, `Task05_SceneAndPrefabBuilder`, Canhões Duplos de Confetes, Balão de Fala 3D | `TASK-05_Celebration_Pirouette.png`, `TASK-05_Celebration_SpeechBubble.png`, `TASK-05_Confetti_Explosion.png` |
-| **TASK-06** | Menu Hub | Rádio Deck com Fitas Cassete Magnéticas (`XRSocketInteractor`) + Botão de Eject | `[x]` | 3 FBX Blender 5.1 (`RetroCassetteTape.fbx`, `CassetteDeckSlot.fbx`, `CassetteOrganizerRack.fbx`) + 5 Áudios (`.wav` em `Assets/Audio/Generated/Task06/`) + 10 Materiais | `MusicCassetteTape`, `RadioCassetteSocket`, `CassetteEjectButton`, `Task06_SceneAndPrefabBuilder`, 6 Prefabs | `TASK-06_Radio_Deck_Overview.png`, `TASK-06_Cassette_Tapes_Closeup.png`, `TASK-06_Tape_Inserted_Slot.png` |
-| **TASK-07** | Menu Hub | Pistola/Dispenser de Balões Antigravidade (*The Lab Style*) + Física e Estouro | `[x]` | 2 FBX Blender 5.1 (`BalloonGunDispenser.fbx`, `InflatableBalloon.fbx`) + 3 Áudios (`.wav` em `Assets/Audio/Generated/Task07/`) + 14 Materiais | `BalloonInflaterGun`, `FloatingBalloon`, `Task07_SceneAndPrefabBuilder`, 2 Prefabs (`BalloonGunDispenser`, `InflatableBalloon`) | `TASK-07_BalloonGun_Desk.png`, `TASK-07_Balloon_Inflating.png`, `TASK-07_Balloons_Floating_Room.png` |
-| **TASK-08** | Menu Hub | Mini Basquete Arcade de Mesa com Botão Spawner, Aro com Duplo Sensor e Placar 3D | `[x]` | 3 FBX Blender 5.1 (`ArcadeBasketballHoop.fbx`, `MiniBasketball.fbx`, `ArcadeSpawnButton.fbx`) + 5 Áudios (`.wav` em `Assets/Audio/Generated/Task08/`) + 12 Materiais | `BasketballHoopScorer`, `BasketballBallAudio`, `ArcadeBallSpawner`, `Task08_SceneAndPrefabBuilder`, 3 Prefabs (`ArcadeBasketballHoop`, `MiniBasketball`, `ArcadeBallSpawnerButton`) | `TASK-08_Basketball_Hoop_Wall.png`, `TASK-08_Scoreboard_Closeup.png`, `TASK-08_Ball_Spawn_Button.png` |
-| **TASK-09** | Menu Hub | Bancada Fidget 3D (Alavanca de Clima/Skybox, Botão de Fogos e Mascote Bobblehead) | `[x]` | 3 FBX Blender 5.1 (`EnvironmentControlLever.fbx`, `FireworksLaunchButton.fbx`, `ExoMascotBobblehead.fbx`) + 5 Áudios (`.wav` em `Assets/Audio/Generated/Task09/`) + 16 Materiais | `AtmosphereLeverInteractable`, `FireworksButtonInteractable`, `BobbleheadSpringToy`, `Task09_SceneAndPrefabBuilder`, 3 Prefabs (`EnvironmentControlLever`, `FireworksLaunchButton`, `ExoMascotBobblehead`) | `TASK-09_Fidget_Station_Desk.png`, `TASK-09_Atmosphere_Day.png`, `TASK-09_Atmosphere_Sunset.png`, `TASK-09_Atmosphere_Night.png` |
-| **TASK-10** | Menu Hub | Seletor de Mapas por Esferas de Portal 3D com Mini-Dioramas e Pedestal | `[x]` | 2 FBX Blender 5.1 (`PortalPedestalSocket.fbx`, `PortalOrbDiorama_Forest.fbx`) + 4 Áudios (`.wav` em `Assets/Audio/Generated/Task10/`) + 11 Materiais | `PortalWorldSphere`, `PortalPedestalSocket`, `Task10_SceneAndPrefabBuilder`, 2 Prefabs (`PortalOrbDiorama_Forest`, `PortalPedestalSocket`) | `TASK-10_Pedestal_Overview.png`, `TASK-10_Orb_Diorama_Closeup.png`, `TASK-10_Orb_Socket_Docked.png` |
-| **TASK-11** | Floresta | Sistema de Maçãs Interativas (Árvores Sacudíveis + Cestas de Pontuação + Splash) | `[x]` | 3 FBX Blender 5.1 (`InteractiveRedApple.fbx`, `GoldenBonusApple.fbx`, `WickerCollectionBasket.fbx`) + 5 Áudios (`.wav` em `Assets/Audio/Generated/Task11/`) + 9 Materiais | `InteractiveApple`, `ShakeableFruitTree`, `AppleCollectionBasket`, `Task11_SceneAndPrefabBuilder`, 3 Prefabs (`InteractiveRedApple`, `GoldenBonusApple`, `WickerCollectionBasket`) | `TASK-11_Forest_Trail_Overview.png`, `TASK-11_Apple_Basket_Closeup.png`, `TASK-11_Tree_Shake_Event.png` |
-| **TASK-12** | Floresta | Sementes Mágicas e Pinhões Arremessáveis (Brotação Procedural de Flores/Cogumelos) | `[x]` | 4 FBX Blender 5.1 (`GlowingPineconeSeed.fbx`, `SproutingFlowerPatch.fbx`, `BouncyMushroomCluster.fbx`, `SeedNestPedestal.fbx`) + 4 Áudios (`.wav` em `Assets/Audio/Generated/Task12/`) + 17 Materiais | `MagicSeedPinecone`, `SproutingPlantLifecycle`, `Task12_SceneAndPrefabBuilder`, 4 Prefabs (`GlowingPineconeSeed`, `SproutingFlowerPatch`, `BouncyMushroomCluster`, `SeedNestPedestal`) | `TASK-12_Magic_Pinecone_Trail.png`, `TASK-12_Flower_Patch_Sprouted.png`, `TASK-12_Mushroom_Cluster_Sprouted.png` |
-| **TASK-13** | Floresta | Fauna e Flora Reativa (Cogumelos Xilofone Pentatônicos, Pássaros e Lanternas) | `[x]` | 3 FBX Blender 5.1 (`XylophoneMushroom.fbx`, `RunePathLantern.fbx`, `LowPolyForestBird.fbx`) + 8 Áudios (`.wav` em `Assets/Audio/Generated/Task13/`) + 17 Materiais | `MusicalMushroom`, `PathLanternInteractable`, `ReactiveForestBird`, `Task13_SceneAndPrefabBuilder`, 3 Prefabs (`XylophoneMushroom`, `RunePathLantern`, `LowPolyForestBird`) | `TASK-13_Xylophone_Glade.png`, `TASK-13_Lantern_Ignited.png`, `TASK-13_Guide_Bird_Perched.png` |
-| **TASK-14** | Gamificação | Trilha de Moedas/Orbes Flutuantes com Atração Magnética para Exoesqueleto | `[x]` | 2 FBX Blender 5.1 (`EnergyStarCoin.fbx`, `BonusDiamondCoin.fbx`) + 3 Áudios (`.wav` em `Assets/Audio/Generated/Task14/`) + 9 Materiais | `CollectibleOrbCoin`, `CoinScoreManager`, `CoinTrailSpawner`, `Task14_SceneAndPrefabBuilder`, 2 Prefabs (`EnergyStarCoin`, `BonusDiamondCoin`) | `TASK-14_Coin_Trail_Perspective.png`, `TASK-14_Coin_Closeup.png`, `TASK-14_Magnetic_Attraction_Effect.png` |
-| **TASK-15** | Gamificação | Sistema de Missões no Visor do Drone + Totens de Checkpoint com Alavanca e Baú | `[x]` | `CheckpointRewardTotem.fbx` (Blender 5.1) + 4 Áudios (`.wav` em `Assets/Audio/Generated/Task15/`) + 6 Materiais + 2 Texturas UI | `SessionQuestManager`, `InteractiveCheckpointTotem`, `Task15_SceneAndPrefabBuilder`, `CheckpointRewardTotem.prefab` | `TASK-15_Drone_Quest_Panel.png`, `TASK-15_Checkpoint_Totem_Trail.png`, `TASK-15_Checkpoint_Chest_Open.png` |
-| **TASK-16** | Gamificação | Persistência (`JSON Save`) + Estante de Troféus Físicos Desbloqueáveis no Menu | `[x]` | 5 FBX Blender 5.1 (`Trophy_GoldenApple.fbx`, `Trophy_LuminousBonsai.fbx`, `Trophy_StarCup.fbx`, `Trophy_DroneCrownHat.fbx`, `Trophy_DisplayStand.fbx`) + 3 Áudios (`.wav` em `Assets/Audio/Generated/Task16/`) + 12 Materiais | `RehabProgressionSaveSystem`, `TrophyShelfManager`, `DroneCrownWearable`, `Task16_SceneAndPrefabBuilder`, 5 Prefabs | `TASK-16_Trophy_Shelf_Closeup.png`, `TASK-16_Drone_Crown_Equipped.png`, `TASK-16_Menu_Hub_Master_Panorama.png` |
-
----
-
-## 4. Especificações Profundas de Engenharia e Critérios de Visual QA por Tarefa
-
-### FASE 1: Fundação, Captura Visual e Ergonomia de Exoesqueleto
-
-#### `TASK-01`: Infraestrutura Multissensorial + Utilitário de Captura Visual (`VRFeedbackManager` & `VisualQACapture`)
-* **1. Pesquisa & Arquitetura:**
-  * Identificar a versão do `XR Interaction Toolkit` e o Render Pipeline ativo (Built-in, URP ou HDRP) para criar um helper de materiais (`MaterialShaderHelper.cs`) que sempre atribui o shader padrão correto (`Standard` ou `Universal Render Pipeline/Lit`), eliminando qualquer risco de material rosa nas tasks seguintes.
-* **2. Geração de Assets (Python / Gemini API):**
-  * Gerar 6 arquivos `.wav` procedurais em `Assets/Audio/Generated/Core/`: `ui_hover_soft.wav`, `grab_pop.wav`, `release_woosh.wav`, `button_click_mech.wav`, `socket_snap.wav`, `success_chime.wav`.
-* **3. Implementação C# Detalhada:**
-  * `VRFeedbackManager.cs`: Singleton com *Object Pool* de 16 `AudioSource` 3D, variação de pitch e Haptics universal.
-  * `InteractableHighlightFeedback.cs`: *Scale Punch* elástico suave + *Emission Highlight* via `MaterialPropertyBlock` ao receber Hover do raio laser.
-  * `VisualQACaptureEditor.cs` (em `Assets/Editor/VisualQA/`): Script de Editor capaz de criar temporariamente uma câmera de inspeção iluminada que enquadra automaticamente os `Renderer.bounds` de qualquer `GameObject` ou cena, renderiza imagens `1920x1080` de múltiplos ângulos (Frente, 45° Isométrico, Topo/Perfil) para `.agents/visual_qa/` e limpa a câmera temporária em seguida.
-* **4. Visual QA & Validação:**
-  * Testar o `VisualQACaptureEditor` tirando um print da cena atual do Menu Principal e da Floresta para mapear onde ficam a mesa, o rádio, o drone e a trilha.
-
-#### `TASK-02`: Ergonomia de Exoesqueleto (`ErgonomicGrabInteractable` & `ThrowAimAssist`)
-* **1. Pesquisa & Arquitetura:**
-  * Configurar os `XRRayInteractor` do jogador com `useForceGrab = true` e detecção assistida para que o paciente no exoesqueleto nunca precise se curvar para pegar itens no chão.
-* **2. Geração de Assets (Blender MCP):**
-  * Modelar `ReticleTargetRing.fbx` (anel tecnológico segmentado de `0.25m` de diâmetro, achatado, cor ciano emissiva) para indicar no chão qual objeto está na mira do raio laser.
-* **3. Implementação C# Detalhada:**
-  * `ErgonomicGrabInteractable.cs`: Retorno suave automático (`Auto-Respawn`) se o brinquedo cair longe da mesa do menu + multiplicador ergonômico de força de arremesso + cálculo de parábola balística (`ThrowAimAssist`) que ajuda suavemente objetos arremessados a caírem dentro de cestas/aros próximos.
-* **4. Visual QA & Validação:**
-  * Capturar print da retícula 3D posicionada sob um objeto interativo e validar que não está enterrada no chão nem com shader quebrado.
+#### 5. Subagente `[E]` — `Ruthless Visual QA & VR Performance Auditor (O Juiz Implacável)`
+* **Escopo Exclusivo:** Subagente analítico e crítico. Inspeciona visualmente os prints `.png` (antigos e novos) e o `TASK-XX_SpatialAudit.json`.
+* **Checklist de Reprovação Imediata (`FAIL`):**
+  1. Há algum objeto duplicado ou largado na coordenada `(0, 0, 0)` da cena?
+  2. Os fidgets e minigames continuam espremidos na mesma mesa em vez de espalhados pelas várias mesas e estantes da sala do Menu?
+  3. Há qualquer árvore, cesta, cogumelo ou objeto flutuando acima do chão ou caindo para fora/debaixo do mapa na cena `Floresta e Rio`?
+  4. O pássaro continua com pernas invisíveis ou apitando sem parar? As maçãs falham ao serem pegas/arremessadas com o laser? O menu ainda tenta teletransportar sozinho ao dar Play?
+* **Poder de Veto:** Se qualquer item falhar, escreve `FAIL` em `.agents/visual_qa/TASK-XX_AuditVerdict.md` e ordena `RE-RUN [B]`, `RE-RUN [C]` ou `RE-RUN [D]` até atingir perfeição absoluta (`PASS`).
 
 ---
 
-### FASE 2: Evolução do Drone Pet (Estilo *FetchBot* do SteamVR)
+## 2. Hotfixes Críticos do Playtest VR (10 Regras Inegociáveis de Correção)
 
-#### `TASK-03`: Máquina de Estados do Drone + Mecânica de "Buscar" (`DroneFetchBehavior`)
-* **1. Pesquisa & Arquitetura:**
-  * Inspecionar o Prefab e os scripts atuais do Drone no projeto para acoplar a máquina de estados de busca sem interferir nos painéis de telemetria do paciente.
-* **2. Geração de Assets (Blender MCP & Audio):**
-  * Modelar `TractorBeamEmitter.fbx` (módulo compacto acoplado na base inferior do drone) e `CyberFetchBaton.fbx` (bastão/brinquedo tecnológico colorido de `0.22m` para brincar de jogar para o drone).
-  * Gerar `tractor_beam_hum.wav` e `drone_fetch_alert.wav`.
-* **3. Implementação C# Detalhada:**
-  * `DroneFetchTarget.cs` & `DroneFetchController.cs`: Quando o jogador arremessa uma maçã, bolinha ou bastão para longe (`> 3.0m`), o drone emite um bip alegre, voa até o item, ativa um feixe trator cônico luminoso (`LineRenderer` + partículas ascendentes), levanta o objeto e traz de volta flutuando na altura do peito do paciente (`1.15m` do chão, ideal para a postura do exoesqueleto).
-* **4. Visual QA & Validação:**
-  * Tirar print em *Close-up* do Drone com o emissor acoplado e o feixe trator ativo segurando o bastão; verificar se o feixe sai exatamente do centro inferior do drone e se o bastão não clipa na malha do drone.
+Todos os subagentes devem tratar estas 10 correções reportadas no teste prático como **prioridade máxima absoluta**:
 
-#### `TASK-04`: Reatividade Afetiva do Drone (Carinho, Cutucada e Dança com o Rádio) (`DroneAffectiveSystem`)
-* **1. Pesquisa & Arquitetura:**
-  * Analisar a face/visor frontal do Drone para exibir expressões dinâmicas e configurar colisores de carinho no topo da cabeça.
-* **2. Geração de Assets (Gemini API / Python Imaging & Audio):**
-  * Gerar texturas de expressões faciais em estilo LED (`^‿^` Feliz, `♥‿♥` Carinho, `@_@` Cutucado, `♪‿♪` Dançando) e 4 sons robóticos expressivos (`drone_purr.wav`, `drone_giggle.wav`, `drone_boop.wav`).
-* **3. Implementação C# Detalhada:**
-  * `DroneAffectiveSystem.cs`: Detecta carinho contínuo com a mão VR (disparando vibração de ronronar no controle, partículas de coração e olhinhos felizes), reação elástica ao ser cutucado e sincronia rítmica (`GetSpectrumData` do `AudioSource` do rádio) fazendo o drone balançar no ritmo da música.
-* **4. Visual QA & Validação:**
-  * Capturar print frontal do visor do Drone exibindo cada expressão LED e as partículas de reação, garantindo que a textura dos olhos esteja alinhada com a frente do modelo 3D.
+1. **FIM DO TELEPORTE AUTOMÁTICO NO MENU PRINCIPAL (`TASK-10`):**
+   * **Problema:** Ao dar Play na cena do Menu Principal, o jogador era teletransportado imediatamente para a cena da Floresta e Rio por causa do gatilho de proximidade/portal das esferas.
+   * **Correção Obrigatória:** **Remover 100% de qualquer chamada `SceneManager.LoadScene` ou `LoadSceneAsync` dos scripts das Esferas de Portal/Diorama (`PortalWorldSphere.cs`, `PortalPedestalSocket.cs` ou similares)!** A mudança de cena para os mapas deve acontecer **EXCLUSIVAMENTE pelo sistema de Canvas 2D original do projeto**. O `PortalOrbDiorama_Forest` deve funcionar **apenas como uma peça de diorama 3D decorativa e interativa** (o jogador pode pegar, olhar a mini-floresta girando lá dentro e encaixar no pedestal para acender luzes/partículas, mas **jamais** carregar outra cena).
+2. **NOVO COMPORTAMENTO DO DRONE: POSICIONAMENTO POR LASER/SCROLL, DISTÂNCIA RELATIVA E ZERO COLISÃO COM O PLAYER (`TASK-03`):**
+   * **Problema:** O Drone tinha textos desnecessários (`- perto` e `+ longe`) embaixo dele, tinha colisão física que empurrava o jogador, e ia buscar maçãs (inclusive debaixo do mapa).
+   * **Correção Obrigatória:**
+     * **Remover os textos/botões `- perto` e `+ longe` embaixo do Drone.**
+     * **O Drone NUNCA deve buscar maçãs nem sair para pegar objetos!** Ele é estritamente o companheiro de acompanhamento e informação do paciente.
+     * **Zero Colisão com o Jogador:** Todos os colisores do Drone devem ignorar completamente a colisão física com o `CharacterController` / `XROrigin` / `Player` (`Physics.IgnoreCollision` + `Rigidbody.isKinematic = true`), de modo que o Drone **jamais empurre ou bloqueie o jogador**. Apenas o colisor de interação do raio laser permanece ativo para o controle.
+     * **Mecânica de Segurar, Ajustar com Scroll e Manter Distância Relativa:**
+       1. O Drone começa parado em uma posição confortável na frente do jogador no início da cena para que o jogador possa se aproximar e ler as informações tranquilamente.
+       2. O jogador pode segurar o Drone apontando o raio laser (`XRRayInteractor` + `XRGrabInteractable` com `translate/anchor control` via thumbstick/scroll) para puxá-lo para mais perto, afastá-lo para mais longe ou colocá-lo em qualquer posição ao seu redor.
+       3. No instante em que o jogador solta o Drone (`OnSelectExited`), o Drone **salva exatamente aquele vetor de distância/offset relativo ao jogador** e, a partir dali, passa a **seguir o jogador suavemente mantendo sempre aquela exata distância onde foi colocado** (permitindo que o jogador o reajuste para mais perto ou mais longe com o laser/scroll a qualquer momento durante a caminhada!).
+3. **MAÇÃS 100% PEGÁVEIS E ARREMESSÁVEIS COM FÍSICA DE BALANÇO DO LASER (`TASK-02` & `TASK-11`):**
+   * **Problema:** Clicar nas maçãs com o laser não as segurava corretamente, e não era possível arremessá-las balançando o laser.
+   * **Correção Obrigatória:**
+     * Configurar todas as maçãs (no chão e nas árvores sacudíveis) com `Rigidbody` (`useGravity = true`, `isKinematic = false`), `SphereCollider` sólido na layer compatível com a `InteractionLayerMask = Everything (-1)` do `XRRayInteractor`.
+     * **Física de Arremesso por Chicote/Balanço do Laser (`LaserSwingVelocityTracker`):** Quando o jogador segura uma maçã com o raio laser e balança o feixe de laser (movimento angular do controle apontando de longe), a velocidade linear da mão quase não muda, mas a **ponta do raio onde a maçã está presa se move rapidamente pelo espaço**. O script deve gravar um *Ring Buffer* das últimas 10 posições globais (`transform.position`) da própria maçã a cada frame enquanto segurada e, no momento em que o jogador solta o botão (`OnSelectExited`), calcular o vetor de velocidade tangencial real ($\vec{v} = \frac{\vec{p}_{\text{atual}} - \vec{p}_{\text{anterior}}}{\Delta t}$) e aplicá-lo diretamente ao `rigidbody.linearVelocity` / `rigidbody.velocity`, fazendo a maçã voar fisicamente na exata direção e velocidade em que o laser foi balançado!
+4. **PREVENÇÃO DE ITENS FORA DO MAPA NA FLORESTA E RIO (`TASK-11` & `TASK-12`):**
+   * **Problema:** Maçãs e itens estavam nascendo fora do mapa ou caindo para debaixo do terreno na cena `Floresta e Rio`.
+   * **Correção Obrigatória:** Todos os spawners e posições iniciais na cena `Floresta e Rio` devem validar se há chão/terreno sólido abaixo via `Physics.Raycast` antes de posicionar qualquer item. Além disso, qualquer objeto arremessável que caia abaixo do nível mínimo da trilha (`transform.position.y < terrainHeight - 1.5f`) deve ser automaticamente reposicionado na margem da trilha ou desativado no pool (nunca caindo infinitamente debaixo do mapa).
+5. **CORREÇÃO DO ÁUDIO DO PÁSSARO NA FLORESTA E RIO (`TASK-13`):**
+   * **Problema:** Quando o jogador chegava perto do pássaro na cena `Floresta e Rio`, ele ficava gritando sem parar e extremamente alto.
+   * **Correção Obrigatória:**
+     * `AudioSource.loop = false` (TERMINANTEMENTE PROIBIDO deixar em loop!).
+     * Volume máximo reduzido para `0.18f` com `spatialBlend = 1.0f` (3D) e `maxDistance = 10.0f`.
+     * Cooldown rígido (`chirpCooldown = 15.0f`) e trava de estado (`hasChirpedThisEncounter = true`): quando o jogador se aproxima, o pássaro toca **um único pio curto e suave** de $0.5\text{s}$ e voa silenciosamente para a próxima árvore, sem nunca repetir o som em loop.
+6. **ESPALHAR FIDGETS, MINIGAMES E TROFÉUS PELAS VÁRIAS MESAS E ESTANTES DA SALA DO MENU (`TASK-06` a `TASK-10` & `TASK-16`):**
+   * **Problema:** Todos os fidgets foram colocados espremidos em uma única mesa, sendo que a sala do Menu Principal possui várias mesas, bancadas e estantes.
+   * **Correção Obrigatória:** Mapear todas as superfícies de móveis existentes na sala do Menu Principal e distribuir os itens:
+     * **Mesa Principal / Perto do Rádio:** Rádio existente + Deck de Fitas + 4 Fitas Cassete espaçadas + Diorama da Floresta (sem teleporte).
+     * **Segunda Mesa / Bancada Lateral Existente:** Estação Fidget espaçada (Alavanca de Clima, Botão de Fogos e Bobblehead com $0.35\text{m}$ de folga entre eles).
+     * **Terceira Superfície / Mesa Auxiliar Existente:** Pistola de Balões no suporte + Botão Spawner e Bolas do Mini Basquete Arcade (com a tabela na parede livre correspondente).
+     * **Estantes (`Shelves`) Existentes na Sala:** Os 4 Troféus Desbloqueáveis (`Maçã Dourada`, `Bonsai Luminoso`, `Taça Estrela` e `Coroa do Drone`) distribuídos nas prateleiras das estantes da sala!
+7. **EXPURGO AUTOMÁTICO DE DUPLICATAS E OBJETOS NO `(0, 0, 0)` + RESTAURAÇÃO DE ITENS FALTANTES (`GLOBAL`):**
+   * **Problema:** Havia várias cópias duplicadas de objetos no Menu e na Floresta e Rio, muitas concentradas na coordenada `(0, 0, 0)` da cena. O usuário apagou duplicatas manualmente e pode ter removido algo sem querer.
+   * **Correção Obrigatória:** Criar e rodar em todas as cenas o utilitário `SceneDuplicateAndOriginPurger.cs` que:
+     1. Verifica se todos os objetos únicos esperados por cada Task estão presentes em suas posições corretas na cena (recriando apenas se algum tiver sido apagado sem querer);
+     2. Deleta automaticamente qualquer instância duplicada excedente;
+     3. Varre a coordenada `(0, 0, 0)` (raio de $1.0\text{m}$) e remove qualquer objeto gerado que tenha sido esquecido lá como cópia de um objeto já posicionado na cena.
+8. **COGUMELOS MUSICAIS PRESERVADOS E BEM DISTRIBUÍDOS (`TASK-13`):**
+   * **Feedback:** Os cogumelos musicais funcionaram muito bem e são muito divertidos!
+   * **Ação:** Preservar 100% da mecânica e timbre dos cogumelos musicais, garantindo apenas que sejam distribuídos em grupos limpos e bem aterrados ao longo das margens da trilha na cena `Floresta e Rio`, sem duplicatas sobrepostas nem cópias no `(0, 0, 0)`.
+
+---
+
+## 3. Segredos de Otimização de Indústria para VR (Garantia de 90 FPS Leve e Fluido)
+
+Para garantir que todas as 16 implementações rodem com leveza extrema em VR sem causar *motion sickness* ou queda de FPS, todo subagente `[B]`, `[C]`, `[D]` e `[E]` é obrigado a aplicar estas técnicas de indústria:
+
+1. **GPU Instancing & SRP Batcher Compatibility:**
+   * Todos os materiais gerados devem habilitar `material.enableInstancing = true` e usar o mesmo shader base do pipeline (`Universal Render Pipeline/Lit` ou `Standard`).
+   * **Proibido usar `renderer.material` em runtime** (isso duplica materiais na memória e quebra o *batching*). Para piscar luzes ou destaques de hover, usar exclusivamente `Renderer.GetPropertyBlock` / `SetPropertyBlock` (`MaterialPropertyBlock`).
+2. **Física VR Ultra-Leve (`PhysX Optimization`):**
+   * **Zero `MeshCollider` em objetos móveis:** Qualquer objeto com `Rigidbody` (maçãs, fitas, bolas de basquete, pinhões, balões, troféus) deve usar apenas colisores primitivos (`SphereCollider`, `BoxCollider` ou `CapsuleCollider`), que são $20\times$ mais rápidos para a CPU calcular.
+   * **Dynamic Collision Detection Switching:** Objetos arremessáveis ficam com `CollisionDetectionMode.Discrete` e entram em `Sleep()` quando parados no chão. O script muda para `CollisionDetectionMode.ContinuousDynamic` **apenas no evento `OnSelectEntered`** (quando o jogador pega o objeto) e volta para `Discrete` $3\text{ segundos}$ após tocar o chão.
+3. **Throttling por Distância ao Quadrado (`sqrMagnitude`) e Zero `Update()` Desnecessário:**
+   * Objetos espalhados pelo mapa grande da `Floresta e Rio` (moedas, cogumelos, pássaros, lanternas, árvores) **não devem rodar lógica pesada todo frame se estiverem longe do jogador**.
+   * Usar `if ((playerTransform.position - transform.position).sqrMagnitude > activeRadiusSqr) return;` ou acionar animações apenas via eventos do `XRRayInteractor` (`hoverEntered`, `selectEntered`, `activated`) e corrotinas temporárias que se encerram sozinhas quando a animação acaba!
+4. **Iluminação VR sem Sombras Dinâmicas Extras (`Zero Extra Shadow Casters`):**
+   * Qualquer `Light` adicionada em lanternas da trilha, feixe do drone ou pedestal deve ter obrigatoriamente `light.shadows = LightShadows.None`. Em VR, cada Point Light com sombra dinâmica renderiza 6 cubemaps por olho (12 passes extras!).
+   * Desativar `Receive Shadows` e `Cast Shadows = Off` em partículas e pequenos detalhes de UI.
+
+---
+
+## 4. Matriz de Estado e Micro-Checkpoints (Persistência Anti-Token Limit)
+
+*O Agente Orquestrador Principal deve atualizar esta tabela diretamente no disco a cada micro-passo concluído (`[ ]` Pendente, `[~]` Em Execução, `[x]` Aprovado, `[!]` Reprovado pelo Auditor E — aguardando retrabalho).*
+
+| ID | Módulo | Tarefa (Com Hotfixes do Playtest + Otimização VR) | `[A]` Spec & Scout | `[B]` Blender 3D & Audio | `[C]` C# Gameplay Code | `[D]` Scene Layout & Purge `(0,0,0)` | `[E]` Visual & VR QA Audit | Status Final |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **TASK-01** | Core / Purge | Infraestrutura Multissensorial + `SceneDuplicateAndOriginPurger` + `VisualQACapture` | `[x]` | `[x]` | `[x]` | `[x]` | `[x]` | `COMPLETED` |
+| **TASK-02** | Core / XRI | Física de Arremesso por Balanço do Laser (`LaserSwingThrow`) + Force Grab Ergonômico | `[x]` | `[x]` | `[x]` | `[x]` | `[x]` | `COMPLETED` |
+| **TASK-03** | Drone Pet | Drone Companheiro: Puxar/Afastar no Laser/Scroll + Distância Relativa + Zero Colisão Player + Sem Textos `-/+` + Sem Pegar Maçãs | `[x]` | `[x]` | `[x]` | `[x]` | `[x]` | `COMPLETED` |
+| **TASK-04** | Drone Pet | Reatividade Afetiva (Carinho/Poke, Expressões LED e Dança Otimizada com o Rádio) | `[x]` | `[x]` | `[x]` | `[x]` | `[x]` | `COMPLETED` |
+| **TASK-05** | Drone Pet | Celebração de Metas Clínicas (Pirueta, Confetes VR-Safe, Fanfarra e Frases) | `[x]` | `[x]` | `[x]` | `[x]` | `[x]` | `COMPLETED` |
+| **TASK-06** | Menu Hub | Rádio Deck com 4 Fitas Cassete Magnéticas (`XRSocketInteractor`) + Eject Físico (Mesa 1) | `[x]` | `[x]` | `[x]` | `[x]` | `[x]` | `COMPLETED` |
+| **TASK-07** | Menu Hub | Pistola/Dispenser de Balões Antigravidade (*The Lab*) + Física Leve (Mesa Auxiliar) | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `PENDING` |
+| **TASK-08** | Menu Hub | Mini Basquete Arcade com Botão Spawner, Aro Duplo Sensor e Placar 3D | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `PENDING` |
+| **TASK-09** | Menu Hub | Distribuição dos Fidgets nas Mesas/Estantes Existentes da Sala (Alavanca, Fogos, Bobblehead) | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `PENDING` |
+| **TASK-10** | Menu Hub | Esfera Diorama 3D Puramente Decorativa (REMOÇÃO TOTAL de Teleporte por Proximidade; Navegação via Canvas) | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `PENDING` |
+| **TASK-11** | Floresta/Rio | Maçãs Pegáveis/Jogáveis no Laser + Árvores Sacudíveis + Cestas + Limite de Mapa Anti-Queda | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `PENDING` |
+| **TASK-12** | Floresta/Rio | Sementes Mágicas e Pinhões Arremessáveis Dentro do Mapa (Brotação Elástica de Flores) | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `PENDING` |
+| **TASK-13** | Floresta/Rio | Pássaro Silencioso/Suave com Cooldown e Pernas Visíveis + Cogumelos Musicais Distribuídos sem Duplicatas | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `PENDING` |
+| **TASK-14** | Gamificação | Trilha de Moedas/Orbes Flutuantes Otimizada (`sqrMagnitude`) para Exoesqueleto | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `PENDING` |
+| **TASK-15** | Gamificação | Missões no Visor do Drone + Totens de Checkpoint Aterrados com Alavanca e Baú | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `PENDING` |
+| **TASK-16** | Gamificação | Persistência (`JSON Save`) + Troféus nas Estantes Existentes do Menu + Varredura Geral `(0,0,0)` | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `PENDING` |
+
+> **Notas da Auditoria Inicial (Claude Code, 2026-11-11):**
+> * TASK-01..05 aprovadas (`AuditVerdict.md` PASS). TASK-06: `[E]` deu FAIL -> ordens: `RE-RUN [C]` (reduzir `ejectImpulseForce` 0.55 -> 0.15) e `RE-RUN [D]` (deck atravessa o rádio ~8 cm; bola/fidgets/troféus fora da Mesa 1; `pairwiseClearances[]` no JSON; refazer 4 capturas).
+> * TASK-07..16 têm código/specs/prints da rodada ANTIGA (10/11) e NÃO foram refeitos com os hotfixes: `PortalWorldSphere.cs` ainda tem `LoadScene` (TASK-10); `DroneFetchController/Target` ainda existem em `Task03/` (garantir que nunca sejam acoplados a maçãs, TASK-11); itens da Mesa 1 (bola, fogos, troféus) precisam ser realocados em TASK-07/08/09/16.
+> * **TASK-06 COMPLETED (PASS do [E] em 2026-11-11).** Pausa programada pelo usuário: a retomada futura deve começar pela **`TASK-07.A`** (primeira célula `[ ]`). Ressalvas herdadas: clamp `maxEjectSpeed` em `EjectRoutine` lê velocidade antes do passo de física (código morto, não bloqueante); itens realocados do Menu (Bobblehead 0.076 m e outros ~0.062-0.066 m) devem ser revalidados com folga >= 0.08 m pelas TASKs 07/08/09/16; textos TMP `Label_*` dos troféus gigantes (TASK-16); collider do `ArcadeBallSpawner` 0.058 m abaixo da malha (TASK-08); validar balão demo com a regra do pool (TASK-07); `Floresta_e_Rio.unity` teve instâncias removidas na limpeza manual (ex.: `[TASK-15] CheckpointRewardTotem`, `Apple_In_Basket`, `EnergyStarCoin_*`) — o `[A]` das TASKs 11+ deve confirmar se algo essencial foi apagado por engano.
+
+---
+
+## 5. Especificações Profundas de Engenharia, Arte 3D, Hotfixes e Auditoria por Tarefa
+
+### FASE 1: Saneamento de Cenas, Limpeza de Duplicatas `(0,0,0)` e Física de Arremesso no Laser
+
+#### `TASK-01`: Infraestrutura Multissensorial + Expurgador de Duplicatas `(0,0,0)` + Utilitário de Captura Visual
+* **`[A]` Spec & Scout:**
+  * Inspecionar imediatamente a cena do `Menu Principal` e a cena `Floresta e Rio`.
+  * **Urgência #1 no Scout:** Localizar qualquer script da rodada anterior que esteja disparando `SceneManager.LoadScene` sozinho no Menu Principal (para desativá-lo já na largada) e listar todos os objetos duplicados ou amontoados na coordenada `(0, 0, 0)` de ambas as cenas.
+* **`[B]` Artista (Áudio & Shaders):**
+  * Verificar/gerar os 6 arquivos `.wav` base em `Assets/Audio/Generated/Core/` com volume normalizado suave (`-8 dB`).
+* **`[C]` Engenheiro C#:**
+  * `MaterialShaderHelper.cs`: Configura shaders compatíveis com URP/Standard com `enableInstancing = true` para performance VR.
+  * `VRFeedbackManager.cs` & `InteractableHighlightFeedback.cs`: Pool de áudio 3D sem alocação de memória (`GC Alloc = 0`) e highlight via `MaterialPropertyBlock`.
+* **`[D]` Scene Layout, Expurgador de `(0,0,0)` & Visual Capture:**
+  * Criar `SceneDuplicateAndOriginPurger.cs` em `Assets/Editor/AutoSetup/`:
+    * Varre a cena aberta buscando objetos com nomes repetidos (`(Clone)`, `(1)`, `(2)` ou múltiplos grupos idênticos gerados por scripts anteriores) e remove as duplicatas.
+    * Inspeciona todos os objetos dentro de um raio de $1.0\text{m}$ da origem `(0, 0, 0)`. Se o objeto for uma cópia desnecessária de um item interativo que já está devidamente posicionado na sala ou na trilha, **remove imediatamente a cópia do `(0, 0, 0)`**.
+  * Criar/atualizar `VisualQACaptureEditor.cs` e `SpatialAuditUtility.cs` para incluir no `TASK-XX_SpatialAudit.json` o campo `"objectsAtOriginZero": []` e `"duplicateObjectsFound": []`.
+* **`[E]` Auditoria Visual e de Cena:**
+  * Confirmar que `(0, 0, 0)` está limpo de lixo/duplicatas e que os prints de diagnóstico das duas cenas foram gerados.
+
+#### `TASK-02`: Física Real de Pegar e Arremessar Balançando o Laser (`LaserSwingThrowInteractable`) + Ergonomia
+* **`[A]` Spec & Scout:**
+  * Diagnosticar por que as maçãs e arremessáveis não estavam sendo pegas ou jogadas com o `XRRayInteractor`. Mapear a configuração exata do `XRRayInteractor` nas mãos do jogador nas cenas `Menu Principal` e `Floresta e Rio`.
+* **`[B]` Artista (Blender MCP):**
+  * Verificar/modelar `ReticleTargetRing.fbx` ($< 250\text{ tris}$, pivô na base $Y = 0$, material ciano instanciado).
+* **`[C]` Engenheiro C# (Solução Definitiva de Arremesso por Laser):**
+  * Criar `LaserSwingThrowInteractable.cs` (acoplado a todas as maçãs, bolas de basquete, pinhões e objetos jogáveis):
+    1. **Garantia de Pegada no Laser (`Ray Grab Fix`):** No `Awake()`/`OnValidate()`, garante que o `XRGrabInteractable` tenha `interactionLayers = ~0` (*Everything*), `movementType = XRBaseInteractable.MovementType.Instantaneous` (ou `VelocityTracking` suave enquanto segurado pelo raio), `throwOnDetach = false` (pois calcularemos a física real customizada no momento de soltar!) e um `SphereCollider`/`BoxCollider` sólido com `isTrigger = false`.
+    2. **Rastreador de Velocidade Espacial na Ponta do Laser (*World-Space Ring Buffer*):**
+       * Quando o jogador segura um objeto à distância com o laser (ou puxa com *Force Grab*) e **balança o feixe do laser para os lados/frente para arremessar**, o script grava em um array circular fixo de 12 posições (`Vector3[12] posBuffer`, `float[12] timeBuffer` — zero GC!) a posição global exata do objeto (`transform.position`) a cada frame.
+       * No exato instante em que o jogador solta o botão do controle (`OnSelectExited`), o script restaura `rigidbody.isKinematic = false`, `rigidbody.useGravity = true` e calcula o vetor de velocidade média ponderada dos últimos $0.08\text{s}$ do movimento do objeto na ponta do laser:
+         $$\vec{v}_{\text{throw}} = \left(\frac{\vec{p}_{\text{now}} - \vec{p}_{\text{window}}}{t_{\text{now}} - t_{\text{window}}}\right) \times \text{throwBoostMultiplier}$$
+       * Aplica $\vec{v}_{\text{throw}}$ diretamente ao `rigidbody.velocity` (com limite de segurança máximo de $18\text{ m/s}$) e adiciona rotação física (`rigidbody.angularVelocity`), fazendo o objeto **voar exatamente na direção e velocidade em que o jogador balançou o laser**, além de aplicar assistência sutil (`ThrowAimAssist` de $18^\circ$) se houver uma cesta ou aro na direção do lançamento!
+* **`[D]` Scene Layout & Prints:**
+  * Configurar os `XRRayInteractor` do player (`enableUIInteraction = true`, `hitDetectionType = SphereCast`, `sphereCastRadius = 0.06f`, `raycastTriggerInteraction = Ignore` para que triggers invisíveis na cena nunca bloqueiem o clique do laser nos objetos físicos!).
+* **`[E]` Auditoria Visual e Funcional:**
+  * Validar que nenhum colisor de trigger na cena bloqueia o raio laser de alcançar os objetos interativos.
+
+---
+
+### FASE 2: Novo Comportamento do Drone Companheiro (Arraste Livre, Distância Relativa e Zero Colisão)
+
+#### `TASK-03`: Drone Companheiro com Arraste por Laser/Scroll, Distância Relativa Dinâmica e Zero Colisão com o Player (`DroneCompanionAnchorSystem`)
+* **`[A]` Spec & Scout:**
+  * Inspecionar o GameObject do Drone nas cenas `Menu Principal` e `Floresta e Rio`.
+  * Localizar os textos/objetos de UI embaixo do Drone que dizem `- perto` / `+ longe` (para remoção) e localizar onde a colisão física do Drone estava empurrando o jogador e onde ele estava indo buscar maçãs.
+* **`[B]` Artista (Blender MCP & Audio):**
+  * Manter os detalhes visuais do Drone leves para VR ($< 1.500\text{ tris}$) e sons discretos de confirmação quando o jogador reposiciona o Drone (`drone_anchor_lock.wav`).
+* **`[C]` Engenheiro C# (Implementação Exata Solicitada pelo Usuário):**
+  * **1. Proibição Total de Buscar Maçãs:** Remover/desativar qualquer lógica que faça o Drone perseguir maçãs ou itens caídos. O Drone **nunca** sai para pegar maçãs e **nunca** desce abaixo do terreno.
+  * **2. Remoção das Mensagens `- perto` / `+ longe`:** Desativar e remover da hierarquia do Drone qualquer texto ou botão inferior de `- perto` e `+ longe`.
+  * **3. Zero Colisão Física Empurrando o Jogador:**
+    * Configurar o `Rigidbody` do Drone como `isKinematic = true` e `useGravity = false`.
+    * No `Awake()`, localizar o `CharacterController` e todos os `Collider` do `XROrigin` / `Player` e executar `Physics.IgnoreCollision(droneCollider, playerCollider, true)` para todos eles. Assim, o Drone possui apenas um colisor para ser segurado pelo raio laser do controle, mas **jamais empurra ou colide com o corpo do jogador**!
+  * **4. Mecânica de Início na Frente + Arrastar com Laser/Scroll + Seguir Mantendo a Distância Escolhida (`DroneCompanionFollowAndGrab.cs`):**
+    * **Estado Inicial (`WaitingInitialRead`):** Quando a cena começa, o Drone inicia estacionado suavemente na frente do jogador (ex: a $1.6\text{m}$ à frente, na altura dos olhos/peito) para que o jogador possa chegar perto e ler as informações do painel com calma.
+    * **Segurar e Arrastar com o Laser + Scroll (`BeingManipulatedByPlayer`):** O Drone possui um `XRGrabInteractable` configurado para o `XRRayInteractor` (com suporte nativo ao **Scroll/Thumbstick do controle para puxar para mais perto ou empurrar para mais longe ao longo do raio**, além de arrastar para os lados/altura).
+    * **Ancoragem e Seguimento com Distância Relativa Constante (`FollowingPlayerAtCustomOffset`):**
+      * Assim que o jogador posiciona o Drone onde quiser (ou começa a caminhar) e solta o botão de segurar (`OnSelectExited`), o Drone calcula e salva o **vetor de offset/distância exato em relação ao jogador** naquele instante:
+        $$\vec{\Delta}_{\text{custom}} = \vec{P}_{\text{drone}} - \vec{P}_{\text{player}} \quad (\text{mantendo a distância escalar } d = \|\vec{\Delta}_{\text{custom}}\|)$$
+      * Dali em diante, conforme o jogador anda pelo mapa, o Drone segue o jogador suavemente (`Vector3.SmoothDamp` sem GC Alloc) **mantendo sempre exatamente aquela posição/distância relativa que o jogador escolheu**, olhando suavemente para o jogador para que a tela de informações esteja sempre legível.
+      * A qualquer momento do jogo, o jogador pode segurar o Drone novamente com o laser e usar o scroll/movimento para puxá-lo para mais perto ou afastá-lo para mais longe, atualizando instantaneamente a nova distância mantida!
+* **`[D]` Scene Layout & Prints:**
+  * Aplicar a configuração no Drone de ambas as cenas (`Menu Principal` e `Floresta e Rio`), remover qualquer texto `- perto / + longe` residual, rodar o `SceneDuplicateAndOriginPurger` e capturar 3 prints do Drone posicionado na frente do player sem os textos inferiores.
+* **`[E]` Auditoria Visual e de Cena:**
+  * Verificar nos prints que os textos `- perto` / `+ longe` sumiram completamente, que o painel principal de informações do paciente está intacto e legível, e que não há duplicatas do Drone na cena.
+
+#### `TASK-04`: Reatividade Afetiva do Drone (Carinho, Cutucada e Dança Otimizada com o Rádio) (`DroneAffectiveSystem`)
+* **`[A]` Spec & Scout:**
+  * Verificar a integração das expressões faciais em LED do Drone com o novo `DroneCompanionFollowAndGrab`.
+* **`[B]` Artista (Texturas & Audio):**
+  * Garantir que o atlas de expressões LED (`^‿^`, `♥‿♥`, `@_@`, `♪‿♪`) use uma única textura leve e sons suaves (`volume <= 0.25f`).
+* **`[C]` Engenheiro C#:**
+  * `DroneAffectiveSystem.cs`: Reação de carinho e dança sutil no ritmo do rádio usando `MaterialPropertyBlock` / troca de UV sem instanciar materiais e sem alterar a distância escolhida pelo jogador.
+* **`[D]` Scene Layout & Prints:**
+  * Capturar print frontal do visor LED do Drone.
+* **`[E]` Auditoria Visual:**
+  * Confirmar alinhamento perfeito dos olhos LED sem *Z-fighting*.
 
 #### `TASK-05`: Comemoração de Metas Clínicas (`DroneMilestoneCelebration`)
-* **1. Pesquisa & Arquitetura:**
-  * Integrar com os contadores de passos/objetivos da caminhada.
-* **2. Geração de Assets (Gemini API):**
-  * Gerar via Gemini API o banco `Assets/Resources/DroneEncouragementPhrases.json` com 50 mensagens curtas e motivadoras em português.
-* **3. Implementação C# Detalhada:**
-  * `DroneMilestoneCelebration.cs`: Ao atingir metas, o drone faz uma pirueta 360° no ar, dispara canhões duplos de confete colorido, toca fanfarra e exibe uma mensagem motivadora em um balão 3D legível (`TextMeshPro`).
-* **4. Visual QA & Validação:**
-  * Tirar print do momento da celebração com o balão de texto ativo e verificar se o texto não está invertido, cortado ou sobreposto à geometria do drone.
+* **`[A]` Spec & Scout:**
+  * Mapear os gatilhos de celebração (passos, cestas de maçã, totens) mantendo o Drone na distância segura escolhida pelo jogador.
+* **`[B]` Artista (Gemini API & Audio):**
+  * Validar `DroneEncouragementPhrases.json` e som de fanfarra suave.
+* **`[C]` Engenheiro C#:**
+  * `DroneMilestoneCelebration.cs`: Faz o giro comemorativo no próprio eixo local (sem sair do lugar e sem avançar em cima do jogador!) e solta partículas leves de confete (`maxParticles = 40`, sem colisão física).
+* **`[D]` Scene Layout & Prints:**
+  * Capturar print da celebração ativa.
+* **`[E]` Auditoria Visual:**
+  * Verificar legibilidade e garantir que o balão não tampa os dados clínicos principais.
 
 ---
 
-### FASE 3: Sala do Menu Principal (Parquinho Interativo estilo *The Lab* & *XRI Demo*)
+### FASE 3: Sala do Menu Principal (Distribuição pelas Várias Mesas/Estantes Existentes e Diorama Sem Teleporte)
 
-#### `TASK-06`: Rádio Deck com Fitas Cassete Magnéticas (`RadioCassetteDeckSystem`)
-* **1. Pesquisa & Arquitetura:**
-  * Inspecionar o rádio já existente na cena do Menu Principal (posicionamento, escala e botões de volume atuais) para posicionar o deck e as fitas ao lado dele de forma harmônica.
-* **2. Geração de Assets (Blender MCP & Audio):**
-  * Modelar `RetroCassetteTape.fbx` (`0.10m x 0.065m x 0.012m`, com 2 carretéis internos separados na hierarquia para girarem via script e etiqueta colorida) e `CassetteDeckSlot.fbx` com botão físico vermelho de **EJECT**.
-* **3. Implementação C# Detalhada:**
-  * `MusicCassetteTape.cs` & `RadioCassetteSocket.cs`: Sistema com `XRSocketInteractor` magnético. Ao aproximar qualquer uma das 4 fitas coloridas, o rádio puxa a fita com som mecânico de *clack*, gira os carretéis internos e troca a música da cena. Apertar o botão físico de *Eject* faz a fita saltar fisicamente de volta para a mesa.
-* **4. Visual QA & Validação:**
-  * Tirar print da mesa do Menu Principal mostrando o rádio existente, o deck e as 4 fitas cassete organizadas sobre a mesa. Verificar se as fitas estão perfeitamente apoiadas na superfície da mesa (sem flutuar e sem atravessar o tampo) e se a fita encaixada no socket fica na orientação correta.
+#### `TASK-06`: Rádio Deck com 4 Fitas Cassete Magnéticas + Eject Físico (`RadioCassetteDeckSystem`)
+* **`[A]` Spec & Scout:**
+  * Localizar a mesa onde está o rádio original na sala do Menu Principal e verificar se há fitas ou rádios duplicados da rodada anterior.
+* **`[B]` Artista (Blender MCP & Audio):**
+  * `RetroCassetteTape.fbx` ($< 400\text{ tris}$, com `Reel_Left` e `Reel_Right`) e `CassetteDeckSlot.fbx` com botão físico `Btn_Eject`.
+* **`[C]` Engenheiro C#:**
+  * `MusicCassetteTape.cs` & `RadioCassetteSocket.cs`: Fitas pegáveis com o laser (`LaserSwingThrowInteractable`), encaixe magnético via `XRSocketInteractor` que troca a música do rádio e botão físico de Eject que lança a fita suavemente de volta para a superfície da mesa.
+* **`[D]` Scene Layout & Purge `(0,0,0)`:**
+  * Posicionar o deck ao lado do rádio existente e alinhar exatamente 4 fitas cassete (uma de cada cor/música, **zero duplicatas**) sobre a mesa do rádio com $0.08\text{m}$ de folga entre elas. Executar o `SceneDuplicateAndOriginPurger` para deletar qualquer fita extra no `(0,0,0)`.
+* **`[E]` Auditoria Visual:**
+  * Confirmar no print que existem exatamente 4 fitas alinhadas na mesa do rádio e nenhuma duplicata espalhada.
 
-#### `TASK-07`: Pistola/Dispenser de Balões Antigravidade (`BalloonGunAndFloatSystem`)
-* **1. Pesquisa & Arquitetura:**
-  * Reproduzir a pistola infladora de balões do *The Lab* da Valve.
-* **2. Geração de Assets (Blender MCP):**
-  * Modelar `BalloonGunDispenser.fbx` (pistolinha sci-fi ergonômica de `0.22m` com cilindro de hélio lateral colorido e bico cônico frontal, pivô exatamente na empunhadura para encaixar na mão VR) e `InflatableBalloon.fbx` (malha de balão liso brilhante com nó na base).
-* **3. Implementação C# Detalhada:**
-  * `BalloonInflaterGun.cs` & `FloatingBalloon.cs`: Segurar o gatilho infla um balão na ponta do bico com som de borracha esticando; soltar o gatilho libera o balão com cor vibrante sorteada, cordinha pendurada (`LineRenderer`) e empuxo antigravidade suave. Apontar o laser e atirar (ou tocar nele) estoura o balão com partículas e som de *POP!*.
-* **4. Visual QA & Validação:**
-  * Simular o disparo de 4 balões via código no Editor, tirar print da sala do Menu com os balões flutuando e a pistola sobre a mesa, validando que o ponto de inflar coincide exatamente com a ponta do bico da pistola.
+#### `TASK-07`: Pistola/Dispenser de Balões Antigravidade (*The Lab Style*) em Mesa/Estante Própria (`BalloonGunAndFloatSystem`)
+* **`[A]` Spec & Scout:**
+  * Escolher uma **mesa lateral ou bancada secundária já existente na sala do Menu** para colocar a estação de balões (longe do rádio e longe dos fidgets!).
+* **`[B]` Artista (Blender MCP & Audio):**
+  * `BalloonGunDispenser.fbx`, `BalloonGunStand.fbx` e `InflatableBalloon.fbx` ($< 500\text{ tris}$, shader com GPU Instancing).
+* **`[C]` Engenheiro C#:**
+  * `BalloonInflaterGun.cs` & `FloatingBalloon.cs`: Infla balões ao segurar o gatilho com o controle; limite máximo de **8 balões simultâneos em Object Pool** (se o jogador inflar o 9º, o mais antigo estoura suavemente, garantindo performance VR infinita!). Estoura ao levar tiro do raio laser.
+* **`[D]` Scene Layout & Purge `(0,0,0)`:**
+  * Posicionar o suporte e a pistola na mesa/bancada secundária existente, limpar duplicatas no `(0,0,0)` e tirar 3 prints.
+* **`[E]` Auditoria Visual:**
+  * Confirmar que a pistola está em sua própria área livre, sem sobrepor nenhum fidget ou rádio.
 
-#### `TASK-08`: Mini Basquete Arcade de Mesa (`ArcadeHoopMinigame`)
-* **1. Pesquisa & Arquitetura:**
-  * Encontrar uma parede ou espaço livre visível na frente/lateral da mesa na sala do Menu Principal para instalar a tabela de basquete sem tampar menus existentes.
-* **2. Geração de Assets (Blender MCP):**
-  * Modelar `ArcadeBasketballHoop.fbx` (tabela com moldura neon, aro metálico laranja de `0.38m` de diâmetro e rede cônica), `MiniBasketball.fbx` (bola laranja com gomos pretos de `0.18m`) e `ArcadeSpawnButton.fbx` (botão fliperama de mesa com legenda "BALL").
-* **3. Implementação C# Detalhada:**
-  * `BasketballHoopScorer.cs` & `ArcadeBallSpawner.cs`: Duplo sensor de passagem no aro (detecta cestas normais e cestas limpas *Swish!*), placar digital 3D com contador de pontos/recorde, buzina de cesta e botão na mesa que invoca bolas na frente do jogador.
-* **4. Visual QA & Validação:**
-  * Tirar print a partir da posição da câmera do jogador no Menu olhando para a tabela de basquete e para o botão na mesa. Confirmar que o placar digital está legível e que a bola passa com folga por dentro do anel do aro.
+#### `TASK-08`: Mini Basquete Arcade com Botão Spawner e Aro Duplo Sensor (`ArcadeHoopMinigame`)
+* **`[A]` Spec & Scout:**
+  * Localizar uma parede livre na sala do Menu Principal e uma mesa/bancada existente em frente a ela para o botão spawner de bolas.
+* **`[B]` Artista (Blender MCP & Audio):**
+  * `ArcadeBasketballHoop.fbx`, `MiniBasketball.fbx` e `ArcadeSpawnButton.fbx`.
+* **`[C]` Engenheiro C#:**
+  * `BasketballHoopScorer.cs` & `ArcadeBallSpawner.cs`: As bolas de basquete **DEVEM** usar o novo `LaserSwingThrowInteractable` (`TASK-02`) para que o jogador possa segurar a bola com o laser, balançar o controle/laser e arremessar na cesta com física realista! Pool limitado a 3 bolas ativas.
+* **`[D]` Scene Layout & Purge `(0,0,0)`:**
+  * Instalar a tabela na parede livre e o botão spawner na mesa correspondente, remover bolas/tabelas duplicadas no `(0,0,0)` e tirar prints.
+* **`[E]` Auditoria Visual:**
+  * Confirmar placar legível, aro desobstruído e zero duplicatas.
 
-#### `TASK-09`: Bancada Fidget 3D (`DesktopFidgetToys`)
-* **1. Pesquisa & Arquitetura:**
-  * Criar uma estação de brinquedos táteis (*fidgets*) no canto da mesa do Menu Principal.
-* **2. Geração de Assets (Blender MCP):**
-  * Modelar `EnvironmentControlLever.fbx` (caixa com alavanca articulada de 3 posições: Dia / Pôr do Sol / Noite), `FireworksLaunchButton.fbx` (botão vermelho de emergência/festa) e `ExoMascotBobblehead.fbx` (mini bonequinho cabeçudo simpático de `0.16m` de altura com cabeça separada do corpo).
-* **3. Implementação C# Detalhada:**
-  * `AtmosphereLeverInteractable.cs` (muda a iluminação da cena suavemente ao puxar a alavanca), `FireworksButtonInteractable.cs` (dispara fogos de artifício coloridos no céu ao apertar) e `BobbleheadSpringToy.cs` (oscilador harmônico amortecido que faz a cabeça do boneco balançar ao ser tocado pelo laser ou pela mão).
-* **4. Visual QA & Validação:**
-  * Tirar print em close-up dos 3 brinquedos lado a lado na mesa e tirar 3 prints comparativos da iluminação (Dia, Pôr do Sol e Noite) acionando a alavanca via script para provar que a transição visual está bonita e sem estourar a exposição.
+#### `TASK-09`: Espalhamento dos Fidgets nas Várias Mesas e Estantes Existentes da Sala (`DesktopFidgetToys` Distributed Layout)
+* **`[A]` Spec & Scout:**
+  * **Correção Crítica do Playtest:** Na versão anterior, todos os fidgets foram colocados espremidos em uma única mesa. O Scout deve mapear **todas as outras mesas, bancadas e estantes (`Shelves`/`Tables`) que já existem na sala do Menu Principal** para espalhar os brinquedos pela sala!
+* **`[B]` Artista (Blender MCP & Audio):**
+  * Verificar/refinar `EnvironmentControlLever.fbx` (Alavanca de Clima), `FireworksLaunchButton.fbx` (Botão de Fogos) e `ExoMascotBobblehead.fbx` (Boneco Cabeçudo com mola).
+* **`[C]` Engenheiro C#:**
+  * `AtmosphereLeverInteractable.cs`, `FireworksButtonInteractable.cs` e `BobbleheadSpringToy.cs`: Garantir funcionamento perfeito tanto clicando de longe com o `XRRayInteractor` quanto tocando de perto, com zero impacto de performance (fogos de artifício sem luzes de sombra dinâmica e com pool de partículas).
+* **`[D]` Scene Layout (Distribuição Multi-Móveis) & Purge `(0,0,0)`:**
+  * **Proibido deixar tudo na mesma mesa!** Distribuir os itens usando as diferentes mesas e estantes reais já presentes na sala do Menu Principal (sem precisar empilhar móveis estranhos se a sala já tem várias mesas e estantes):
+    * Colocar a **Alavanca de Clima** e o **Botão de Fogos** bem espaçados ($> 0.45\text{m}$ de distância) em uma mesa lateral livre existente;
+    * Colocar o **Mascote Bobblehead** em destaque em outra mesa ou prateleira/estante acessível;
+    * Verificar se havia objetos sobrepostos da rodada anterior, **deletar todas as cópias sobrepostas e tudo o que estiver largado no `(0, 0, 0)`**, e gerar prints de cada móvel mostrando o espaçamento amplo.
+* **`[E]` Auditoria Visual Implacável:**
+  * Inspecionar os prints da sala do Menu: se os fidgets ainda estiverem amontoados em uma mesa só ou se houver qualquer sobreposição/duplicata, emitir `FAIL -> RE-RUN [D]` imediatamente!
 
-#### `TASK-10`: Seletor de Mapas por Esferas de Portal 3D (`WorldPortalSphereSelector`)
-* **1. Pesquisa & Arquitetura:**
-  * Manter os botões de UI originais funcionando e adicionar o pedestal 3D com as esferas de mundo estilo *The Lab*.
-* **2. Geração de Assets (Blender MCP):**
-  * Modelar `PortalOrbDiorama_Forest.fbx` (esfera translúcida de `0.18m` contendo mini pinheiros, riacho e mini maçãs lá dentro) e `PortalPedestalSocket.fbx` (base tecnológica luminosa de encaixe).
-* **3. Implementação C# Detalhada:**
-  * `PortalWorldSphere.cs`: Permite carregar a cena da Floresta tanto encaixando a esfera no pedestal quanto puxando a esfera em direção ao próprio rosto/headset com transição de *Fade*.
-* **4. Visual QA & Validação:**
-  * Tirar print da esfera com o mini-diorama visível dentro dela (verificando se o material externo da redoma está realmente transparente/semitransparente no Render Pipeline atual e não opaco).
-
----
-
-### FASE 4: Mapa da Floresta (Microinterações de Cenário durante a Caminhada)
-
-#### `TASK-11`: Sistema de Maçãs Interativas, Árvores Sacudíveis e Cestas (`ForestAppleInteractionSystem`)
-* **1. Pesquisa & Arquitetura:**
-  * Abrir/inspecionar a cena da Floresta para mapear as coordenadas exatas da trilha de caminhada do paciente, as árvores próximas e as maçãs existentes.
-* **2. Geração de Assets (Blender MCP & Audio):**
-  * Modelar `InteractiveRedApple.fbx` (`0.085m`), `GoldenBonusApple.fbx` e `WickerCollectionBasket.fbx` (cesta de vime aberta de `0.50m` de largura com placa de madeira indicando pontos).
-* **3. Implementação C# Detalhada:**
-  * `InteractiveApple.cs`, `ShakeableFruitTree.cs` & `AppleCollectionBasket.cs`:
-    * Apontar o raio laser para a copa das árvores e apertar o gatilho sacode os galhos, solta folhas e derruba maçãs físicas que quicam até o chão.
-    * O jogador puxa as maçãs do chão com `Force Grab` (sem precisar abaixar com o exoesqueleto) e pode jogá-las longe (para o Drone buscar), jogá-las dentro das cestas de vime ao longo da trilha (ganhando pontos e confetes) ou na água (efeito de *splash*).
-* **4. Visual QA & Validação:**
-  * Tirar print da trilha da Floresta mostrando as cestas de vime posicionadas nas margens da trilha e as maçãs no chão/cesta, garantindo que nenhuma cesta esteja flutuando acima do terreno ou bloqueando o caminho onde o paciente passa.
-
-#### `TASK-12`: Sementes Mágicas e Pinhões Arremessáveis (`MagicSeedThrowables`)
-* **1. Pesquisa & Arquitetura:**
-  * Criar objetos pequenos na beira da trilha que transformam o cenário onde caem.
-* **2. Geração de Assets (Blender MCP):**
-  * Modelar `GlowingPineconeSeed.fbx` (pinhão com detalhes dourados/ciano), `SproutingFlowerPatch.fbx` (conjunto alegre de flores coloridas e grama com pivô na base) e `BouncyMushroomCluster.fbx`.
-* **3. Implementação C# Detalhada:**
-  * `MagicSeedPinecone.cs`: Quando arremessado pelo jogador, ao atingir o chão da floresta, abre-se em partículas e faz brotar suavemente (animação elástica de escala `0` -> `1`) um canteiro de flores luminosas alinhado à inclinação do terreno.
-* **4. Visual QA & Validação:**
-  * Simular o impacto de uma semente no terreno da Floresta, tirar print do canteiro de flores brotado e validar que as flores nascem rentes ao solo com a orientação vertical correta.
-
-#### `TASK-13`: Fauna e Flora Reativa ao Laser (`ForestReactiveEnvironment`)
-* **1. Pesquisa & Arquitetura:**
-  * Espalhar elementos reativos nas bordas da trilha que respondem instantaneamente ao toque do raio laser durante a marcha.
-* **2. Geração de Assets (Blender MCP & Síntese Pentatônica Python):**
-  * Modelar `XylophoneMushroom.fbx` (cogumelo colorido bioluminescente), `RunePathLantern.fbx` (lanterna rústica de madeira/pedra de `0.90m` de altura) e `LowPolyForestBird.fbx` (passarinho azul/amarelo com asas articuladas).
-  * Sintetizar 5 notas de marimba na escala pentatônica (`C4, D4, E4, G4, A4`).
-* **3. Implementação C# Detalhada:**
-  * `MusicalMushroom.cs` (toca notas musicais harmoniosas e faz *squash & stretch* ao passar o laser), `ReactiveForestBird.cs` (canta e voa em curva Bezier para a próxima árvore à frente guiando o jogador) e `PathLanternInteractable.cs` (acende fogo dourado ao clicar com o laser).
-* **4. Visual QA & Validação:**
-  * Tirar print na cena da Floresta enquadrando um grupo de 5 cogumelos musicais, uma lanterna acesa e um pássaro pousado, conferindo cores, iluminação da chama e escala em relação às árvores.
+#### `TASK-10`: Esfera de Diorama 3D Puramente Decorativa — REMOÇÃO TOTAL DO TELEPORTE AUTOMÁTICO (`DioramaDisplayOrb`)
+* **`[A]` Spec & Scout:**
+  * **Correção Crítica #1 do Playtest:** Identificar o script `PortalWorldSphere.cs` / `WorldPortalSphereSelector` que estava teletransportando o jogador automaticamente para a cena `Floresta e Rio` assim que dava Play no Menu Principal.
+* **`[B]` Artista (Blender MCP):**
+  * Manter o belo modelo `PortalOrbDiorama_Forest.fbx` (esfera transparente com mini pinheiros, rio e maçãs dentro) e sua base `PortalPedestalSocket.fbx`.
+* **`[C]` Engenheiro C# (Desativação Total de Teleporte por Esfera/Proximidade):**
+  * Reescrever `PortalWorldSphere.cs` como um **Diorama 3D Interativo Puro (`InteractiveDioramaOrb.cs`)**:
+    * **REMOVER TODAS as chamadas a `SceneManager.LoadScene` e `SceneManager.LoadSceneAsync` deste script e do pedestal!**
+    * **REMOVER qualquer checagem de distância para a câmera (`Vector3.Distance(transform.position, cam.position)`) que causava o teleporte por proximidade!**
+    * Quando o jogador pega a esfera com o laser ou a coloca no pedestal, ela gira a mini-floresta interna, acende partículas mágicas suaves dentro do globo de vidro e toca uma melodia tranquila da floresta, servindo como uma peça de exibição interativa na sala.
+    * Garantir que a transição real de cenas para os mapas ocorra **100% pelo Canvas 2D original do Menu Principal**, que deve permanecer totalmente funcional e desobstruído.
+* **`[D]` Scene Layout & Teste de Play Mode:**
+  * Posicionar o pedestal e o diorama em uma estante ou canto livre de uma mesa, remover qualquer esfera duplicada no `(0, 0, 0)` e verificar que entrar em Play Mode na cena do Menu Principal **mantém o jogador na sala do Menu Principal sem teletransportar sozinho**!
+* **`[E]` Auditoria Visual e Funcional:**
+  * Confirmar no código (`grep` por `LoadScene` nos scripts gerados) que **nenhum script novo chama `LoadScene`**, garantindo que apenas o Canvas original do projeto troque de fase.
 
 ---
 
-### FASE 5: Gamificação Completa, Objetivos e Sala de Troféus
+### FASE 4: Cena da Floresta e Rio (Maçãs Jogáveis no Laser, Limite de Mapa, Pássaro Suave e Cogumelos Distribuídos)
 
-#### `TASK-14`: Trilha de Moedas/Orbes com Atração Magnética Adaptativa (`AdaptiveCoinTrailSystem`)
-* **1. Pesquisa & Arquitetura:**
-  * Distribuir moedas ao longo do eixo central da caminhada para premiar cada metro percorrido com o exoesqueleto.
-* **2. Geração de Assets (Blender MCP & Audio):**
-  * Modelar `EnergyStarCoin.fbx` (moeda octogonal dourada/ciano de `0.28m` com estrela central em relevo) e gerar som cristalino de coleta com pitch progressivo.
-* **3. Implementação C# Detalhada:**
-  * `CollectibleOrbCoin.cs` & `CoinTrailSpawner.cs`: Moedas giratórias que voam magneticamente para o jogador quando ele se aproxima a menos de `2.0m` caminhando, além de moedas bônus laterais que podem ser coletadas apontando o raio laser.
-* **4. Visual QA & Validação:**
-  * Tirar print em perspectiva da trilha da Floresta mostrando a fileira de moedas flutuando a `1.1m` de altura ao longo do caminho do jogador.
+#### `TASK-11`: Maçãs Pegáveis/Jogáveis no Laser + Árvores Sacudíveis + Cestas + Proteção Contra Itens Fora do Mapa (`ForestAppleInteractionSystem`)
+* **`[A]` Spec & Scout:**
+  * Abrir a cena `Floresta e Rio` (e verificar se há outra cena de floresta).
+  * **Diagnóstico Crítico do Playtest:**
+    1. Verificar todas as maçãs que estavam fora do mapa (fazendo o drone antigo ir para debaixo do chão) e todas as duplicatas no `(0, 0, 0)`.
+    2. Verificar por que as maçãs não estavam sendo seguradas e arremessadas com o laser.
+    3. Verificar se alguma cesta ou árvore interativa foi apagada durante a limpeza manual de duplicatas para restaurar apenas as instâncias corretas.
+* **`[B]` Artista (Blender MCP & Audio):**
+  * `InteractiveRedApple.fbx` ($< 320\text{ tris}$, pivô no centro para rolar/voar com física natural!), `GoldenBonusApple.fbx` e `WickerCollectionBasket.fbx` ($< 900\text{ tris}$, cavidade aberta).
+* **`[C]` Engenheiro C# (Física Real de Maçã no Laser + Anti-Out-of-Bounds):**
+  * `InteractiveApple.cs`:
+    * **NÃO adicionar `DroneFetchTarget` nas maçãs!** O Drone nunca deve pegar maçãs.
+    * Acoplar obrigatoriamente o `LaserSwingThrowInteractable` (`TASK-02`) + `XRGrabInteractable` (`useForceGrab = true`, `interactionLayers = ~0`, `movementType = Instantaneous` durante o grab para seguir o laser sem atraso, e aplicando a velocidade tangencial do balanço do laser ao `Rigidbody` quando solta!).
+    * Assim, quando o jogador aponta o laser para uma maçã no chão, segura com o botão do controle, dá um impulso balançando o laser e solta, **a maçã voa fisicamente na exata direção e velocidade em que foi lançada**, quicando no chão ou caindo dentro das cestas!
+    * **Proteção Anti-Debaixo do Mapa (`OutOfBoundsSafetyGuard`):** Se a maçã cair abaixo do terreno (`transform.position.y < startTerrainY - 1.5f`) ou sair dos limites da trilha, ela reseta imediatamente para sua posição segura na grama ao lado da trilha e entra em `rigidbody.Sleep()`.
+  * `ShakeableFruitTree.cs` & `AppleCollectionBasket.cs`:
+    * Sacudir árvores com o laser derruba maçãs apenas **dentro do raio seguro da trilha** (com limite de pool de 12 maçãs na cena para zero peso em VR).
+* **`[D]` Scene Layout, Expurgo de Fora do Mapa / `(0,0,0)` & Aterramento:**
+  * **Limpeza Obrigatória na Cena `Floresta e Rio`:**
+    1. Deletar imediatamente todas as maçãs, cestas ou objetos que estejam **fora do limites do terreno/mapa** ou na coordenada `(0, 0, 0)`.
+    2. Executar o `ForestGlobalGroundingFixer` para aterrar todas as árvores e posicionar grupos limpos de maçãs pegáveis e cestas de vime **estritamente nas margens visíveis e acessíveis da trilha onde o jogador caminha** (validadas por `Physics.Raycast` contra o chão real da trilha).
+    3. Capturar 3 prints da trilha mostrando as maçãs e cestas perfeitamente apoiadas no chão.
+* **`[E]` Auditoria Visual e Espacial:**
+  * Confirmar no `SpatialAudit.json` e nos prints que **0 maçãs estão fora do mapa**, **0 objetos estão no `(0,0,0)`**, todas as maçãs têm `LaserSwingThrowInteractable` ativo e nenhuma árvore flutua.
 
-#### `TASK-15`: Checklist de Missões no Visor do Drone + Totens de Checkpoint (`SessionQuestAndCheckpointManager`)
-* **1. Pesquisa & Arquitetura:**
-  * Conectar todas as interações da Floresta (maçãs, lanternas, sementes, moedas, passos) em um sistema de missões visível no Drone e checkpoints físicos na trilha.
-* **2. Geração de Assets (Blender MCP):**
-  * Modelar `CheckpointRewardTotem.fbx` (totem estilizado de madeira e pedra na lateral da trilha com alavanca lateral e baú de recompensas no topo).
-* **3. Implementação C# Detalhada:**
-  * `SessionQuestManager.cs` & `InteractiveCheckpointTotem.cs`: Exibe 3 missões dinâmicas com barras de progresso; ao puxar a alavanca de um totem de checkpoint na trilha, o baú abre com chuva de moedas e salva o progresso.
-* **4. Visual QA & Validação:**
-  * Tirar print do Totem de Checkpoint posicionado na margem da trilha e do painel de missões ativo no Drone, garantindo legibilidade perfeita das fontes.
+#### `TASK-12`: Sementes Mágicas e Pinhões Arremessáveis com Física de Laser (`MagicSeedThrowables`)
+* **`[A]` Spec & Scout:**
+  * Verificar os pinhões (`GlowingPineconeSeed`) na cena `Floresta e Rio`, limpando duplicatas no `(0,0,0)` ou itens fora do mapa.
+* **`[B]` Artista (Blender MCP & Audio):**
+  * `GlowingPineconeSeed.fbx`, `SproutingFlowerPatch.fbx` e `BouncyMushroomCluster.fbx` ($< 600\text{ tris}$ cada, GPU Instancing ativo).
+* **`[C]` Engenheiro C#:**
+  * `MagicSeedPinecone.cs`: Usa a mesma física de arremesso por balanço do laser (`LaserSwingThrowInteractable`) das maçãs! Quando o jogador pega um pinhão com o laser, balança e joga no chão, faz brotar um canteiro de flores (limitado a um *Object Pool* de 10 canteiros para nunca pesar em VR).
+* **`[D]` Scene Layout & Purge `(0,0,0)`:**
+  * Posicionar os pinhões apenas nas bordas válidas da trilha, remover duplicatas no `(0,0,0)` e tirar prints.
+* **`[E]` Auditoria Visual:**
+  * Confirmar aterramento perfeito e ausência de duplicatas.
 
-#### `TASK-16`: Persistência de Progresso + Troféus Físicos Desbloqueáveis no Menu (`TrophyRoomProgressionSystem`)
-* **1. Pesquisa & Arquitetura:**
-  * Transformar as conquistas das sessões em troféus físicos interativos permanentes na sala do Menu Principal.
-* **2. Geração de Assets (Blender MCP):**
-  * Modelar 4 troféus colecionáveis: `Trophy_GoldenApple.fbx`, `Trophy_LuminousBonsai.fbx`, `Trophy_StarCup.fbx` e `Trophy_DroneCrownHat.fbx` (uma coroa dourada que o jogador pode pegar na mesa e **colocar na cabeça do Drone Pet** via `XRSocketInteractor`!).
-* **3. Implementação C# Detalhada:**
-  * `RehabProgressionSaveSystem.cs` & `TrophyShelfManager.cs`: Sistema de save JSON com flag `unlockAllForDemo = true` ativada por padrão para que todos os troféus já apareçam na mesa prontos para teste imediato.
-* **4. Visual QA & Validação Final Geral:**
-  * Tirar print panorâmico final da sala do Menu Principal com todos os troféus, a coroa equipada no topo do Drone Pet, o rádio com fitas, a pistola de balões, os brinquedos Fidget e a tabela de basquete, gerando o relatório final `VISUAL_QA_REPORT.md`.
+#### `TASK-13`: Pássaro Silencioso/Suave com Pernas Visíveis + Distribuição Limpa dos Cogumelos Musicais e Lanternas (`ForestReactiveEnvironment`)
+* **`[A]` Spec & Scout:**
+  * **Diagnóstico Crítico do Playtest:**
+    1. O pássaro na cena `Floresta e Rio` ficava gritando sem parar e extremamente alto quando o jogador chegava perto, além de precisar ter as duas pernas visíveis.
+    2. Os **Cogumelos Musicais funcionam muito bem e são muito divertidos**, mas havia duplicatas desnecessárias espalhadas e objetos no `(0, 0, 0)`. O usuário apagou duplicatas manualmente, então o Scout deve verificar a distribuição atual dos cogumelos ao longo da trilha para garantir que estejam completos, sem sobreposição e sem cópias no `(0, 0, 0)`.
+* **`[B]` Artista (Blender MCP & Áudio Suave Calibrado):**
+  * Modelar/validar `LowPolyForestBird.fbx` com **`Leg_Left` e `Leg_Right` sólidos e visíveis** apoiados em $Y = 0$.
+  * **Refazer `forest_bird_chirp.wav`:** Gerar um som de passarinho **curto ($0.45\text{s}$), suave, melodioso, em frequência média-baixa agradável ($1.200\text{ Hz}$ a $2.200\text{ Hz}$) e com amplitude baixa (`peak = -12 dB`)**, eliminando qualquer timbre agudo ou estridente!
+  * Preservar intactos os 5 áudios pentatônicos dos cogumelos musicais que o usuário aprovou.
+* **`[C]` Engenheiro C# (Correção Definitiva do Grito do Pássaro):**
+  * `ReactiveForestBird.cs`:
+    * Configurar no código: `audioSource.loop = false;`, `audioSource.playOnAwake = false;`, `audioSource.volume = 0.16f;` (volume baixo e confortável!), `audioSource.spatialBlend = 1.0f;`.
+    * **Trava Anti-Spam de Áudio (`Strict Cooldown & Single Trigger`):** Quando o jogador chega perto ou aponta o laser, o pássaro verifica `if (Time.time < lastChirpTime + 15.0f || isFlying) return;`. Ele atualiza `lastChirpTime = Time.time`, toca `PlayOneShot` **uma única vez** com volume `0.16f` e inicia imediatamente o voo suave em curva Bezier para uma árvore mais adiante na trilha! **Ele NUNCA fica parado gritando repetidamente perto do jogador.**
+  * `MusicalMushroom.cs` & `PathLanternInteractable.cs`:
+    * Manter a mecânica divertida dos cogumelos musicais intacta; garantir que as lanternas usem luzes sem sombra dinâmica (`LightShadows.None`) para máxima performance em VR.
+* **`[D]` Scene Layout, Distribuição na Trilha & Purge `(0,0,0)`:**
+  * Na cena `Floresta e Rio`:
+    1. Executar o `SceneDuplicateAndOriginPurger` para remover todos os cogumelos, pássaros ou lanternas duplicados que estavam no `(0, 0, 0)` ou sobrepostos no mesmo lugar.
+    2. Distribuir os grupos de **Cogumelos Musicais** de forma limpa, harmônica e bem espaçada ao longo de toda a trilha de caminhada (ex: 3 ou 4 estações musicais de 5 cogumelos cada, perfeitamente aterradas nas curvas da trilha e do rio).
+    3. Posicionar os pássaros e lanternas em pontos únicos e aterrados ao longo do caminho, tirando o close-up das pernas do pássaro e o print das estações de cogumelos.
+* **`[E]` Auditoria Visual e de Áudio:**
+  * Verificar no código de `ReactiveForestBird.cs` que `loop == false`, `volume <= 0.20f` e `cooldown >= 15f`. Verificar nos prints que as pernas do pássaro estão visíveis, que os cogumelos musicais estão bem distribuídos ao longo do mapa e que o `(0, 0, 0)` está 100% vazio.
 
 ---
 
-## 5. Prompt de Disparo (Para Enviar pelo App do Celular junto com o Anexo)
+### FASE 5: Gamificação Leve para VR, Missões, Totens e Troféus nas Estantes do Menu
 
-Copie e envie exatamente este texto junto com o arquivo `.md` anexado:
+#### `TASK-14`: Trilha de Moedas/Orbes Flutuantes Otimizada para VR (`AdaptiveCoinTrailSystem`)
+* **`[A]` Spec & Scout:**
+  * Verificar a trilha de moedas na cena `Floresta e Rio`, limpando moedas fora do mapa ou duplicadas no `(0,0,0)`.
+* **`[B]` Artista (Blender MCP & Audio):**
+  * `EnergyStarCoin.fbx` ($< 280\text{ tris}$, material com GPU Instancing).
+* **`[C]` Engenheiro C# (Otimização de Rotação Unificada):**
+  * Em vez de 30 moedas rodando `Update()` individualmente, o `CoinTrailSpawner.cs` / `CoinManager` gira todas as moedas visíveis em um único loop centralizado e checa a distância ao jogador usando `sqrMagnitude`!
+* **`[D]` Scene Layout & Purge `(0,0,0)`:**
+  * Distribuir uma única fileira limpa de moedas acompanhando o caminho real da trilha na cena `Floresta e Rio`, sem duplicatas e sem moedas fora do mapa.
+* **`[E]` Auditoria Visual:**
+  * Confirmar alinhamento da trilha e zero objetos em `(0,0,0)`.
+
+#### `TASK-15`: Checklist de Missões no Visor do Drone + Totens de Checkpoint Aterrados (`SessionQuestAndCheckpointManager`)
+* **`[A]` Spec & Scout:**
+  * Verificar os Totens de Checkpoint na trilha da `Floresta e Rio` e o painel de missões acoplado ao Drone.
+* **`[B]` Artista (Blender MCP & Audio):**
+  * `CheckpointRewardTotem.fbx` ($< 1.200\text{ tris}$) com alavanca lateral e tampa de baú articulada.
+* **`[C]` Engenheiro C#:**
+  * `SessionQuestManager.cs` & `InteractiveCheckpointTotem.cs`: Conectar a coleta de maçãs nas cestas, cogumelos tocados, lanternas acesas e moedas ao progresso das missões, garantindo que a UI no Drone não recrie strings todo frame (atualiza apenas quando o contador muda!).
+* **`[D]` Scene Layout & Purge `(0,0,0)`:**
+  * Posicionar os Totens aterrados nas margens da trilha da `Floresta e Rio`, remover qualquer totem duplicado no `(0,0,0)` e tirar prints.
+* **`[E]` Auditoria Visual:**
+  * Confirmar totens aterrados e UI do Drone limpa (sem os textos antigos `- perto / + longe`).
+
+#### `TASK-16`: Troféus nas Estantes Existentes do Menu + Varredura Global Final Anti-Duplicatas e Certificação VR (`TrophyRoomProgressionSystem`)
+* **`[A]` Spec & Scout:**
+  * Mapear as **estantes (`Shelves`) e prateleiras existentes na sala do Menu Principal** para colocar os troféus e fazer uma inspeção final completa nas cenas `Menu Principal` e `Floresta e Rio`.
+* **`[B]` Artista (Blender MCP):**
+  * `Trophy_GoldenApple.fbx`, `Trophy_LuminousBonsai.fbx`, `Trophy_StarCup.fbx` e `Trophy_DroneCrownHat.fbx` ($< 800\text{ tris}$ cada).
+* **`[C]` Engenheiro C#:**
+  * `RehabProgressionSaveSystem.cs` & `TrophyShelfManager.cs`: Persistência em JSON com `unlockAllForDemo = true` e encaixe da coroa na cabeça do Drone.
+* **`[D]` Scene Layout nas Estantes & Varredura Global Final `(0,0,0)`:**
+  * Posicionar os Troféus distribuídos nas **estantes existentes da sala do Menu Principal** (deixando as mesas livres e organizadas!).
+  * Rodar a **Varredura Global Final (`SceneDuplicateAndOriginPurger`)** tanto na cena do `Menu Principal` quanto na cena `Floresta e Rio`, garantindo:
+    1. **Zero objetos duplicados** em qualquer lugar das cenas;
+    2. **Zero objetos esquecidos na coordenada `(0, 0, 0)`**;
+    3. **Zero scripts chamando `LoadScene` fora do Canvas original do Menu**;
+    4. **Todos os objetos necessários presentes, testados e funcionais**.
+  * Gerar os prints panorâmicos finais das duas cenas e o relatório `FINAL_VR_PLAYTEST_AND_PERFORMANCE_CERTIFICATE.md`.
+* **`[E]` Auditoria Visual e de Performance Global Final:**
+  * Inspecionar rigorosamente todos os prints e o relatório JSON final, validando que todas as 10 correções do playtest do usuário e todas as metas de otimização VR foram 100% cumpridas.
+
+---
+
+## 6. Prompt de Disparo Otimizado para Gemini Flash High (Copie e Envie em um Chat Novo no Antigravity)
+
+Abra uma **nova conversa limpa** no Antigravity, anexe este arquivo `.md` e envie exatamente o texto abaixo:
 
 ```text
-Estou te enviando em anexo o plano mestre de arquitetura e implementação (AGENTS_IMPLEMENTATION_PLAN.md).
+Estou te enviando em anexo o plano mestre atualizado com as correções do meu playtest em VR e regras de otimização de performance (AGENTS_IMPLEMENTATION_PLAN.md). Uma primeira versão das tasks já existe no workspace, mas apresentou bugs específicos no meu teste prático que precisam ser corrigidos com rigor absoluto.
 
-O Editor da Unity JÁ ESTÁ ABERTO no computador. Execute obrigatoriamente este PASSO ZERO antes de começar as tasks:
-1. Copie INTEGRALMENTE o conteúdo do arquivo em anexo e salve-o fisicamente na raiz do meu workspace em dois locais: `./AGENTS_IMPLEMENTATION_PLAN.md` e `./AGENTS.md`.
-2. Crie as pastas `./.agents/specs/` e `./.agents/visual_qa/`.
+Execute obrigatoriamente este PASSO ZERO antes de qualquer coisa:
+1. Salve INTEGRALMENTE o conteúdo do arquivo em anexo na raiz do workspace em `./AGENTS_IMPLEMENTATION_PLAN.md` e `./AGENTS.md`.
+2. Garanta que as pastas `./.agents/specs/` e `./.agents/visual_qa/` existam.
 
-Após salvar os arquivos no disco, atue como Orquestrador Mestre e execute da TASK-01 até a TASK-16 em ordem estrita, UMA TAREFA POR VEZ, invocando subagentes dedicados (`invoke_subagent`) para que cada tarefa tenha esforço, pesquisa e qualidade máximos.
+REGRA CRÍTICA DE ORÇAMENTO DE OUTPUT (MODO MICRO-SUBAGENTES):
+Como estamos usando o modelo Flash High, NUNCA peça para um único subagente fazer uma Task inteira de uma vez!
+Atue como Orquestrador Mestre e execute a Matriz da Seção 4 CÉLULA POR CÉLULA, fazendo chamadas `invoke_subagent` SEPARADAS E SEQUENCIAIS para cada especialista (`[A]`, `[B]`, `[C]`, `[D]` e `[E]`):
 
-Para CADA TASK, o subagente é OBRIGADO a cumprir os 5 estágios:
-1. Pesquisa do projeto atual e criação da Spec em `.agents/specs/TASK-XX_Spec.md`;
-2. Geração dos modelos 3D no Blender MCP (`.fbx`), áudios procedurais em Python (`.wav`) e dados via Gemini API;
-3. Implementação completa dos scripts C# (Unity XRI) + execução de Editor Script no Unity aberto para montar os Prefabs e posicioná-los na cena com 0 erros no Console;
-4. LOOP DE VISUAL QA OBRIGATÓRIO: Renderizar/capturar screenshots em alta resolução da cena/objeto na Unity (`.agents/visual_qa/TASK-XX_*.png`), INSPECIONAR VISUALMENTE A IMAGEM GERADA procurando por shaders rosas, objetos flutuando, escala errada ou UI cortada, e corrigir automaticamente na Unity/Blender até que o print esteja visualmente perfeito;
-5. Atualizar a tabela de progresso no arquivo `./AGENTS_IMPLEMENTATION_PLAN.md` e `./AGENTS.md` marcando `[x]` antes de avançar para a próxima task.
+Enquanto percorre da TASK-01 à TASK-16, garanta que os especialistas apliquem TODAS as 10 correções obrigatórias do meu playtest (Seção 2) e as otimizações de VR (Seção 3):
+1. MENU SEM TELEPORTE AUTOMÁTICO (TASK-01 / TASK-10): Remova imediatamente qualquer `LoadScene` ou teleporte por proximidade das esferas de portal/diorama! Ao dar Play no Menu Principal, não posso ser teletransportado sozinho para a Floresta e Rio. Deixe apenas o diorama 3D decorativo; a ida para os mapas será feita exclusivamente pelo sistema de Canvas normal do projeto.
+2. DRONE COMPANHEIRO (TASK-03):
+   - Tire as mensagens `- perto` e `+ longe` de baixo do Drone.
+   - Tire a colisão física do Drone com o Player (`Physics.IgnoreCollision` / Kinematic) para ele NUNCA empurrar o jogador.
+   - O Drone NÃO deve pegar maçãs nunca, apenas acompanhar!
+   - Ele deve começar na frente do player (para o player ler as infos dele), permitir que o player o segure com o laser do controle e o arraste/ajuste mais perto ou mais longe com o scroll/movimento, e a partir de onde foi solto ele deve passar a seguir o player mantendo sempre aquela exata distância escolhida.
+3. MAÇÃS PEGÁVEIS E JOGÁVEIS BALANÇANDO O LASER (TASK-02 / TASK-11): As maçãs precisam ser pegáveis clicando com o laser e ter física real de arremesso (`LaserSwingThrowInteractable`): quando pego com o laser, dou velocidade balançando o laser e solto, ela deve voar fisicamente na direção em que foi solta. Corrija também itens fora do mapa na Floresta e Rio que caíam debaixo do chão.
+4. PÁSSARO E COGUMELOS NA FLORESTA E RIO (TASK-13): O pássaro estava gritando sem parar e extremamente alto quando chega perto — tire o loop, baixe bastante o volume, coloque cooldown longo para dar apenas um pio curto e suave, e garanta as pernas visíveis. Mantenha os cogumelos musicais (que ficaram ótimos!), apenas distribuindo-os de forma limpa pelo mapa.
+5. ESPALHAR NAS VÁRIAS MESAS/ESTANTES E LIMPAR DUPLICATAS NO `(0,0,0)` (GLOBAL / TASK-06 a 16): Em vez de espremer todos os fidgets em uma mesa só no Menu, espalhe os minigames, fidgets e troféus pelas várias mesas e estantes que já existem na sala. Em todas as tasks, verifique se algum item necessário foi apagado sem querer, elimine todas as duplicatas desnecessárias no Menu e na Floresta e Rio, e delete qualquer objeto duplicado largado na coordenada `(0, 0, 0)` da cena!
 
-Comece agora pelo Passo Zero e inicie imediatamente a TASK-01.
+Atualize a tabela da Seção 4 em `./AGENTS_IMPLEMENTATION_PLAN.md` e `./AGENTS.md` a cada micro-célula concluída (`[x]`). Comece agora pelo Passo Zero e dispare imediatamente o Subagente `TASK-01.A`.
 ```
