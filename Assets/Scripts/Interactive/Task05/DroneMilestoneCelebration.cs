@@ -72,7 +72,6 @@ namespace VRRehab.DronePet
     ///   Fanfarra suave (<= -8.5 dBFS, vol 0.22f), estouro suave (vol 0.20f), expressão Happy no visor LED.
     /// </summary>
     [DisallowMultipleComponent]
-    [ExecuteAlways]
     public class DroneMilestoneCelebration : MonoBehaviour
     {
         public static DroneMilestoneCelebration Instance { get; private set; }
@@ -143,6 +142,7 @@ namespace VRRehab.DronePet
 
         // Controle de marcos atingidos
         private int lastStepMilestone = 0;
+        private int lastGuideMilestoneCount = 0;
         private float lastDistanceMilestone = 0f;
         private float lastSymmetryCelebrationTime = -60f;
         private bool wasSymmetryPoor = false;
@@ -204,13 +204,19 @@ namespace VRRehab.DronePet
         public void LocateDependencies()
         {
             if (droneGuia == null)
-                droneGuia = GetComponent<DroneGuiaIA>() ?? FindFirstObjectByType<DroneGuiaIA>();
+                {
+                droneGuia = GetComponent<DroneGuiaIA>();
+                if (droneGuia == null) droneGuia = FindFirstObjectByType<DroneGuiaIA>();
+            }
 
             if (telemetria == null)
                 telemetria = FindFirstObjectByType<TelemetriaClinica>();
 
             if (affectiveSystem == null)
-                affectiveSystem = GetComponent<DroneAffectiveSystem>() ?? FindFirstObjectByType<DroneAffectiveSystem>();
+                {
+                affectiveSystem = GetComponent<DroneAffectiveSystem>();
+                if (affectiveSystem == null) affectiveSystem = FindFirstObjectByType<DroneAffectiveSystem>();
+            }
 
             if (cameraPaciente == null)
             {
@@ -371,24 +377,25 @@ namespace VRRehab.DronePet
 
         private void EvaluateAutomaticMilestones()
         {
-            if (isCelebrating) return;
-
-            // 1. Sincronia com EstadoDrone.CelebrandoMeta em DroneGuiaIA
-            if (droneGuia != null && droneGuia.estadoAtual == DroneGuiaIA.EstadoDrone.CelebrandoMeta)
+            // 1. Marco de passos: quem conta é o DroneGuiaIA (estado CelebrandoMeta). Usamos o contador dele para
+            //    disparar UMA comemoração por meta (antes os dois scripts contavam passos e a festa saía em dobro).
+            if (droneGuia != null)
             {
-                TriggerCelebration(CelebrationCategory.Passos);
-                return;
+                if (droneGuia.ContadorMetasCelebradas != lastGuideMilestoneCount)
+                {
+                    lastGuideMilestoneCount = droneGuia.ContadorMetasCelebradas;
+                    if (!isCelebrating) TriggerCelebration(CelebrationCategory.Passos);
+                    return;
+                }
             }
-
-            if (telemetria == null) return;
-
-            // 2. Marco de Passos
-            if (telemetria.totalPassos >= lastStepMilestone + stepsMilestoneInterval)
+            else if (telemetria != null && telemetria.totalPassos >= lastStepMilestone + stepsMilestoneInterval)
             {
                 lastStepMilestone = (telemetria.totalPassos / stepsMilestoneInterval) * stepsMilestoneInterval;
-                TriggerCelebration(CelebrationCategory.Passos);
+                if (!isCelebrating) TriggerCelebration(CelebrationCategory.Passos);
                 return;
             }
+
+            if (isCelebrating || telemetria == null) return;
 
             // 3. Marco de Simetria Articular Excelente (> 80%)
             if (telemetria.totalPassos >= 8)
@@ -692,174 +699,11 @@ namespace VRRehab.DronePet
                 visualModelTransform.localRotation = visualRestRot;
             }
 
-            transform.localRotation = Quaternion.identity;
             HideSpeechBubbleInstant();
 
             if (affectiveSystem != null)
             {
                 affectiveSystem.SetExpression(DroneLEDExpression.Normal);
-            }
-        }
-
-        /// <summary>
-        /// Configura a pose exata para a captura do print TASK-05_Celebration_Pirouette.png:
-        /// Nó visual inclinado na pirueta acrobática com confetes no ar.
-        /// O transform raiz permanece 100% INTACTO. O HUD clínico permanece ATIVO.
-        /// </summary>
-        public void SetVisualQAPirouettePose()
-        {
-            LocateDependencies();
-            LoadPhrasesBank();
-
-            isCelebrating = true;
-            celebrationTimer = 0.95f; // Meio da pirueta (pico do swoop)
-            pirouetteVerticalOffset = pirouetteVerticalSwoop;
-
-            // Raiz estática
-            transform.localRotation = Quaternion.identity;
-
-            // Pirueta exclusivamente no nó visual
-            if (visualModelTransform != null)
-            {
-                visualModelTransform.localPosition = visualRestPos + new Vector3(0f, pirouetteVerticalSwoop, 0f);
-                visualModelTransform.localRotation = visualRestRot * Quaternion.Euler(-6.0f, 65.0f, 16.0f);
-            }
-
-            // Balão acima do HUD (Y = 0.96m)
-            if (speechBubbleAnchor != null)
-            {
-                speechBubbleAnchor.gameObject.SetActive(true);
-                speechBubbleAnchor.localScale = Vector3.one;
-                speechBubbleAnchor.localPosition = new Vector3(0f, bubbleElevationOffset, 0f);
-                speechBubbleAnchor.localRotation = Quaternion.identity;
-
-                if (bubbleCanvasGroup != null) bubbleCanvasGroup.alpha = 1.0f;
-                if (txtMotivationalSpeech != null)
-                    txtMotivationalSpeech.text = "Sensacional! Você atingiu a meta de passos com vigor e constância!";
-                if (txtCategoryBadge != null)
-                    txtCategoryBadge.text = "[META DE PASSOS]";
-            }
-
-            if (affectiveSystem != null)
-            {
-                affectiveSystem.SetExpression(DroneLEDExpression.Happy);
-            }
-
-            SimulateConfettiParticles(0.55f);
-        }
-
-        /// <summary>
-        /// Configura a pose exata para a captura do print TASK-05_Celebration_SpeechBubble.png:
-        /// Close-up focado no balão de fala 3D com texto nítido em português acima do HUD clínico.
-        /// </summary>
-        public void SetVisualQASpeechBubblePose(string message = null, string tag = null)
-        {
-            LocateDependencies();
-            LoadPhrasesBank();
-
-            isCelebrating = true;
-            celebrationTimer = 1.8f;
-            pirouetteVerticalOffset = 0.0f;
-
-            // Raiz estática
-            transform.localRotation = Quaternion.identity;
-
-            // Modelo visual em repouso
-            if (visualModelTransform != null)
-            {
-                visualModelTransform.localPosition = visualRestPos;
-                visualModelTransform.localRotation = visualRestRot;
-            }
-
-            // Balão acima do HUD (Y = 0.96m)
-            if (speechBubbleAnchor != null)
-            {
-                speechBubbleAnchor.gameObject.SetActive(true);
-                speechBubbleAnchor.localScale = Vector3.one;
-                speechBubbleAnchor.localPosition = new Vector3(0f, bubbleElevationOffset, 0f);
-                speechBubbleAnchor.localRotation = Quaternion.identity;
-
-                if (bubbleCanvasGroup != null) bubbleCanvasGroup.alpha = 1.0f;
-                if (txtMotivationalSpeech != null)
-                {
-                    txtMotivationalSpeech.text = !string.IsNullOrEmpty(message)
-                        ? message
-                        : "Simetria perfeita! Ambas as pernas estão trabalhando com equilíbrio exemplar!";
-                }
-                if (txtCategoryBadge != null)
-                {
-                    txtCategoryBadge.text = !string.IsNullOrEmpty(tag) ? tag : "[SIMETRIA EXCELENTE]";
-                }
-            }
-
-            if (affectiveSystem != null)
-            {
-                affectiveSystem.SetExpression(DroneLEDExpression.Happy);
-            }
-        }
-
-        /// <summary>
-        /// Configura a pose para a captura do print TASK-05_Confetti_Explosion.png:
-        /// Visão frontal panorâmica com confetes multicolores flutuando ao redor do drone.
-        /// </summary>
-        public void SetVisualQAConfettiExplosionPose()
-        {
-            LocateDependencies();
-            LoadPhrasesBank();
-
-            isCelebrating = true;
-            celebrationTimer = 0.65f;
-            pirouetteVerticalOffset = 0.06f;
-
-            // Raiz estática
-            transform.localRotation = Quaternion.identity;
-
-            // Leve elevação no nó visual
-            if (visualModelTransform != null)
-            {
-                visualModelTransform.localPosition = visualRestPos + new Vector3(0f, 0.06f, 0f);
-                visualModelTransform.localRotation = visualRestRot;
-            }
-
-            // Balão visível acima do HUD
-            if (speechBubbleAnchor != null)
-            {
-                speechBubbleAnchor.gameObject.SetActive(true);
-                speechBubbleAnchor.localScale = Vector3.one;
-                speechBubbleAnchor.localPosition = new Vector3(0f, bubbleElevationOffset, 0f);
-                speechBubbleAnchor.localRotation = Quaternion.identity;
-
-                if (bubbleCanvasGroup != null) bubbleCanvasGroup.alpha = 1.0f;
-                if (txtMotivationalSpeech != null)
-                    txtMotivationalSpeech.text = "Nova marca de distância conquistada! Você percorreu um longo trajeto com bravura!";
-                if (txtCategoryBadge != null)
-                    txtCategoryBadge.text = "[DISTÂNCIA CONQUISTADA]";
-            }
-
-            if (affectiveSystem != null)
-            {
-                affectiveSystem.SetExpression(DroneLEDExpression.Happy);
-            }
-
-            SimulateConfettiParticles(0.35f);
-        }
-
-        public void SimulateConfettiParticles(float simulationTime)
-        {
-            if (leftConfettiCannon != null)
-            {
-                ConfigureConfettiVRSafe(leftConfettiCannon);
-                leftConfettiCannon.Clear();
-                leftConfettiCannon.Play();
-                leftConfettiCannon.Simulate(simulationTime, true, true);
-            }
-
-            if (rightConfettiCannon != null)
-            {
-                ConfigureConfettiVRSafe(rightConfettiCannon);
-                rightConfettiCannon.Clear();
-                rightConfettiCannon.Play();
-                rightConfettiCannon.Simulate(simulationTime, true, true);
             }
         }
 

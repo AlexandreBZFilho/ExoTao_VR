@@ -79,7 +79,7 @@ public static class PainelControleICEditor
             }
 
             // 4. Garante TrackedDeviceGraphicRaycaster no Canvas para compatibilidade com o laser VR
-            if (c.renderMode == RenderMode.WorldSpace)
+            if (c.renderMode == RenderMode.WorldSpace && c.GetComponentInParent<DroneGuiaIA>(true) == null) // painéis do drone são só de leitura
             {
                 var trackedRaycaster = c.GetComponent<TrackedDeviceGraphicRaycaster>();
                 if (trackedRaycaster == null)

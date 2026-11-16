@@ -148,6 +148,9 @@ public static class InicializadorSistemasIC
                     c.worldCamera = mainCam;
                 }
 
+                // Painéis do drone são só de leitura: sem raycaster (o laser deve pinçar o corpo do drone, não o painel)
+                if (c.GetComponentInParent<DroneGuiaIA>(true) != null) continue;
+
                 // Garante suporte a laser de controles VR
                 TrackedDeviceGraphicRaycaster raycaster = c.GetComponent<TrackedDeviceGraphicRaycaster>();
                 if (raycaster == null)

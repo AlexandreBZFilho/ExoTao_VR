@@ -1,0 +1,137 @@
+=== Correção do Drone (2026-11-13 17:06:44) ===
+[Campos_Mediterrâneos] 16 ajustes (salva)
+  - peça copiada do drone do Menu: Modelo_3D_ExoBot/Visor_LED_Frontal
+  - peça copiada do drone do Menu: ParticleSystem_Hearts
+  - peça copiada do drone do Menu: ConfettiCannons_Group
+  - peça copiada do drone do Menu: SpeechBubble_Anchor
+  - componente adicionado (cópia do Menu): AudioSource
+  - componente adicionado (cópia do Menu): DroneAffectiveSystem
+  - componente adicionado (cópia do Menu): DroneMilestoneCelebration
+  - BoxCollider ajustado à malha: centro (0.000, 0.000, 0.020), tamanho (0.531, 0.479, 0.407)
+  - DroneCompanionFollowAndGrab atualizado: colliders=[BoxCollider do corpo], sfxAnchorLock, headTransform
+  - malha do drone sem sombra projetada (VR)
+  - visor LED sem sombras/probes
+  - luz 'Luz_Biofeedback' (sem sombra, alcance 2.5 m)
+  - áudio de hover (loop suave 3D)
+  - áudio de voz do drone (3D, sem loop)
+  - Canvas_Holograma_Clinico: painel só de leitura (raycasters/alvos de clique removidos)
+  - SpeechBubble_Anchor/SpeechBubble_Canvas: painel só de leitura (raycasters/alvos de clique removidos)
+[Casa_Suíça] 16 ajustes (salva)
+  - peça copiada do drone do Menu: Modelo_3D_ExoBot/Visor_LED_Frontal
+  - peça copiada do drone do Menu: ParticleSystem_Hearts
+  - peça copiada do drone do Menu: ConfettiCannons_Group
+  - peça copiada do drone do Menu: SpeechBubble_Anchor
+  - componente adicionado (cópia do Menu): AudioSource
+  - componente adicionado (cópia do Menu): DroneAffectiveSystem
+  - componente adicionado (cópia do Menu): DroneMilestoneCelebration
+  - BoxCollider ajustado à malha: centro (0.000, 0.000, 0.020), tamanho (0.531, 0.479, 0.407)
+  - DroneCompanionFollowAndGrab atualizado: colliders=[BoxCollider do corpo], sfxAnchorLock, headTransform
+  - malha do drone sem sombra projetada (VR)
+  - visor LED sem sombras/probes
+  - luz 'Luz_Biofeedback' (sem sombra, alcance 2.5 m)
+  - áudio de hover (loop suave 3D)
+  - áudio de voz do drone (3D, sem loop)
+  - Canvas_Holograma_Clinico: painel só de leitura (raycasters/alvos de clique removidos)
+  - SpeechBubble_Anchor/SpeechBubble_Canvas: painel só de leitura (raycasters/alvos de clique removidos)
+[Centro_Metropolitano] 16 ajustes (salva)
+  - peça copiada do drone do Menu: Modelo_3D_ExoBot/Visor_LED_Frontal
+  - peça copiada do drone do Menu: ParticleSystem_Hearts
+  - peça copiada do drone do Menu: ConfettiCannons_Group
+  - peça copiada do drone do Menu: SpeechBubble_Anchor
+  - componente adicionado (cópia do Menu): AudioSource
+  - componente adicionado (cópia do Menu): DroneAffectiveSystem
+  - componente adicionado (cópia do Menu): DroneMilestoneCelebration
+  - BoxCollider ajustado à malha: centro (0.000, 0.000, 0.020), tamanho (0.531, 0.479, 0.407)
+  - DroneCompanionFollowAndGrab atualizado: colliders=[BoxCollider do corpo], sfxAnchorLock, headTransform
+  - malha do drone sem sombra projetada (VR)
+  - visor LED sem sombras/probes
+  - luz 'Luz_Biofeedback' (sem sombra, alcance 2.5 m)
+  - áudio de hover (loop suave 3D)
+  - áudio de voz do drone (3D, sem loop)
+  - Canvas_Holograma_Clinico: painel só de leitura (raycasters/alvos de clique removidos)
+  - SpeechBubble_Anchor/SpeechBubble_Canvas: painel só de leitura (raycasters/alvos de clique removidos)
+[Escadaria_Histórica] 16 ajustes (salva)
+  - peça copiada do drone do Menu: Modelo_3D_ExoBot/Visor_LED_Frontal
+  - peça copiada do drone do Menu: ParticleSystem_Hearts
+  - peça copiada do drone do Menu: ConfettiCannons_Group
+  - peça copiada do drone do Menu: SpeechBubble_Anchor
+  - componente adicionado (cópia do Menu): AudioSource
+  - componente adicionado (cópia do Menu): DroneAffectiveSystem
+  - componente adicionado (cópia do Menu): DroneMilestoneCelebration
+  - BoxCollider ajustado à malha: centro (0.000, 0.000, 0.020), tamanho (0.531, 0.479, 0.407)
+  - DroneCompanionFollowAndGrab atualizado: colliders=[BoxCollider do corpo], sfxAnchorLock, headTransform
+  - malha do drone sem sombra projetada (VR)
+  - visor LED sem sombras/probes
+  - luz 'Luz_Biofeedback' (sem sombra, alcance 2.5 m)
+  - áudio de hover (loop suave 3D)
+  - áudio de voz do drone (3D, sem loop)
+  - Canvas_Holograma_Clinico: painel só de leitura (raycasters/alvos de clique removidos)
+  - SpeechBubble_Anchor/SpeechBubble_Canvas: painel só de leitura (raycasters/alvos de clique removidos)
+[Floresta_e_Rio] 9 ajustes (salva)
+  - BoxCollider ajustado à malha: centro (0.000, 0.000, 0.020), tamanho (0.531, 0.479, 0.407)
+  - DroneCompanionFollowAndGrab atualizado: offsetLocal, minDistance, maxDistance, smoothTime, colliders=[BoxCollider do corpo], headTransform
+  - malha do drone sem sombra projetada (VR)
+  - visor LED sem sombras/probes
+  - luz 'Luz_Biofeedback' (sem sombra, alcance 2.5 m)
+  - áudio de hover (loop suave 3D)
+  - áudio de voz do drone (3D, sem loop)
+  - Canvas_Holograma_Clinico: painel só de leitura (raycasters/alvos de clique removidos)
+  - SpeechBubble_Anchor/SpeechBubble_Canvas: painel só de leitura (raycasters/alvos de clique removidos)
+[Menu_Principal] 10 ajustes (salva)
+  - BoxCollider ajustado à malha: centro (0.000, 0.000, 0.020), tamanho (0.531, 0.479, 0.407)
+  - DroneCompanionFollowAndGrab atualizado: offsetLocal, minDistance, maxDistance, smoothTime, colliders=[BoxCollider do corpo], headTransform
+  - malha do drone sem sombra projetada (VR)
+  - visor LED sem sombras/probes
+  - luz 'Luz_Biofeedback' (sem sombra, alcance 2.5 m)
+  - áudio de hover (loop suave 3D)
+  - áudio de voz do drone (3D, sem loop)
+  - Canvas_Holograma_Clinico: painel só de leitura (raycasters/alvos de clique removidos)
+  - SpeechBubble_Anchor/SpeechBubble_Canvas: painel só de leitura (raycasters/alvos de clique removidos)
+  - DroneHeadSocket: XRSocketInteractor removido (prendia fitas/bolas/maçãs na cabeça do drone)
+[Montanhas_Nevadas] 15 ajustes (salva)
+  - peça copiada do drone do Menu: Modelo_3D_ExoBot/Visor_LED_Frontal
+  - peça copiada do drone do Menu: ParticleSystem_Hearts
+  - peça copiada do drone do Menu: ConfettiCannons_Group
+  - peça copiada do drone do Menu: SpeechBubble_Anchor
+  - componente adicionado (cópia do Menu): AudioSource
+  - componente adicionado (cópia do Menu): DroneAffectiveSystem
+  - componente adicionado (cópia do Menu): DroneMilestoneCelebration
+  - BoxCollider ajustado à malha: centro (0.000, 0.000, 0.020), tamanho (0.531, 0.479, 0.407)
+  - DroneCompanionFollowAndGrab atualizado: colliders=[BoxCollider do corpo], sfxAnchorLock, headTransform
+  - malha do drone sem sombra projetada (VR)
+  - luz 'Luz_Biofeedback' (sem sombra, alcance 2.5 m)
+  - áudio de hover (loop suave 3D)
+  - áudio de voz do drone (3D, sem loop)
+  - Canvas_Holograma_Clinico: painel só de leitura (raycasters/alvos de clique removidos)
+  - SpeechBubble_Anchor/SpeechBubble_Canvas: painel só de leitura (raycasters/alvos de clique removidos)
+[Pequeno_Porto] 15 ajustes (salva)
+  - peça copiada do drone do Menu: Modelo_3D_ExoBot/Visor_LED_Frontal
+  - peça copiada do drone do Menu: ParticleSystem_Hearts
+  - peça copiada do drone do Menu: ConfettiCannons_Group
+  - peça copiada do drone do Menu: SpeechBubble_Anchor
+  - componente adicionado (cópia do Menu): AudioSource
+  - componente adicionado (cópia do Menu): DroneAffectiveSystem
+  - componente adicionado (cópia do Menu): DroneMilestoneCelebration
+  - BoxCollider ajustado à malha: centro (0.000, 0.000, 0.020), tamanho (0.531, 0.479, 0.407)
+  - DroneCompanionFollowAndGrab atualizado: colliders=[BoxCollider do corpo], sfxAnchorLock, headTransform
+  - malha do drone sem sombra projetada (VR)
+  - luz 'Luz_Biofeedback' (sem sombra, alcance 2.5 m)
+  - áudio de hover (loop suave 3D)
+  - áudio de voz do drone (3D, sem loop)
+  - Canvas_Holograma_Clinico: painel só de leitura (raycasters/alvos de clique removidos)
+  - SpeechBubble_Anchor/SpeechBubble_Canvas: painel só de leitura (raycasters/alvos de clique removidos)
+[Scene de Testes] 14 ajustes (salva)
+  - peça copiada do drone do Menu: Modelo_3D_ExoBot/Visor_LED_Frontal
+  - peça copiada do drone do Menu: ParticleSystem_Hearts
+  - peça copiada do drone do Menu: ConfettiCannons_Group
+  - peça copiada do drone do Menu: SpeechBubble_Anchor
+  - componente adicionado (cópia do Menu): AudioSource
+  - componente adicionado (cópia do Menu): DroneAffectiveSystem
+  - componente adicionado (cópia do Menu): DroneMilestoneCelebration
+  - BoxCollider ajustado à malha: centro (0.000, 0.000, 0.020), tamanho (0.531, 0.479, 0.407)
+  - DroneCompanionFollowAndGrab atualizado: colliders=[BoxCollider do corpo], sfxAnchorLock
+  - malha do drone sem sombra projetada (VR)
+  - luz 'Luz_Biofeedback' (sem sombra, alcance 2.5 m)
+  - áudio de hover (loop suave 3D)
+  - áudio de voz do drone (3D, sem loop)
+  - Canvas_Holograma_Clinico: painel só de leitura (raycasters/alvos de clique removidos)

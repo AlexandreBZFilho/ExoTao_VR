@@ -62,7 +62,6 @@ public class EstacaoHologramaDroneMenu : MonoBehaviour
 
         Material matTitanioEscuro = ObterOuCriarMaterial(shaderAtivo, "SciFi_Console_Titanium", new Color(0.11f, 0.14f, 0.18f), 0.78f, 0.72f, false);
         Material matAcoMedio      = ObterOuCriarMaterial(shaderAtivo, "SciFi_Console_Steel", new Color(0.20f, 0.25f, 0.31f), 0.65f, 0.68f, false);
-        Material matBrancoMedico  = ObterOuCriarMaterial(shaderAtivo, "ExoBot_Body_Mat", new Color(0.92f, 0.96f, 1.00f), 0.25f, 0.86f, false);
         Material matCyanNeon      = ObterOuCriarMaterial(shaderAtivo, "SciFi_Console_CyanGlow", new Color(0.00f, 0.90f, 1.00f), 0.20f, 0.90f, true);
         Material matAmberWarn     = ObterOuCriarMaterial(shaderAtivo, "SciFi_Console_AmberGlow", new Color(1.00f, 0.45f, 0.05f), 0.20f, 0.85f, true);
         Material matFeixeHolo     = ObterOuCriarMaterial(shaderAtivo, "SciFi_Hologram_Beam", new Color(0.00f, 0.82f, 1.00f), 0.10f, 0.95f, true);
@@ -73,7 +72,7 @@ public class EstacaoHologramaDroneMenu : MonoBehaviour
         ConstruirConsole3D(matTitanioEscuro, matAcoMedio, matCyanNeon, matAmberWarn, matFeixeHolo);
 
         // 2. Constrói o Drone 3D Flutuante no Holograma (se ainda não existir)
-        ConstruirDroneShowcase3D(matBrancoMedico, matTitanioEscuro, matGlowDinamico);
+        ConstruirDroneShowcase3D(matTitanioEscuro, matGlowDinamico);
 
         // 3. Constrói o Display Wall Sci-Fi Multi-Telas (Canvas WorldSpace)
         ConstruirDisplayWallSciFi();
@@ -162,7 +161,7 @@ public class EstacaoHologramaDroneMenu : MonoBehaviour
         luzHolograma.color = coresEstados[0];
     }
 
-    private void ConstruirDroneShowcase3D(Material matBranco, Material matEscuro, Material matGlow)
+    private void ConstruirDroneShowcase3D(Material matEscuro, Material matGlow)
     {
         // Remove antigo Anel_Projetor_Giratorio se existia no console
         Transform consoleRaiz = transform.Find("Console_Pedestal_3D");
@@ -214,7 +213,7 @@ public class EstacaoHologramaDroneMenu : MonoBehaviour
         }
         if (malhaBlueprint == null)
         {
-            malhaBlueprint = GeradorMalhaDroneBlueprint.ConstruirMalhaDroneCAD();
+            Debug.LogError("[EstacaoHologramaDroneMenu] Malha Resources/Models/ExoBot_Blueprint_Drone não encontrada.", this);
         }
 
         Shader shaderAtivo = ObterShaderCompativel();

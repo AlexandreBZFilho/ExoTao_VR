@@ -9,9 +9,9 @@ namespace VRRehab.Interactive.Task07
     /// <summary>
     /// Pistola/Dispenser Ergonômico de Balões Antigravidade (estilo The Lab / Valve).
     /// Herda de ErgonomicGrabInteractable garantindo Force Grab assistido e Auto-Respawn.
-    /// Ao segurar o gatilho (OnActivated), infla um balão colorido no bico (Muzzle_Socket)
+    /// Segure a pistola com o GATILHO (select) e aperte o botão LATERAL/grip (OnActivated) para inflar um balão colorido no bico (Muzzle_Socket)
     /// com som de borracha esticando e haptics progressivos.
-    /// Ao soltar o gatilho (OnDeactivated), desprende o balão no ar com física antigravidade.
+    /// Ao soltar o botão lateral (OnDeactivated), desprende o balão no ar com física antigravidade.
     /// </summary>
     [DisallowMultipleComponent]
     [SelectionBase]
@@ -37,7 +37,7 @@ namespace VRRehab.Interactive.Task07
         [Tooltip("Tempo em segundos para inflar de min até max escala.")]
         [SerializeField] private float inflateDuration = 1.5f;
 
-        [Tooltip("Velocidade inicial de lançamento ao soltar o gatilho (m/s).")]
+        [Tooltip("Velocidade inicial de lançamento ao soltar o botão lateral (m/s).")]
         [SerializeField] private float launchVelocity = 0.85f;
 
         [Header("Áudios e Efeitos")]

@@ -1,0 +1,12 @@
+=== Teste de assentamento (3 s de física, sem salvar) em Menu_Principal ===
+BalloonGunDispenser_Instance: deslocamento 0.032 m (dy -0.032), kinematic=False
+Demo_Basketball_Table: deslocamento 0.005 m (dy -0.005), kinematic=False
+TrophyDisplayStand_Instance/SlotAnchor_0_GoldenApple/TrophyItem_GoldenApple: deslocamento 0.000 m (dy +0.000), kinematic=False
+TrophyDisplayStand_Instance/SlotAnchor_1_LuminousBonsai/TrophyItem_LuminousBonsai: deslocamento 0.008 m (dy +0.000), kinematic=False
+TrophyDisplayStand_Instance/SlotAnchor_2_StarCup/TrophyItem_StarCup: deslocamento 0.001 m (dy +0.000), kinematic=False
+TrophyDisplayStand_Instance/SlotAnchor_3_DroneCrown/TrophyItem_DroneCrown: deslocamento 0.029 m (dy +0.000), kinematic=False
+[IC] Ergonomic_Toy_Demo: deslocamento 0.003 m (dy +0.003), kinematic=False
+Tape_CyberHorizon_Active: deslocamento 0.035 m (dy -0.020), kinematic=False
+Tape_LunaCantina_Rack: deslocamento 0.040 m (dy -0.026), kinematic=False
+Tape_NeonSunset_Rack: deslocamento 0.031 m (dy -0.017), kinematic=False
+Tape_EmeraldZen_Rack: deslocamento 0.030 m (dy -0.013), kinematic=False

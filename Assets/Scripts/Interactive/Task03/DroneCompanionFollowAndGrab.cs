@@ -1,496 +1,663 @@
-using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
-using VRRehab.Core;
 
 namespace VRRehab.DronePet
 {
     public enum CompanionFollowState
     {
-        /// <summary>
-        /// Estado 1: Estacionário a 1.6m na frente do paciente (Y ~ 1.45m), com micro-flutuação senoidal suave,
-        /// permitindo leitura tranquila das instruções clínicas e métricas de telemetria sem perseguição.
-        /// </summary>
+        /// <summary>Parado na frente-esquerda do paciente para leitura calma do painel, até o paciente andar/virar ou pinçar o drone.</summary>
         WaitingInitialRead,
-
-        /// <summary>
-        /// Estado 2: Sendo manipulado pelo jogador através do raio laser (XRGrabInteractable + allowAnchorControl).
-        /// O jogador pode aproximar/afastar no analógico/scroll entre 1.2m e 4.5m, mantendo o visor virado para si.
-        /// </summary>
+        /// <summary>Sendo arrastado pelo raio laser (pinçado pelo BoxCollider do corpo).</summary>
         BeingManipulatedByPlayer,
-
-        /// <summary>
-        /// Estado 3: Acompanhamento dinâmico mantendo o vetor de deslocamento relativo memorizado no espaço Yaw
-        /// do paciente. Move-se suavemente via Vector3.SmoothDamp (zero alocação de memória GC).
-        /// </summary>
+        /// <summary>Seguindo o paciente mantendo o offset escolhido no momento em que foi solto.</summary>
         FollowingPlayerAtCustomOffset
     }
 
     /// <summary>
-    /// Controlador de Acompanhamento Ergonômico e Manipulação Espacial por Raio Laser do Drone Pet (TASK-03).
-    /// Herda de XRGrabInteractable para permitir puxar, empurrar e reposicionar o Drone com o laser em tempo real,
-    /// sem nunca colidir com o paciente (Rigidbody cinemático + Physics.IgnoreCollision) e sem buscar maçãs.
+    /// Locomoção e manipulação do Drone companheiro (única fonte de verdade da POSIÇÃO do drone).
+    ///
+    /// - Pinçar com o laser (XRRayInteractor) no BoxCollider sólido do corpo e arrastar para qualquer lugar.
+    ///   O analógico (eixo Y) do controle que está segurando aproxima/afasta o drone ao longo do raio
+    ///   (scroll do mouse também funciona no Editor/simulador).
+    /// - Ao soltar, memoriza o offset relativo à cabeça do paciente e passa a segui-lo mantendo exatamente essa distância.
+    /// - Posição padrão: um pouco à esquerda do campo de visão, para não bloquear a visão da frente.
+    /// - Sem colisão com o jogador (Physics.IgnoreCollision + filtro nos casts), mas COM colisão contra paredes,
+    ///   móveis e terreno (BoxCast com deslizamento + despenetração). Objetos dinâmicos (maçãs, bolas) são empurrados.
+    /// - Se ficar preso atrás de uma parede por muito tempo, reaparece na posição alvo (se estiver livre).
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
-    [RequireComponent(typeof(BoxCollider))]
     [DisallowMultipleComponent]
     [SelectionBase]
-    public class DroneCompanionFollowAndGrab : XRGrabInteractable
+    public class DroneCompanionFollowAndGrab : XRBaseInteractable
     {
-        [Header("Estado Atual do Companheiro")]
+        [Header("Estado")]
         [SerializeField] private CompanionFollowState currentState = CompanionFollowState.WaitingInitialRead;
         public CompanionFollowState CurrentState => currentState;
+        public bool IsBeingDragged => currentState == CompanionFollowState.BeingManipulatedByPlayer;
 
-        [Header("Parâmetros de Posicionamento Ergonômico")]
-        [Tooltip("Distância horizontal inicial à frente do paciente no início da sessão (m)")]
-        [SerializeField] private float initialDistance = 1.60f;
+        [Header("Posição Padrão (relativa à cabeça do paciente)")]
+        [Tooltip("X = lado (negativo = esquerda), Y = altura relativa aos olhos, Z = distância à frente (m)")]
+        [SerializeField] private Vector3 defaultOffset = new Vector3(-0.55f, -0.30f, 1.35f);
 
-        [Tooltip("Altura de repouso inicial em relação ao solo (m)")]
-        [SerializeField] private float initialHeight = 1.45f;
-
-        [Tooltip("Distância mínima de aproximação do paciente para evitar obstrução visual")]
-        [SerializeField] private float minDistance = 1.20f;
-
-        [Tooltip("Distância máxima permitida para manter o HUD legível")]
-        [SerializeField] private float maxDistance = 4.50f;
-
-        [Tooltip("Tempo de suavização do Vector3.SmoothDamp durante a marcha")]
-        [SerializeField] private float smoothTime = 0.35f;
-
-        [Header("Offset Memorizado (Espaço Local de Rotação Yaw do Paciente)")]
-        [Tooltip("Vetor de deslocamento relativo memorizado no momento em que o laser solta o Drone")]
-        [SerializeField] private Vector3 offsetLocal = new Vector3(0f, 0f, 1.60f);
+        [Header("Offset Memorizado (definido ao soltar o drone)")]
+        [SerializeField] private Vector3 offsetLocal = new Vector3(-0.55f, -0.30f, 1.35f);
         public Vector3 OffsetLocal => offsetLocal;
 
-        [Header("Recursos de Áudio e Feedback Multissensorial")]
-        [Tooltip("Clip de áudio suave tocado na confirmação de ancoragem ao soltar o Drone")]
+        [Header("Limites")]
+        [Tooltip("Distância horizontal mínima entre o centro do drone e a cabeça (perto o bastante para fazer carinho)")]
+        [SerializeField] private float minDistance = 0.50f;
+        [SerializeField] private float maxDistance = 5.50f;
+        [SerializeField] private float minHeightAboveGround = 0.35f;
+        [SerializeField] private float maxHeightAboveHead = 1.20f;
+
+        [Header("Seguimento")]
+        [SerializeField] private float smoothTime = 0.30f;
+        [SerializeField] private float bobAmplitude = 0.02f;
+        [Tooltip("O paciente precisa se afastar isso (m) do ponto inicial para o drone sair do estado de leitura inicial")]
+        [SerializeField] private float startFollowDistance = 0.60f;
+
+        [Header("Recentralização preguiçosa (estilo menus do Quest)")]
+        [Tooltip("Se o paciente vira mais que isso e o drone sai do campo de visão, o drone volta para o lado dele")]
+        [SerializeField] private float recenterYawThreshold = 60f;
+        [SerializeField] private float recenterDelay = 1.0f;
+        [SerializeField] private float recenterSpeedDegPerSec = 140f;
+        [SerializeField] private float inViewHalfAngle = 50f;
+
+        [Header("Arraste pelo Laser")]
+        [SerializeField] private float thumbstickDistanceSpeed = 2.0f;
+        [SerializeField] private float mouseScrollStep = 0.15f;
+        [SerializeField] private float minGrabDistance = 0.35f;
+        [SerializeField] private float maxGrabDistance = 6.0f;
+        [SerializeField] private float dragFollowSharpness = 22f;
+
+        [Header("Colisão com o Mundo")]
+        [SerializeField] private LayerMask collisionMask = Physics.DefaultRaycastLayers;
+        [SerializeField] private float skinWidth = 0.02f;
+        [SerializeField] private float stuckTeleportDistance = 2.5f;
+        [SerializeField] private float stuckTeleportDelay = 1.5f;
+
+        [Header("Áudio")]
         public AudioClip sfxAnchorLock;
+        [Range(0.05f, 0.40f)] [SerializeField] private float anchorLockVolume = 0.18f;
 
-        [Tooltip("Volume máximo do áudio de ancoragem (confortável e não estridente)")]
-        [Range(0.05f, 0.40f)]
-        [SerializeField] private float anchorLockVolume = 0.18f;
+        [Header("Referências (auto-detectadas se vazias)")]
+        [Tooltip("Cabeça/câmera do paciente")]
+        public Transform headTransform;
+        [Tooltip("Raiz do jogador (CharacterController / XR Origin) — seus colisores são ignorados")]
+        public Transform playerRoot;
 
-        [Header("Referências")]
-        [Tooltip("Transform do paciente / headset (se nulo, busca automaticamente a MainCamera / Player)")]
-        public Transform patientTransform;
+        // ---- Componentes ----
+        private Rigidbody body;
+        private BoxCollider bodyCollider;
+        private AudioSource sfxSource;
 
-        // Componentes e Estado Interno
-        private Rigidbody droneRb;
-        private BoxCollider droneCollider;
-        private AudioSource audioSourceAnchor;
-        private DroneGuiaIA droneGuia;
+        // ---- Seguimento ----
+        private float referenceYaw;
+        private float recenterTimer;
+        private bool recentering;
+        private Vector3 followVelocity;
+        private Vector3 initialHeadPosition;
+        private bool poseInitialized;
+        private float stuckTimer;
 
-        private Vector3 initialStationaryAnchor;
-        private Vector3 initialPlayerPosition;
-        private Vector3 currentSmoothVelocity = Vector3.zero;
-        private bool hasInitializedPose = false;
+        // ---- Arraste ----
+        private IXRSelectInteractor dragInteractor;
+        private Transform dragOrigin;
+        private float dragDistance;
+        private Vector3 dragGrabOffset;
+
+        // ---- Filtro de colisão (sem alocação por frame) ----
+        private readonly HashSet<Collider> playerColliders = new HashSet<Collider>();
+        private readonly RaycastHit[] castHits = new RaycastHit[16];
+        private readonly Collider[] overlapHits = new Collider[16];
+        private float nextPlayerScanTime;
+
+        // =====================================================================
+        // CICLO DE VIDA
+        // =====================================================================
 
         protected override void Awake()
         {
+            body = GetComponent<Rigidbody>();
+            body.isKinematic = true;
+            body.useGravity = false;
+            body.interpolation = RigidbodyInterpolation.None; // posição é escrita direto no transform
+            body.collisionDetectionMode = CollisionDetectionMode.Discrete;
+
+            bodyCollider = GetComponent<BoxCollider>();
+            if (bodyCollider == null) bodyCollider = gameObject.AddComponent<BoxCollider>();
+            bodyCollider.isTrigger = false; // sólido: o laser (que ignora triggers) consegue pinçar e o drone colide com o mundo
+            FitColliderToModel();
+
+            // O ÚNICO colisor de interação do drone é o corpo (evita que triggers filhos/socket da coroa roubem o laser)
+            colliders.Clear();
+            colliders.Add(bodyCollider);
+            interactionLayers = ~0;
+            selectMode = InteractableSelectMode.Single;
+
             base.Awake();
 
-            // Configuração do XRGrabInteractable para manipulação VR confortável
-            movementType = MovementType.Instantaneous;
-            trackRotation = false; // Preserva rotação autônoma voltada para o paciente (painel legível)
-            trackPosition = true;
-            throwOnDetach = false; // Drone não é jogado como uma bola ao soltar
-            attachEaseInTime = 0.15f;
-            interactionLayers = ~0; // Aceita qualquer interação de raio laser
-
-            ConfigurePhysics();
-            EnsureAudioSource();
+            sfxSource = gameObject.AddComponent<AudioSource>();
+            sfxSource.playOnAwake = false;
+            sfxSource.loop = false;
+            sfxSource.spatialBlend = 1f;
+            sfxSource.minDistance = 0.8f;
+            sfxSource.maxDistance = 8f;
+            sfxSource.dopplerLevel = 0f;
+#if UNITY_EDITOR
+            if (sfxAnchorLock == null)
+                sfxAnchorLock = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Generated/Task03/drone_anchor_lock.wav");
+#endif
         }
 
         protected virtual void Start()
         {
-            EnsurePatientReference();
-            IgnorePlayerCollisions();
+            EnsurePlayerReferences(true);
+            InitializePose();
+        }
 
-            if (Application.isPlaying && !hasInitializedPose)
+        /// <summary>Ajusta o BoxCollider ao tamanho real da malha do drone (Modelo_3D_ExoBot).</summary>
+        private void FitColliderToModel()
+        {
+            Transform model = transform.Find("Modelo_3D_ExoBot");
+            MeshFilter mf = model != null ? model.GetComponent<MeshFilter>() : null;
+            if (mf == null || mf.sharedMesh == null)
             {
-                SetupInitialStationaryPose();
+                bodyCollider.center = new Vector3(0f, 0.05f, 0f);
+                bodyCollider.size = new Vector3(1.0f, 0.6f, 0.45f);
+                return;
+            }
+
+            Bounds mb = mf.sharedMesh.bounds;
+            Matrix4x4 toRoot = transform.worldToLocalMatrix * model.localToWorldMatrix;
+            Vector3 min = Vector3.positiveInfinity, max = Vector3.negativeInfinity;
+            for (int i = 0; i < 8; i++)
+            {
+                Vector3 c = mb.center + Vector3.Scale(mb.extents, new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1));
+                Vector3 p = toRoot.MultiplyPoint3x4(c);
+                min = Vector3.Min(min, p);
+                max = Vector3.Max(max, p);
+            }
+            bodyCollider.center = (min + max) * 0.5f;
+            bodyCollider.size = (max - min) * 0.95f;
+        }
+
+        public void EnsurePlayerReferences(bool forceRescan = false)
+        {
+            if (headTransform == null)
+            {
+                DroneGuiaIA guia = GetComponent<DroneGuiaIA>();
+                if (guia != null && guia.cameraPaciente != null) headTransform = guia.cameraPaciente;
+                else if (Camera.main != null) headTransform = Camera.main.transform;
+            }
+
+            if (playerRoot == null)
+            {
+                CharacterController cc = FindFirstObjectByType<CharacterController>();
+                if (cc != null) playerRoot = cc.transform;
+                else if (headTransform != null)
+                {
+                    var origin = headTransform.GetComponentInParent<Unity.XR.CoreUtils.XROrigin>();
+                    playerRoot = origin != null ? origin.transform : headTransform;
+                }
+            }
+
+            if (forceRescan || Time.time >= nextPlayerScanTime)
+            {
+                nextPlayerScanTime = Time.time + 5f;
+                RescanPlayerColliders();
             }
         }
 
-        private void ConfigurePhysics()
+        /// <summary>Coleta colisores do jogador (CharacterController, mãos, cabeça) e desliga a colisão física com o drone.</summary>
+        private void RescanPlayerColliders()
         {
-            droneRb = GetComponent<Rigidbody>();
-            if (droneRb == null) droneRb = gameObject.AddComponent<Rigidbody>();
-            droneRb.isKinematic = true;
-            droneRb.useGravity = false;
-            droneRb.interpolation = RigidbodyInterpolation.Interpolate;
-
-            droneCollider = GetComponent<BoxCollider>();
-            if (droneCollider == null) droneCollider = gameObject.AddComponent<BoxCollider>();
-            droneCollider.isTrigger = true;
-            droneCollider.center = new Vector3(0f, 0.25f, 0f);
-            droneCollider.size = new Vector3(1.10f, 0.95f, 0.45f);
-
-            // Garante registro do colisor no interator
-            if (!colliders.Contains(droneCollider))
+            Collider[] mine = GetComponentsInChildren<Collider>(true);
+            AddPlayerColliders(playerRoot, mine);
+            if (headTransform != null)
             {
-                colliders.Add(droneCollider);
+                var origin = headTransform.GetComponentInParent<Unity.XR.CoreUtils.XROrigin>();
+                AddPlayerColliders(origin != null ? origin.transform : headTransform, mine);
             }
-
-            droneGuia = GetComponent<DroneGuiaIA>();
-            if (droneGuia == null) droneGuia = GetComponentInParent<DroneGuiaIA>();
+            foreach (CharacterController cc in FindObjectsByType<CharacterController>(FindObjectsSortMode.None))
+                AddPlayerColliders(cc.transform, mine);
         }
 
-        public void EnsurePatientReference()
+        private void AddPlayerColliders(Transform root, Collider[] mine)
         {
-            if (patientTransform == null)
+            if (root == null || root == transform || root.IsChildOf(transform)) return;
+            foreach (Collider c in root.GetComponentsInChildren<Collider>(true))
             {
-                if (droneGuia != null && droneGuia.corpoPaciente != null)
+                if (c == null || c.transform.IsChildOf(transform)) continue;
+                if (playerColliders.Add(c))
                 {
-                    patientTransform = droneGuia.corpoPaciente;
-                }
-                else if (Camera.main != null)
-                {
-                    patientTransform = Camera.main.transform;
-                }
-                else
-                {
-                    CharacterController cc = FindFirstObjectByType<CharacterController>();
-                    if (cc != null) patientTransform = cc.transform;
-                }
-            }
-        }
-
-        public void IgnorePlayerCollisions()
-        {
-            Collider[] myColliders = GetComponentsInChildren<Collider>(true);
-
-            // Ignora CharacterControllers na cena
-            CharacterController[] ccs = FindObjectsByType<CharacterController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            foreach (var cc in ccs)
-            {
-                if (cc == null) continue;
-                foreach (var col in myColliders)
-                {
-                    if (col != null) Physics.IgnoreCollision(col, cc, true);
-                }
-            }
-
-            // Ignora colisores do corpo/mãos do paciente
-            if (patientTransform != null)
-            {
-                foreach (var pCol in patientTransform.GetComponentsInChildren<Collider>(true))
-                {
-                    if (pCol == null) continue;
-                    foreach (var myCol in myColliders)
-                    {
-                        if (myCol != null) Physics.IgnoreCollision(myCol, pCol, true);
-                    }
-                }
-            }
-
-            // Ignora colisores da câmera/cabeça
-            if (Camera.main != null && Camera.main.transform != patientTransform)
-            {
-                foreach (var camCol in Camera.main.GetComponentsInChildren<Collider>(true))
-                {
-                    if (camCol == null) continue;
-                    foreach (var myCol in myColliders)
-                    {
-                        if (myCol != null) Physics.IgnoreCollision(myCol, camCol, true);
-                    }
+                    foreach (Collider m in mine)
+                        if (m != null) Physics.IgnoreCollision(m, c, true);
                 }
             }
         }
 
-        private void EnsureAudioSource()
+        private void InitializePose()
         {
-            if (audioSourceAnchor == null)
-            {
-                audioSourceAnchor = gameObject.AddComponent<AudioSource>();
-                audioSourceAnchor.playOnAwake = false;
-                audioSourceAnchor.loop = false;
-                audioSourceAnchor.spatialBlend = 1.0f; // 3D Audio
-                audioSourceAnchor.minDistance = 0.8f;
-                audioSourceAnchor.maxDistance = 8.0f;
-                audioSourceAnchor.volume = anchorLockVolume;
-            }
-
-            if (sfxAnchorLock == null)
-            {
-                sfxAnchorLock = Resources.Load<AudioClip>("Audio/Generated/Task03/drone_anchor_lock");
-#if UNITY_EDITOR
-                if (sfxAnchorLock == null)
-                {
-                    sfxAnchorLock = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Generated/Task03/drone_anchor_lock.wav");
-                }
-#endif
-            }
-        }
-
-        /// <summary>
-        /// Inicializa o Drone no Estado 1: Calmo e estacionário a 1.6m na frente do paciente.
-        /// </summary>
-        public void SetupInitialStationaryPose()
-        {
-            EnsurePatientReference();
-            if (patientTransform == null) return;
-
-            Vector3 forward = GetPatientHorizontalForward();
-            Vector3 startPos = patientTransform.position + forward * initialDistance;
-            float groundY = GetGroundAltitude(startPos);
-            startPos.y = groundY + initialHeight;
-
-            transform.position = startPos;
-            initialStationaryAnchor = startPos;
-            initialPlayerPosition = patientTransform.position;
-            hasInitializedPose = true;
-
-            offsetLocal = new Vector3(0f, 0f, initialDistance);
+            if (headTransform == null) return;
+            referenceYaw = HorizontalYaw(headTransform.forward);
+            offsetLocal = defaultOffset;
+            initialHeadPosition = headTransform.position;
             currentState = CompanionFollowState.WaitingInitialRead;
 
-            OrientTowardsPatient(true);
+            Vector3 start = ComputeFollowTarget(false);
+            // Começa num lugar livre; se a posição padrão estiver dentro de algo, fica onde a cena colocou
+            if (!IsBoxBlocked(start)) transform.position = start;
+            transform.rotation = LookAtHeadRotation(transform.position);
+            poseInitialized = true;
         }
+
+        // =====================================================================
+        // ARRASTE PELO LASER
+        // =====================================================================
 
         protected override void OnSelectEntered(SelectEnterEventArgs args)
         {
             base.OnSelectEntered(args);
 
+            dragInteractor = args.interactorObject;
+            XRRayInteractor ray = dragInteractor as XRRayInteractor;
+            dragOrigin = ray != null && ray.rayOriginTransform != null ? ray.rayOriginTransform : dragInteractor.GetAttachTransform(this);
+
+            Vector3 toDrone = transform.position - dragOrigin.position;
+            if (ray != null)
+            {
+                dragDistance = Mathf.Clamp(Vector3.Dot(toDrone, dragOrigin.forward), minGrabDistance, maxGrabDistance);
+                dragGrabOffset = transform.position - (dragOrigin.position + dragOrigin.forward * dragDistance);
+                dragGrabOffset = Vector3.ClampMagnitude(dragGrabOffset, 0.6f);
+            }
+            else
+            {
+                // Interactor direto (mão encostada): o drone acompanha a mão mantendo o ponto de pegada
+                dragDistance = 0f;
+                dragGrabOffset = toDrone;
+            }
+
             currentState = CompanionFollowState.BeingManipulatedByPlayer;
-
-            if (droneGuia != null)
-            {
-                droneGuia.estaArrastandoDrone = true;
-            }
-
-            // Pulso háptico suave na pegada
-            if (args.interactorObject is XRBaseControllerInteractor ctrl)
-            {
-                ctrl.SendHapticImpulse(0.15f, 0.08f);
-            }
+            followVelocity = Vector3.zero;
+            Haptic(args.interactorObject, 0.15f, 0.08f);
         }
 
         protected override void OnSelectExited(SelectExitEventArgs args)
         {
             base.OnSelectExited(args);
+            if (args.interactorObject != dragInteractor) return;
 
-            EnsurePatientReference();
-
-            if (patientTransform != null)
-            {
-                // Calcula e memoriza o vetor de deslocamento relativo no espaço local de rotação yaw do paciente:
-                // offsetLocal = Quaternion.Inverse(Quaternion.Euler(0, playerTransform.eulerAngles.y, 0)) * (transform.position - playerTransform.position);
-                Vector3 deltaGlobal = transform.position - patientTransform.position;
-                Quaternion playerYawRot = Quaternion.Euler(0f, patientTransform.eulerAngles.y, 0f);
-                offsetLocal = Quaternion.Inverse(playerYawRot) * deltaGlobal;
-
-                // Clampa distância horizontal no plano XZ entre 1.2m e 4.5m
-                Vector2 xz = new Vector2(offsetLocal.x, offsetLocal.z);
-                float dist = xz.magnitude;
-                if (dist < minDistance)
-                {
-                    xz = (dist < 0.01f ? Vector2.up : xz.normalized) * minDistance;
-                    offsetLocal.x = xz.x;
-                    offsetLocal.z = xz.y;
-                }
-                else if (dist > maxDistance)
-                {
-                    xz = xz.normalized * maxDistance;
-                    offsetLocal.x = xz.x;
-                    offsetLocal.z = xz.y;
-                }
-
-                // Clampa altura relativa
-                offsetLocal.y = Mathf.Clamp(offsetLocal.y, -0.65f, 1.60f);
-            }
-
+            dragInteractor = null;
+            dragOrigin = null;
+            MemorizeCurrentOffset();
             currentState = CompanionFollowState.FollowingPlayerAtCustomOffset;
+            recentering = false;
+            recenterTimer = 0f;
 
-            if (droneGuia != null)
+            if (sfxAnchorLock != null && sfxSource != null)
             {
-                droneGuia.estaArrastandoDrone = false;
-                droneGuia.offsetLocalPaciente = offsetLocal;
-                droneGuia.posicaoPersonalizadaPeloJogador = true;
+                sfxSource.pitch = Random.Range(0.98f, 1.02f);
+                sfxSource.PlayOneShot(sfxAnchorLock, anchorLockVolume);
             }
-
-            // Toca áudio suave de confirmação de ancoragem (drone_anchor_lock.wav)
-            PlayAnchorLockAudio();
-
-            // Emite pulso háptico suave na soltura
-            if (args.interactorObject is XRBaseControllerInteractor ctrl)
-            {
-                ctrl.SendHapticImpulse(0.18f, 0.12f);
-            }
+            Haptic(args.interactorObject, 0.18f, 0.12f);
         }
 
-        private void PlayAnchorLockAudio()
+        public override void ProcessInteractable(XRInteractionUpdateOrder.UpdatePhase updatePhase)
         {
-            if (sfxAnchorLock != null && audioSourceAnchor != null)
-            {
-                audioSourceAnchor.pitch = UnityEngine.Random.Range(0.98f, 1.02f);
-                audioSourceAnchor.PlayOneShot(sfxAnchorLock, anchorLockVolume);
-            }
+            base.ProcessInteractable(updatePhase);
+            if (updatePhase == XRInteractionUpdateOrder.UpdatePhase.Dynamic && currentState == CompanionFollowState.BeingManipulatedByPlayer)
+                UpdateDrag(Time.deltaTime);
         }
+
+        private void UpdateDrag(float dt)
+        {
+            if (dragOrigin == null) return;
+
+            Vector3 target;
+            if (dragInteractor is XRRayInteractor)
+            {
+                dragDistance = Mathf.Clamp(dragDistance + ReadDistanceInput(dt), minGrabDistance, maxGrabDistance);
+                target = dragOrigin.position + dragOrigin.forward * dragDistance + dragGrabOffset;
+            }
+            else
+            {
+                target = dragOrigin.position + dragGrabOffset;
+            }
+
+            target = ClampToComfortZone(target);
+            Vector3 next = Vector3.Lerp(transform.position, target, 1f - Mathf.Exp(-dragFollowSharpness * dt));
+            MoveWithCollision(next);
+            transform.rotation = Quaternion.Slerp(transform.rotation, LookAtHeadRotation(transform.position), 1f - Mathf.Exp(-10f * dt));
+        }
+
+        /// <summary>Eixo Y do analógico do controle que segura o drone (+ scroll do mouse): aproxima/afasta ao longo do raio.</summary>
+        private float ReadDistanceInput(float dt)
+        {
+            float delta = 0f;
+            float stickY = 0f;
+            bool hasStick = false;
+
+            if (dragInteractor is XRBaseControllerInteractor ctrlInteractor && ctrlInteractor.xrController != null)
+            {
+                if (ctrlInteractor.xrController is ActionBasedController abc)
+                {
+                    var action = abc.translateAnchorAction.action;
+                    if (action != null && action.enabled && action.bindings.Count > 0)
+                    {
+                        stickY = action.ReadValue<Vector2>().y;
+                        hasStick = true;
+                    }
+                }
+
+                if (!hasStick)
+                {
+                    // Fallback: lê o analógico/trackpad direto do dispositivo XR da mão correspondente
+                    bool left = ctrlInteractor.xrController.name.IndexOf("Left", System.StringComparison.OrdinalIgnoreCase) >= 0;
+                    UnityEngine.XR.InputDevice dev = UnityEngine.XR.InputDevices.GetDeviceAtXRNode(left ? UnityEngine.XR.XRNode.LeftHand : UnityEngine.XR.XRNode.RightHand);
+                    if (dev.isValid && dev.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out Vector2 axis))
+                        stickY = axis.y;
+                }
+            }
+
+            if (Mathf.Abs(stickY) > 0.2f) delta += stickY * thumbstickDistanceSpeed * dt;
+
+#if ENABLE_LEGACY_INPUT_MANAGER
+            float scroll = Input.mouseScrollDelta.y;
+            if (Mathf.Abs(scroll) > 0.01f) delta += scroll * mouseScrollStep;
+#endif
+            return delta;
+        }
+
+        private void MemorizeCurrentOffset()
+        {
+            if (headTransform == null) return;
+
+            Vector3 delta = transform.position - headTransform.position;
+            Vector3 local = Quaternion.Inverse(Quaternion.Euler(0f, referenceYaw, 0f)) * new Vector3(delta.x, 0f, delta.z);
+            Vector2 xz = new Vector2(local.x, local.z);
+            float d = xz.magnitude;
+            if (d < minDistance) xz = (d < 0.01f ? Vector2.up : xz / d) * minDistance;
+            else if (d > maxDistance) xz = xz / d * maxDistance;
+
+            offsetLocal = new Vector3(xz.x, Mathf.Clamp(delta.y, -1.4f, maxHeightAboveHead), xz.y);
+        }
+
+        // =====================================================================
+        // SEGUIMENTO
+        // =====================================================================
 
         private void Update()
         {
-            if (!Application.isPlaying) return;
+            EnsurePlayerReferences();
+            if (headTransform == null) return;
+            if (!poseInitialized) InitializePose();
 
-            if (patientTransform == null)
+            float dt = Time.deltaTime;
+            if (dt <= 0f) return;
+
+            if (currentState == CompanionFollowState.BeingManipulatedByPlayer) return; // tratado em ProcessInteractable
+
+            UpdateReferenceYaw(dt);
+
+            if (currentState == CompanionFollowState.WaitingInitialRead)
             {
-                EnsurePatientReference();
-                if (patientTransform == null) return;
+                Vector3 moved = headTransform.position - initialHeadPosition;
+                moved.y = 0f;
+                if (moved.sqrMagnitude > startFollowDistance * startFollowDistance || recentering)
+                    currentState = CompanionFollowState.FollowingPlayerAtCustomOffset;
             }
 
-            switch (currentState)
+            Vector3 target = ComputeFollowTarget(true);
+            Vector3 next = Vector3.SmoothDamp(transform.position, target, ref followVelocity, smoothTime, Mathf.Infinity, dt);
+            Vector3 before = transform.position;
+            MoveWithCollision(next);
+
+            // Preso atrás de parede/porta: depois de um tempo, reaparece no alvo se o alvo estiver livre
+            bool blocked = (transform.position - next).sqrMagnitude > 0.0004f;
+            if (blocked) followVelocity = (transform.position - before) / dt;
+            if (blocked && (target - transform.position).sqrMagnitude > stuckTeleportDistance * stuckTeleportDistance)
             {
-                case CompanionFollowState.WaitingInitialRead:
-                    UpdateWaitingInitialRead();
-                    break;
-
-                case CompanionFollowState.BeingManipulatedByPlayer:
-                    UpdateBeingManipulated();
-                    break;
-
-                case CompanionFollowState.FollowingPlayerAtCustomOffset:
-                    UpdateFollowingCustomOffset();
-                    break;
+                stuckTimer += dt;
+                if (stuckTimer > stuckTeleportDelay && !IsBoxBlocked(target))
+                {
+                    transform.position = target;
+                    followVelocity = Vector3.zero;
+                    stuckTimer = 0f;
+                }
             }
-        }
+            else stuckTimer = 0f;
 
-        private void UpdateWaitingInitialRead()
-        {
-            // Transita para acompanhamento dinâmico se o paciente iniciar caminhada
-            bool isWalking = CheckPatientWalking();
-            float distMoved = Vector3.Distance(
-                new Vector3(patientTransform.position.x, 0f, patientTransform.position.z),
-                new Vector3(initialPlayerPosition.x, 0f, initialPlayerPosition.z)
-            );
-
-            if (isWalking || distMoved > 0.45f)
-            {
-                offsetLocal = new Vector3(0f, 0f, initialDistance);
-                currentState = CompanionFollowState.FollowingPlayerAtCustomOffset;
-                return;
-            }
-
-            // Flutuação senoidal suave mantendo posição inicial calma
-            float bob = Mathf.Sin(Time.time * 1.8f) * 0.025f;
-            transform.position = initialStationaryAnchor + Vector3.up * bob;
-
-            OrientTowardsPatient(false);
-        }
-
-        private void UpdateBeingManipulated()
-        {
-            // Suporte ergonômico a scroll do mouse no Editor para testes rápidos
-            float scroll = Input.mouseScrollDelta.y;
-            if (Mathf.Abs(scroll) > 0.01f)
-            {
-                Vector3 dir = (transform.position - patientTransform.position).normalized;
-                transform.position += dir * (scroll * 0.35f);
-            }
-
-            // Clampa distância em relação ao paciente entre min e max
-            Vector3 delta = transform.position - patientTransform.position;
-            Vector3 deltaHoriz = new Vector3(delta.x, 0f, delta.z);
-            float dist = deltaHoriz.magnitude;
-            if (dist < minDistance && dist > 0.001f)
-            {
-                deltaHoriz = deltaHoriz.normalized * minDistance;
-                transform.position = new Vector3(patientTransform.position.x + deltaHoriz.x, transform.position.y, patientTransform.position.z + deltaHoriz.z);
-            }
-            else if (dist > maxDistance)
-            {
-                deltaHoriz = deltaHoriz.normalized * maxDistance;
-                transform.position = new Vector3(patientTransform.position.x + deltaHoriz.x, transform.position.y, patientTransform.position.z + deltaHoriz.z);
-            }
-
-            // Clampa altitude em relação ao solo para não atravessar o chão
-            float groundY = GetGroundAltitude(transform.position);
-            float clampedY = Mathf.Clamp(transform.position.y, groundY + 0.65f, groundY + 2.80f);
-            if (Mathf.Abs(transform.position.y - clampedY) > 0.01f)
-            {
-                transform.position = new Vector3(transform.position.x, clampedY, transform.position.z);
-            }
-
-            // Drone mantém orientação voltada para o paciente (trackRotation = false)
-            OrientTowardsPatient(false);
-        }
-
-        private void UpdateFollowingCustomOffset()
-        {
-            // Calcula a posição alvo no mundo a partir da rotação Yaw do paciente e do offset memorizado
-            Quaternion playerYaw = Quaternion.Euler(0f, patientTransform.eulerAngles.y, 0f);
-            Vector3 targetPos = patientTransform.position + playerYaw * offsetLocal;
-
-            // Respeita o solo e aplica suave micro-bobbing
-            float groundY = GetGroundAltitude(targetPos);
-            float bob = Mathf.Sin(Time.time * 2.0f) * 0.025f;
-            float targetY = Mathf.Max(groundY + 0.65f, targetPos.y + bob);
-            targetPos.y = targetY;
-
-            // Movimento suave via Vector3.SmoothDamp (zero GC Alloc)
-            transform.position = Vector3.SmoothDamp(transform.position, targetPos, ref currentSmoothVelocity, smoothTime);
-
-            // Rotação suave olhando para o paciente
-            OrientTowardsPatient(false);
-        }
-
-        private void OrientTowardsPatient(bool instant)
-        {
-            if (patientTransform == null) return;
-
-            Vector3 dir = patientTransform.position - transform.position;
-            dir.y = 0f;
-            if (dir.sqrMagnitude > 0.001f)
-            {
-                Quaternion targetRot = Quaternion.LookRotation(dir.normalized, Vector3.up);
-                transform.rotation = instant ? targetRot : Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 6.0f);
-            }
-        }
-
-        private bool CheckPatientWalking()
-        {
-            if (droneGuia != null)
-            {
-                if (droneGuia.receptorExo != null && droneGuia.receptorExo.PacienteCaminhando)
-                    return true;
-                if (droneGuia.telemetria != null && droneGuia.telemetria.velocidadeAtualMs > 0.12f)
-                    return true;
-            }
-            return false;
-        }
-
-        private Vector3 GetPatientHorizontalForward()
-        {
-            Vector3 fwd = patientTransform != null ? patientTransform.forward : Vector3.forward;
-            fwd.y = 0f;
-            return fwd.sqrMagnitude > 0.001f ? fwd.normalized : Vector3.forward;
-        }
-
-        private float GetGroundAltitude(Vector3 pos)
-        {
-            float refY = patientTransform != null ? patientTransform.position.y : pos.y;
-            Vector3 origin = new Vector3(pos.x, refY + 2.5f, pos.z);
-            if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, 12f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
-            {
-                return hit.point.y;
-            }
-            return refY;
+            transform.rotation = Quaternion.Slerp(transform.rotation, LookAtHeadRotation(transform.position), 1f - Mathf.Exp(-6f * dt));
         }
 
         /// <summary>
-        /// Permite redefinir programaticamente a distância do drone (ex: via atalho de acessibilidade).
+        /// Mantém uma direção de referência "preguiçosa": olhar para o drone nunca faz ele fugir;
+        /// mas se o paciente se vira e o drone fica fora da visão por um tempo, ele volta para o lado do paciente.
         /// </summary>
-        public void SetCustomDistance(float distanceMeters)
+        private void UpdateReferenceYaw(float dt)
         {
-            float d = Mathf.Clamp(distanceMeters, minDistance, maxDistance);
-            Vector2 xz = new Vector2(offsetLocal.x, offsetLocal.z);
-            if (xz.sqrMagnitude < 0.01f) xz = Vector2.up;
-            xz = xz.normalized * d;
-            offsetLocal = new Vector3(xz.x, offsetLocal.y, xz.y);
+            float camYaw = HorizontalYaw(headTransform.forward);
+            float deltaYaw = Mathf.DeltaAngle(referenceYaw, camYaw);
 
-            if (droneGuia != null)
+            if (recentering)
             {
-                droneGuia.offsetLocalPaciente = offsetLocal;
-                droneGuia.posicaoPersonalizadaPeloJogador = true;
+                referenceYaw = Mathf.MoveTowardsAngle(referenceYaw, camYaw, recenterSpeedDegPerSec * dt);
+                if (Mathf.Abs(Mathf.DeltaAngle(referenceYaw, camYaw)) < 2f)
+                {
+                    recentering = false;
+                    recenterTimer = 0f;
+                }
+                return;
             }
+
+            Vector3 toDrone = transform.position - headTransform.position;
+            toDrone.y = 0f;
+            Vector3 fwd = headTransform.forward;
+            fwd.y = 0f;
+            bool droneInView = toDrone.sqrMagnitude > 0.0001f && fwd.sqrMagnitude > 0.0001f &&
+                               Vector3.Angle(fwd, toDrone) < inViewHalfAngle;
+
+            if (Mathf.Abs(deltaYaw) > recenterYawThreshold && !droneInView)
+            {
+                recenterTimer += dt;
+                if (recenterTimer > recenterDelay) recentering = true;
+            }
+            else recenterTimer = 0f;
+        }
+
+        private Vector3 ComputeFollowTarget(bool withBob)
+        {
+            Vector3 head = headTransform.position;
+            Vector3 horiz = Quaternion.Euler(0f, referenceYaw, 0f) * new Vector3(offsetLocal.x, 0f, offsetLocal.z);
+            Vector3 target = new Vector3(head.x + horiz.x, head.y + offsetLocal.y, head.z + horiz.z);
+            if (withBob) target.y += Mathf.Sin(Time.time * 2f) * bobAmplitude;
+            return ClampToComfortZone(target);
+        }
+
+        /// <summary>Garante distância mínima da cabeça, altura mínima acima do chão e máxima acima da cabeça.</summary>
+        private Vector3 ClampToComfortZone(Vector3 p)
+        {
+            if (headTransform == null) return p;
+            Vector3 head = headTransform.position;
+
+            Vector3 flat = new Vector3(p.x - head.x, 0f, p.z - head.z);
+            float d = flat.magnitude;
+            float minD = currentState == CompanionFollowState.BeingManipulatedByPlayer ? minDistance * 0.8f : minDistance;
+            if (d < minD)
+            {
+                Vector3 dir = d > 0.001f ? flat / d : HorizontalForward(headTransform);
+                p = new Vector3(head.x + dir.x * minD, p.y, head.z + dir.z * minD);
+            }
+
+            float ground = GroundHeight(p, head.y);
+            p.y = Mathf.Clamp(p.y, ground + minHeightAboveGround, Mathf.Max(ground + minHeightAboveGround, head.y + maxHeightAboveHead));
+            return p;
+        }
+
+        // =====================================================================
+        // COLISÃO COM O MUNDO (não com o jogador)
+        // =====================================================================
+
+        private void MoveWithCollision(Vector3 desired)
+        {
+            Vector3 pos = transform.position;
+            Vector3 delta = desired - pos;
+
+            for (int pass = 0; pass < 2; pass++)
+            {
+                float dist = delta.magnitude;
+                if (dist < 0.0001f) break;
+                Vector3 dir = delta / dist;
+
+                if (!CastBody(pos, dir, dist + skinWidth, out RaycastHit hit))
+                {
+                    pos += delta;
+                    break;
+                }
+
+                float allowed = Mathf.Max(0f, hit.distance - skinWidth);
+                pos += dir * allowed;
+                // desliza ao longo da superfície com o restante do movimento
+                delta = Vector3.ProjectOnPlane(dir * (dist - allowed), hit.normal);
+            }
+
+            transform.position = Depenetrate(pos);
+        }
+
+        private bool CastBody(Vector3 rootPos, Vector3 dir, float distance, out RaycastHit nearest)
+        {
+            nearest = default;
+            Quaternion rot = transform.rotation;
+            Vector3 center = rootPos + rot * Vector3.Scale(bodyCollider.center, transform.lossyScale);
+            Vector3 half = Vector3.Scale(bodyCollider.size * 0.5f, transform.lossyScale) * 0.98f;
+
+            int n = Physics.BoxCastNonAlloc(center, half, dir, castHits, rot, distance, collisionMask, QueryTriggerInteraction.Ignore);
+            float best = float.MaxValue;
+            bool found = false;
+            for (int i = 0; i < n; i++)
+            {
+                RaycastHit h = castHits[i];
+                if (IsIgnored(h.collider)) continue;
+                if (h.distance <= 0f) continue; // sobreposição inicial é resolvida pela despenetração
+                if (h.distance < best)
+                {
+                    best = h.distance;
+                    nearest = h;
+                    found = true;
+                }
+            }
+            return found;
+        }
+
+        private Vector3 Depenetrate(Vector3 rootPos)
+        {
+            Quaternion rot = transform.rotation;
+            Vector3 center = rootPos + rot * Vector3.Scale(bodyCollider.center, transform.lossyScale);
+            Vector3 half = Vector3.Scale(bodyCollider.size * 0.5f, transform.lossyScale);
+
+            int n = Physics.OverlapBoxNonAlloc(center, half, overlapHits, rot, collisionMask, QueryTriggerInteraction.Ignore);
+            for (int i = 0; i < n; i++)
+            {
+                Collider other = overlapHits[i];
+                if (IsIgnored(other)) continue;
+                if (Physics.ComputePenetration(bodyCollider, rootPos, rot,
+                        other, other.transform.position, other.transform.rotation,
+                        out Vector3 pushDir, out float pushDist))
+                {
+                    rootPos += pushDir * Mathf.Min(pushDist + 0.001f, 0.25f);
+                }
+            }
+            return rootPos;
+        }
+
+        private bool IsBoxBlocked(Vector3 rootPos)
+        {
+            Quaternion rot = transform.rotation;
+            Vector3 center = rootPos + rot * Vector3.Scale(bodyCollider.center, transform.lossyScale);
+            Vector3 half = Vector3.Scale(bodyCollider.size * 0.5f, transform.lossyScale);
+            int n = Physics.OverlapBoxNonAlloc(center, half, overlapHits, rot, collisionMask, QueryTriggerInteraction.Ignore);
+            for (int i = 0; i < n; i++)
+                if (!IsIgnored(overlapHits[i])) return true;
+            return false;
+        }
+
+        /// <summary>Colisores que NÃO bloqueiam o drone: ele mesmo, o jogador e objetos dinâmicos (que são empurrados).</summary>
+        private bool IsIgnored(Collider c)
+        {
+            if (c == null || c.isTrigger) return true;
+            if (c.transform == transform || c.transform.IsChildOf(transform)) return true;
+            if (playerColliders.Contains(c)) return true;
+            Rigidbody rb = c.attachedRigidbody;
+            if (rb != null && !rb.isKinematic) return true;
+            return false;
+        }
+
+        private float GroundHeight(Vector3 p, float referenceY)
+        {
+            Vector3 origin = new Vector3(p.x, Mathf.Max(p.y, referenceY) + 1.0f, p.z);
+            int n = Physics.RaycastNonAlloc(origin, Vector3.down, castHits, 12f, collisionMask, QueryTriggerInteraction.Ignore);
+            float best = float.MaxValue;
+            float y = referenceY - 1.6f; // sem chão detectado: assume olhos ~1.6 m acima do chão
+            for (int i = 0; i < n; i++)
+            {
+                if (IsIgnored(castHits[i].collider)) continue;
+                if (castHits[i].distance < best)
+                {
+                    best = castHits[i].distance;
+                    y = castHits[i].point.y;
+                }
+            }
+            return y;
+        }
+
+        // =====================================================================
+        // UTILITÁRIOS
+        // =====================================================================
+
+        private Quaternion LookAtHeadRotation(Vector3 from)
+        {
+            Vector3 dir = headTransform != null ? headTransform.position - from : -transform.forward;
+            dir.y = 0f;
+            return dir.sqrMagnitude > 0.0001f ? Quaternion.LookRotation(dir.normalized, Vector3.up) : transform.rotation;
+        }
+
+        private static float HorizontalYaw(Vector3 forward)
+        {
+            forward.y = 0f;
+            if (forward.sqrMagnitude < 0.0001f) return 0f;
+            return Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
+        }
+
+        private static Vector3 HorizontalForward(Transform t)
+        {
+            Vector3 f = t.forward;
+            f.y = 0f;
+            return f.sqrMagnitude > 0.0001f ? f.normalized : Vector3.forward;
+        }
+
+        private static void Haptic(IXRInteractor interactor, float amplitude, float duration)
+        {
+            if (interactor is XRBaseControllerInteractor ctrl) ctrl.SendHapticImpulse(amplitude, duration);
+        }
+
+        /// <summary>Volta para a posição padrão (frente-esquerda do paciente).</summary>
+        public void ResetToDefaultPosition()
+        {
+            offsetLocal = defaultOffset;
+            if (headTransform != null) referenceYaw = HorizontalYaw(headTransform.forward);
+            if (currentState != CompanionFollowState.BeingManipulatedByPlayer)
+                currentState = CompanionFollowState.FollowingPlayerAtCustomOffset;
+        }
+
+        /// <summary>Define a distância horizontal mantida (ex.: atalho de acessibilidade do terapeuta).</summary>
+        public void SetCustomDistance(float meters)
+        {
+            Vector2 xz = new Vector2(offsetLocal.x, offsetLocal.z);
+            if (xz.sqrMagnitude < 0.0001f) xz = Vector2.up;
+            xz = xz.normalized * Mathf.Clamp(meters, minDistance, maxDistance);
+            offsetLocal = new Vector3(xz.x, offsetLocal.y, xz.y);
         }
     }
 }

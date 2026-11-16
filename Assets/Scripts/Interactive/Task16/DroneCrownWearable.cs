@@ -52,8 +52,13 @@ namespace VRRehab.Interactive.Task16
             if (grabInteractable != null)
             {
                 grabInteractable.selectEntered.AddListener(OnGrabbed);
+                grabInteractable.selectExited.AddListener(_ => lastReleaseTime = Time.time);
             }
         }
+
+        /// <summary>Instante em que o jogador soltou/arremessou a coroa (só encaixa se estiver na mão ou acabou de ser solta).</summary>
+        private float lastReleaseTime = -100f;
+        private const float EquipWindowAfterRelease = 1.5f;
 
         private void Start()
         {
@@ -95,14 +100,20 @@ namespace VRRehab.Interactive.Task16
 
         private void OnTriggerEnter(Collider other)
         {
-            // Detecta aproximação do socket da cabeça do Drone
-            if (other.CompareTag("Untagged") && other.name == "DroneHeadSocketTrigger")
-            {
-                if (!isEquippedOnDrone)
-                {
-                    EquipOnDrone(true);
-                }
-            }
+            // Detecta a coroa encostando no trigger da cabeça do Drone (DroneHeadSocket).
+            // Só encaixa se o jogador estiver segurando a coroa ou acabou de soltá-la/arremessá-la:
+            // assim o drone voando perto da estante de troféus não "rouba" a coroa sozinho.
+            if (isEquippedOnDrone) return;
+            bool isHeadSocket = other.name == "DroneHeadSocket" || other.name == "DroneHeadSocketTrigger" ||
+                                (droneHeadSocketTransform != null && other.transform == droneHeadSocketTransform);
+            if (!isHeadSocket) return;
+
+            bool heldOrJustThrown = (grabInteractable != null && grabInteractable.isSelected) ||
+                                    Time.time - lastReleaseTime < EquipWindowAfterRelease;
+            if (!heldOrJustThrown) return;
+
+            droneHeadSocketTransform = other.transform;
+            EquipOnDrone(true);
         }
 
         /// <summary>
@@ -203,23 +214,14 @@ namespace VRRehab.Interactive.Task16
 
         private IEnumerator CelebrationWiggleRoutine()
         {
-            Transform droneRoot = droneHeadSocketTransform != null ? droneHeadSocketTransform.root : null;
-            if (droneRoot == null) yield break;
-
-            Quaternion origRot = droneRoot.localRotation;
-            float elapsed = 0f;
-            float duration = 1.8f;
-
-            while (elapsed < duration)
+            // O balanço é feito pelo sistema afetivo no nó visual (Modelo_3D_ExoBot). Girar a raiz aqui
+            // brigava com o DroneCompanionFollowAndGrab (dono da posição/rotação) e dava um "tranco" no fim.
+            if (droneAffective == null) yield break;
+            for (int i = 0; i < 3; i++)
             {
-                elapsed += Time.deltaTime;
-                float t = elapsed / duration;
-                float wiggle = Mathf.Sin(t * Mathf.PI * 8f) * 12f * (1f - t);
-                droneRoot.localRotation = origRot * Quaternion.Euler(0f, wiggle, wiggle * 0.4f);
-                yield return null;
+                droneAffective.Wiggle(1f - i * 0.25f);
+                yield return new WaitForSeconds(0.45f);
             }
-
-            droneRoot.localRotation = origRot;
         }
 
         /// <summary>

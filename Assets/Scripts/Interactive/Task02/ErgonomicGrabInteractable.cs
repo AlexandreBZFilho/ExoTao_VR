@@ -40,6 +40,12 @@ namespace VRRehab.Ergonomics
         [Tooltip("Ponto de ancoragem inicial (definido automaticamente na inicialização se nulo).")]
         [SerializeField] protected Transform customHomeAnchor;
 
+        [Header("Física ao Soltar")]
+        [Tooltip("Ao soltar, o objeto SEMPRE volta a ter física normal (não cinemático, com gravidade).\n" +
+                 "Sem isso o XRI restaura o estado que o Rigidbody tinha no instante em que foi pego: se o objeto estava " +
+                 "cinemático (na prateleira, voltando para casa, encaixado), ele ficava flutuando no ar ao ser solto.")]
+        [SerializeField] protected bool alwaysDynamicAfterRelease = true;
+
         [Header("Eventos e Feedback")]
         [SerializeField] protected bool playAudioHapticFeedback = true;
 
@@ -64,8 +70,9 @@ namespace VRRehab.Ergonomics
             cachedRb = GetComponent<Rigidbody>();
             if (cachedRb != null)
             {
-                originalWasKinematic = cachedRb.isKinematic;
+                originalWasKinematic = cachedRb.isKinematic && !alwaysDynamicAfterRelease;
             }
+            forceGravityOnDetach = alwaysDynamicAfterRelease;
 
             // Captura posição de repouso inicial
             SetHomeTransform(transform.position, transform.rotation);
@@ -181,6 +188,14 @@ namespace VRRehab.Ergonomics
             base.SetupRigidbodyDrop(rb);
 
             if (rb == null) return;
+
+            if (alwaysDynamicAfterRelease)
+            {
+                rb.isKinematic = false;
+                rb.useGravity = true;
+                rb.constraints = RigidbodyConstraints.None;
+                rb.WakeUp();
+            }
 
             // Se houver componente ThrowAimAssist, aplica velocidade assistida
             if (TryGetComponent<ThrowAimAssist>(out var aimAssist))
