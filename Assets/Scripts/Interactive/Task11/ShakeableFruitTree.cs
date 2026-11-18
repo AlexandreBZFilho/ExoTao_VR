@@ -154,6 +154,30 @@ namespace VRRehab.Interactive.Task11
             isShaking = false;
         }
 
+        /// <summary>Máximo de maçãs derrubadas vivas na cena (todas as árvores juntas): leveza em VR.</summary>
+        public const int MaxFallenApplesInScene = 12;
+
+        /// <summary>Maçãs derrubadas ainda na cena, da mais antiga para a mais nova.</summary>
+        private static readonly System.Collections.Generic.List<GameObject> fallenApples = new System.Collections.Generic.List<GameObject>(MaxFallenApplesInScene + 4);
+
+        /// <summary>Abre espaço no pool: remove a maçã derrubada mais antiga que não está na mão do paciente.</summary>
+        private static void MakeRoomInPool()
+        {
+            fallenApples.RemoveAll(a => a == null);
+            while (fallenApples.Count >= MaxFallenApplesInScene)
+            {
+                int victim = -1;
+                for (int i = 0; i < fallenApples.Count; i++)
+                {
+                    var grab = fallenApples[i].GetComponent<UnityEngine.XR.Interaction.Toolkit.XRGrabInteractable>();
+                    if (grab == null || !grab.isSelected) { victim = i; break; }
+                }
+                if (victim < 0) return; // todas na mão do paciente: não remove nenhuma
+                Destroy(fallenApples[victim]);
+                fallenApples.RemoveAt(victim);
+            }
+        }
+
         private void SpawnFallingApples()
         {
             int count = Random.Range(minApplesPerShake, maxApplesPerShake + 1);
@@ -175,8 +199,23 @@ namespace VRRehab.Interactive.Task11
                 Vector3 spawnPos = transform.position + canopyCenterOffset + localOffset;
                 Quaternion spawnRot = Random.rotation;
 
+                MakeRoomInPool();
+                if (fallenApples.Count >= MaxFallenApplesInScene) break; // pool cheio e todas na mão: não cria mais
+
                 GameObject appleInstance = Instantiate(prefabToUse, spawnPos, spawnRot);
+                fallenApples.Add(appleInstance);
                 appleInstance.name = isThisAppleGolden ? $"GoldenBonusApple_{Time.frameCount}_{i}" : $"InteractiveRedApple_{Time.frameCount}_{i}";
+
+                // "Casa" da maçã = chão logo abaixo de onde nasceu (não o meio da copa): se ela for arremessada longe
+                // ou cair fora do mapa, volta para a grama ao pé da árvore em vez de reaparecer flutuando na copa.
+                var ergo = appleInstance.GetComponent<VRRehab.Ergonomics.ErgonomicGrabInteractable>();
+                if (ergo != null && TerrainGroundUtil.TryGetHeight(spawnPos, out float groundY))
+                {
+                    float radius = 0.05f;
+                    var sphere = appleInstance.GetComponent<SphereCollider>();
+                    if (sphere != null) radius = sphere.radius * appleInstance.transform.lossyScale.y;
+                    ergo.SetHomeTransform(new Vector3(spawnPos.x, groundY + radius + 0.02f, spawnPos.z), spawnRot);
+                }
 
                 // Impulso inicial suave para espalhar as maçãs no solo
                 Rigidbody rb = appleInstance.GetComponent<Rigidbody>();

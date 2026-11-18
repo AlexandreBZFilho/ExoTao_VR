@@ -1,0 +1,10 @@
+=== Correção da cesta (2026-11-16 02:26:10) ===
+0 componentes Missing Script removidos
+aro: 8 segmentos com CapsuleCollider (antes BoxCollider de topo plano)
+sensores, placar e referências do scorer configurados
+prefab salvo
+instância 'ArcadeBasketballHoop_Instance' sincronizada com o prefab (0 overrides revertidos)
+Missing Script na cena do Menu depois da correção: 0
+sensor Sensor_TriggerTop: Top, scorer ligado=True, trigger=True, tamanho (0.34, 0.12, 0.34), pos local (0.00, -0.05, -0.34)
+sensor Sensor_TriggerBottom: Bottom, scorer ligado=True, trigger=True, tamanho (0.24, 0.14, 0.24), pos local (0.00, -0.35, -0.34)
+cena do Menu salva

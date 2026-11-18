@@ -1,0 +1,11 @@
+=== Acabamento da Floresta (2026-11-16 02:26:21) ===
+  BonusDiamondCoin_River: +0.41 m (base agora 0.60 m acima do chão)
+  EnergyStarCoin_13: +0.93 m (base agora 1.03 m acima do chão)
+  EnergyStarCoin_14: +0.17 m (base agora 1.03 m acima do chão)
+  trilha do CoinTrailSpawner: 2 pontos sincronizados com as moedas
+moedas ajustadas: 3
+  estação 'XylophoneMushrooms_Glade_2' em (42.00, 2.99, 62.80): raio 2.0 m, 0 células de capim removidas
+  estação 'XylophoneMushrooms_Glade_3' em (39.50, 2.99, 68.60): raio 2.0 m, 0 células de capim removidas
+  estação 'XylophoneMushrooms_Glade' em (50.90, 3.00, 65.46): raio 2.0 m, 0 células de capim removidas
+capim removido em volta de 3 estações de cogumelos (0 células)
+cena Floresta_e_Rio salva

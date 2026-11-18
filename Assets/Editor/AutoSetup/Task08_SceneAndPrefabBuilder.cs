@@ -496,6 +496,10 @@ namespace VRRehab.EditorAutoSetup
             botForwarder.sensorType = HoopSensorForwarder.SensorType.Bottom;
             botForwarder.scorer = scorer;
 
+            // Hotfix do playtest: sensores robustos + placar novo (painel com título, 3 colunas e faixa de mensagem).
+            // Mantém este builder coerente com BasketballArcadeFixer caso seja executado de novo.
+            VRRehab.EditorTools.BasketballArcadeFixer.ConfigureHoopHierarchy(root);
+
             string savePath = $"{PrefabsDir}/ArcadeBasketballHoop.prefab";
             GameObject savedPrefab = PrefabUtility.SaveAsPrefabAsset(root, savePath);
             UnityEngine.Object.DestroyImmediate(root);

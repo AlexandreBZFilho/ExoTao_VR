@@ -1,0 +1,72 @@
+=== Inspeção da cesta ===
+Prefab: ok
+  ArcadeBasketballHoop lp (0.00, 0.00, 0.00) [BoxCollider(c (0.00, 0.00, 0.01) s (0.72, 0.52, 0.04)), BasketballHoopScorer]
+    Visual_Model lp (0.00, 0.00, 0.00) [MeshFilter, MeshRenderer]
+    Hoop_Rim_Solid_Colliders lp (0.00, 0.00, 0.00) []
+      Hoop_Rim_Segment lp (0.19, -0.13, -0.34) [BoxCollider(c (0.00, 0.00, 0.00) s (0.14, 0.04, 0.04))]
+      Hoop_Rim_Segment lp (0.13, -0.13, -0.21) [BoxCollider(c (0.00, 0.00, 0.00) s (0.14, 0.04, 0.04))]
+      Hoop_Rim_Segment lp (0.00, -0.13, -0.15) [BoxCollider(c (0.00, 0.00, 0.00) s (0.14, 0.04, 0.04))]
+      Hoop_Rim_Segment lp (-0.13, -0.13, -0.21) [BoxCollider(c (0.00, 0.00, 0.00) s (0.14, 0.04, 0.04))]
+      Hoop_Rim_Segment lp (-0.19, -0.13, -0.34) [BoxCollider(c (0.00, 0.00, 0.00) s (0.14, 0.04, 0.04))]
+      Hoop_Rim_Segment lp (-0.13, -0.13, -0.48) [BoxCollider(c (0.00, 0.00, 0.00) s (0.14, 0.04, 0.04))]
+      Hoop_Rim_Segment lp (0.00, -0.13, -0.53) [BoxCollider(c (0.00, 0.00, 0.00) s (0.14, 0.04, 0.04))]
+      Hoop_Rim_Segment lp (0.13, -0.13, -0.48) [BoxCollider(c (0.00, 0.00, 0.00) s (0.14, 0.04, 0.04))]
+    Sensor_TriggerTop lp (0.00, -0.09, -0.34) [BoxCollider(c (0.00, 0.00, 0.00) s (0.36, 0.04, 0.36) trig), <MISSING SCRIPT>]
+    Sensor_TriggerBottom lp (0.00, -0.41, -0.34) [BoxCollider(c (0.00, 0.00, 0.00) s (0.26, 0.06, 0.26) trig), <MISSING SCRIPT>]
+    Rim_Glow_Light lp (0.00, -0.13, -0.34) [Light]
+    Score_Celebration_Particles lp (0.00, -0.13, -0.34) [ParticleSystem, ParticleSystemRenderer]
+    Scoreboard_Canvas_3D lp (0.00, 0.35, -0.09) []
+      Text_Status_Notice lp (0.00, 0.04, 0.00) [MeshRenderer, TextMeshPro]
+      Text_Score_Value lp (0.00, 0.01, 0.00) [MeshRenderer, TextMeshPro]
+      Text_Score_Label lp (0.00, -0.04, 0.00) [MeshRenderer, TextMeshPro]
+      Text_Streak_Value lp (-0.15, 0.01, 0.00) [MeshRenderer, TextMeshPro]
+      Text_Streak_Label lp (-0.15, -0.04, 0.00) [MeshRenderer, TextMeshPro]
+      Text_HighScore_Value lp (0.15, 0.01, 0.00) [MeshRenderer, TextMeshPro]
+      Text_High_Label lp (0.15, -0.04, 0.00) [MeshRenderer, TextMeshPro]
+Instância: ArcadeBasketballHoop_Instance pos (0.12, 1.85, 2.70) rot (0.00, 270.00, 0.00) escala (1.00, 1.00, 1.00)
+  é instância de prefab: True (Assets/Prefabs/Interactive/ArcadeBasketballHoop.prefab)
+    ArcadeBasketballHoop_Instance lp (0.12, 1.85, 2.70) [BoxCollider(c (0.00, 0.00, 0.01) s (0.72, 0.52, 0.04)), BasketballHoopScorer]
+      Visual_Model lp (0.00, 0.00, 0.00) [MeshFilter, MeshRenderer]
+      Hoop_Rim_Solid_Colliders lp (0.00, 0.00, 0.00) []
+        Hoop_Rim_Segment lp (0.19, -0.13, -0.34) [BoxCollider(c (0.00, 0.00, 0.00) s (0.14, 0.04, 0.04))]
+        Hoop_Rim_Segment lp (0.13, -0.13, -0.21) [BoxCollider(c (0.00, 0.00, 0.00) s (0.14, 0.04, 0.04))]
+        Hoop_Rim_Segment lp (0.00, -0.13, -0.15) [BoxCollider(c (0.00, 0.00, 0.00) s (0.14, 0.04, 0.04))]
+        Hoop_Rim_Segment lp (-0.13, -0.13, -0.21) [BoxCollider(c (0.00, 0.00, 0.00) s (0.14, 0.04, 0.04))]
+        Hoop_Rim_Segment lp (-0.19, -0.13, -0.34) [BoxCollider(c (0.00, 0.00, 0.00) s (0.14, 0.04, 0.04))]
+        Hoop_Rim_Segment lp (-0.13, -0.13, -0.48) [BoxCollider(c (0.00, 0.00, 0.00) s (0.14, 0.04, 0.04))]
+        Hoop_Rim_Segment lp (0.00, -0.13, -0.53) [BoxCollider(c (0.00, 0.00, 0.00) s (0.14, 0.04, 0.04))]
+        Hoop_Rim_Segment lp (0.13, -0.13, -0.48) [BoxCollider(c (0.00, 0.00, 0.00) s (0.14, 0.04, 0.04))]
+      Sensor_TriggerTop lp (0.00, -0.09, -0.34) [BoxCollider(c (0.00, 0.00, 0.00) s (0.36, 0.04, 0.36) trig), <MISSING SCRIPT>]
+      Sensor_TriggerBottom lp (0.00, -0.41, -0.34) [BoxCollider(c (0.00, 0.00, 0.00) s (0.26, 0.06, 0.26) trig), <MISSING SCRIPT>]
+      Rim_Glow_Light lp (0.00, -0.13, -0.34) [Light]
+      Score_Celebration_Particles lp (0.00, -0.13, -0.34) [ParticleSystem, ParticleSystemRenderer]
+      Scoreboard_Canvas_3D lp (0.00, 0.35, -0.09) []
+        Text_Status_Notice lp (0.00, 0.04, 0.00) [MeshRenderer, TextMeshPro, MeshFilter]
+        Text_Score_Value lp (0.00, 0.01, 0.00) [MeshRenderer, TextMeshPro, MeshFilter]
+        Text_Score_Label lp (0.00, -0.04, 0.00) [MeshRenderer, TextMeshPro, MeshFilter]
+        Text_Streak_Value lp (-0.15, 0.01, 0.00) [MeshRenderer, TextMeshPro, MeshFilter]
+        Text_Streak_Label lp (-0.15, -0.04, 0.00) [MeshRenderer, TextMeshPro, MeshFilter]
+        Text_HighScore_Value lp (0.15, 0.01, 0.00) [MeshRenderer, TextMeshPro, MeshFilter]
+        Text_High_Label lp (0.15, -0.04, 0.00) [MeshRenderer, TextMeshPro, MeshFilter]
+Malha ArcadeBasketballHoop: bounds centro (0.00, -0.02, -0.26) tamanho (0.73, 0.93, 0.59) tris 4700; Visual_Model localPos (0.00, 0.00, 0.00) rot (0.00, 0.00, 0.00) escala (1.00, 1.00, 1.00)
+  submesh 0 [M_Hoop_Backboard]: centro (0.00, 0.00, -0.01) tamanho (0.70, 0.50, 0.03)
+  submesh 1 [M_Hoop_NeonTrim]: centro (0.00, 0.09, -0.04) tamanho (0.73, 0.71, 0.10)
+  submesh 2 [M_Hoop_TargetWhite]: centro (0.00, -0.04, -0.03) tamanho (0.25, 0.20, 0.00)
+  submesh 3 [M_Hoop_FrameMetal]: centro (0.00, 0.08, -0.13) tamanho (0.60, 0.70, 0.33)
+  submesh 4 [M_Hoop_DisplayGlass]: centro (0.00, 0.35, -0.09) tamanho (0.46, 0.13, 0.00)
+  submesh 5 [M_Hoop_RimOrange]: centro (0.00, -0.13, -0.34) tamanho (0.43, 0.03, 0.43)
+  submesh 6 [M_Hoop_NetWhite]: centro (0.00, -0.31, -0.34) tamanho (0.40, 0.36, 0.40)
+  TMP 'Text_Status_Notice': "ARCADE HOOP" font 0.45 localPos (0.00, 0.04, 0.00) rect (20.00, 5.00) bounds (0.32, 0.04, 0.00) cor RGBA(0.000, 0.900, 1.000, 1.000)
+  TMP 'Text_Score_Value': "00" font 0.85 localPos (0.00, 0.01, 0.00) rect (20.00, 5.00) bounds (0.10, 0.07, 0.00) cor RGBA(1.000, 0.900, 0.150, 1.000)
+  TMP 'Text_Score_Label': "PONTOS" font 0.28 localPos (0.00, -0.04, 0.00) rect (20.00, 5.00) bounds (0.12, 0.02, 0.00) cor RGBA(0.850, 0.850, 0.900, 1.000)
+  TMP 'Text_Streak_Value': "x0" font 0.75 localPos (-0.15, 0.01, 0.00) rect (20.00, 5.00) bounds (0.08, 0.06, 0.00) cor RGBA(0.200, 1.000, 0.500, 1.000)
+  TMP 'Text_Streak_Label': "STREAK" font 0.28 localPos (-0.15, -0.04, 0.00) rect (20.00, 5.00) bounds (0.11, 0.02, 0.00) cor RGBA(0.650, 0.650, 0.750, 1.000)
+  TMP 'Text_HighScore_Value': "00" font 0.75 localPos (0.15, 0.01, 0.00) rect (20.00, 5.00) bounds (0.09, 0.06, 0.00) cor RGBA(1.000, 0.450, 0.150, 1.000)
+  TMP 'Text_High_Label': "RECORDE" font 0.28 localPos (0.15, -0.04, 0.00) rect (20.00, 5.00) bounds (0.13, 0.02, 0.00) cor RGBA(0.650, 0.650, 0.750, 1.000)
+Bola: Demo_Basketball_Table pos (0.69, 1.01, 5.87)
+Spawner: ArcadeBallSpawner_Instance pos (0.44, 0.95, 4.82)
+Missing Script na cena do Menu: 2
+  ArcadeBasketballHoop_Instance/Sensor_TriggerTop (1)
+  ArcadeBasketballHoop_Instance/Sensor_TriggerBottom (1)
+D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\BASKET_before_front.png
+D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\BASKET_before_scoreboard.png

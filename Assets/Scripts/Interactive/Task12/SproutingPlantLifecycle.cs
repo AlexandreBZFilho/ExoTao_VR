@@ -61,20 +61,35 @@ namespace VRRehab.Interactive.Task12
         {
             // Inicia do tamanho zero e expande elasticamente
             StartCoroutine(ElasticSproutRoutine());
-            OnPlantSproutedEvent?.Invoke(this);
 
             if (pollenParticles != null && !pollenParticles.isPlaying)
             {
                 pollenParticles.Play();
             }
+
+            Camera cam = Camera.main;
+            if (cam != null) viewer = cam.transform;
         }
+
+        /// <summary>
+        /// Avisa as missões que o PACIENTE fez este canteiro brotar (chamado pelo pinhão ao brotar).
+        /// Antes o aviso saía no Start de qualquer canteiro, e os 2 canteiros de demonstração já colocados na cena
+        /// completavam a missão "Magia Botânica" sozinhos no instante em que a fase começava.
+        /// </summary>
+        public void AnnounceSprouted()
+        {
+            OnPlantSproutedEvent?.Invoke(this);
+        }
+
+        // Balanço ao vento só perto do jogador (canteiros longe não gastam CPU em VR)
+        private const float SwayRadiusSqr = 25f * 25f;
+        private Transform viewer;
 
         private void Update()
         {
-            if (enableWindSway)
-            {
-                ApplyWindSway();
-            }
+            if (!enableWindSway) return;
+            if (viewer != null && (viewer.position - transform.position).sqrMagnitude > SwayRadiusSqr) return;
+            ApplyWindSway();
         }
 
         public void Configure(bool isMushroom, AudioClip sfxBounce, ParticleSystem pollenPs)
@@ -193,7 +208,11 @@ namespace VRRehab.Interactive.Task12
             // Reproduz som de boing
             if (sfxMushroomBounce != null)
             {
-                AudioSource.PlayClipAtPoint(sfxMushroomBounce, transform.position, 0.95f);
+                // Pool de áudio do VRFeedbackManager (sem criar GameObject por som) e volume confortável
+                if (VRRehab.Core.VRFeedbackManager.Instance != null)
+                    VRRehab.Core.VRFeedbackManager.Instance.PlaySound(sfxMushroomBounce, transform.position, 0.55f, 0.95f, 1.05f);
+                else
+                    AudioSource.PlayClipAtPoint(sfxMushroomBounce, transform.position, 0.55f);
             }
 
             if (activeBounceRoutine != null)

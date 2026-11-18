@@ -120,8 +120,12 @@ namespace VRRehab.Interactive.Task11
             }
         }
 
-        private void FixedUpdate()
+        protected override void FixedUpdate()
         {
+            // IMPORTANTE: chama a base. Antes este método era 'private' e ESCONDIA o FixedUpdate do
+            // LaserSwingThrowInteractable: a proteção "voou para fora do mapa / atravessou o chão" nunca rodava nas maçãs.
+            base.FixedUpdate();
+
             // Checagem de imersão no rio
             if (!isSelected && appleRb != null && !appleRb.isKinematic)
             {

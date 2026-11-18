@@ -41,7 +41,11 @@ namespace VRRehab.Interactive.Task11
 
         public static event System.Action<int, int> OnAppleScoredEvent; // pointsEarned, totalApplesScored
 
-        private HashSet<InteractiveApple> scoredApples = new HashSet<InteractiveApple>();
+        private readonly HashSet<InteractiveApple> scoredApples = new HashSet<InteractiveApple>();
+        // Maçãs que já estavam dentro da cesta quando a cena começou (decoração "Apple_In_Basket"): não pontuam
+        // sozinhas no Play. Só voltam a valer depois que saem da cesta (o paciente tira e arremessa de novo).
+        private readonly HashSet<InteractiveApple> restingApples = new HashSet<InteractiveApple>();
+        private static readonly Collider[] overlapBuffer = new Collider[16];
         private DroneMilestoneCelebration droneCelebration;
 
         private void Awake()
@@ -70,10 +74,35 @@ namespace VRRehab.Interactive.Task11
             AimAssistTargetRegistry.Unregister(this);
         }
 
-        private void OnTriggerEnter(Collider other)
+        private void Start()
+        {
+            // Registra as maçãs que já começam dentro da boca da cesta (decorativas)
+            int n = Physics.OverlapSphereNonAlloc(AimTargetPosition, rimRadius, overlapBuffer, ~0, QueryTriggerInteraction.Collide);
+            for (int i = 0; i < n; i++)
+            {
+                InteractiveApple apple = overlapBuffer[i] != null ? overlapBuffer[i].GetComponentInParent<InteractiveApple>() : null;
+                if (apple != null) restingApples.Add(apple);
+            }
+        }
+
+        private void OnTriggerEnter(Collider other) => TryScore(other);
+
+        // Maçã solta DENTRO da boca da cesta (o paciente desceu a maçã com o laser e soltou): pontua ao soltar
+        private void OnTriggerStay(Collider other) => TryScore(other);
+
+        private void OnTriggerExit(Collider other)
         {
             InteractiveApple apple = other.GetComponentInParent<InteractiveApple>();
+            if (apple != null) restingApples.Remove(apple);
+        }
+
+        private void TryScore(Collider other)
+        {
+            if (other.attachedRigidbody == null) return;
+            InteractiveApple apple = other.attachedRigidbody.GetComponent<InteractiveApple>();
             if (apple == null) return;
+            if (apple.IsGrabbed) return;                 // ainda presa no laser: atravessar a cesta segurando não vale
+            if (restingApples.Contains(apple)) return;   // decoração que já estava na cesta
             if (scoredApples.Contains(apple)) return;
 
             // Registra para não pontuar duas vezes a mesma maçã
@@ -147,7 +176,9 @@ namespace VRRehab.Interactive.Task11
         {
             GameObject popupGo = new GameObject("ScorePopup3D");
             popupGo.transform.position = AimTargetPosition + Vector3.up * 0.15f;
-            popupGo.transform.rotation = Quaternion.LookRotation(popupGo.transform.position - Camera.main.transform.position);
+            Camera cam = Camera.main;
+            if (cam != null)
+                popupGo.transform.rotation = Quaternion.LookRotation(popupGo.transform.position - cam.transform.position);
 
             TextMeshPro tmp = popupGo.AddComponent<TextMeshPro>();
             tmp.text = $"+{points} PTS";

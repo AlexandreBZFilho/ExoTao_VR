@@ -114,8 +114,8 @@ def build_golden_apple(export_path):
     # Create UV sphere for apple
     res = bmesh.ops.create_uvsphere(
         bm_apple,
-        u_segments=24,
-        v_segments=16,
+        u_segments=16,  # VR: era 24x16 (troféu <= 800 tris)
+        v_segments=10,
         radius=0.042
     )
     # Deform vertices into apple shape: slightly indented top (z>0.02) and bottom (z<-0.02)
@@ -575,8 +575,8 @@ def build_drone_crown_hat(export_path):
     bm_velvet = bmesh.new()
     bmesh.ops.create_uvsphere(
         bm_velvet,
-        u_segments=24,
-        v_segments=14,
+        u_segments=16,  # VR: era 24x14
+        v_segments=8,
         radius=0.066
     )
     # Scale and place dome from z=0.005 to z=0.075
@@ -657,8 +657,8 @@ def build_drone_crown_hat(export_path):
         # Golden pearl sphere at each peak tip
         bmesh.ops.create_uvsphere(
             bm_gold,
-            u_segments=10,
-            v_segments=8,
+            u_segments=6,   # VR: pérolas eram 10x8
+            v_segments=4,
             radius=0.0075,
             matrix=mathutils.Matrix.Translation((px, py, pz + 0.006))
         )

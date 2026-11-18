@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using VRRehab.Core;
@@ -89,10 +90,7 @@ namespace VRRehab.Interactive.Task12
             isThrown = false;
 
             // Chime agradável ao puxar com o raio do laser ou pegar com a mão
-            if (sfxPickupChime != null)
-            {
-                AudioSource.PlayClipAtPoint(sfxPickupChime, transform.position, 0.90f);
-            }
+            PlayAt(sfxPickupChime, transform.position, 0.6f);
 
             // Ativa aura mágica cintilante na mão
             if (auraGlowParticles != null && !auraGlowParticles.isPlaying)
@@ -140,14 +138,8 @@ namespace VRRehab.Interactive.Task12
             isThrown = false;
 
             // 1. Áudios de impacto e brotação elástica
-            if (sfxImpactBurst != null)
-            {
-                AudioSource.PlayClipAtPoint(sfxImpactBurst, spawnPoint, 1.0f);
-            }
-            if (sfxSproutElastic != null)
-            {
-                AudioSource.PlayClipAtPoint(sfxSproutElastic, spawnPoint, 1.0f);
-            }
+            PlayAt(sfxImpactBurst, spawnPoint, 0.6f);
+            PlayAt(sfxSproutElastic, spawnPoint, 0.6f);
 
             // 2. Partículas de impacto e pólen luminoso
             if (impactBurstParticles != null)
@@ -172,8 +164,13 @@ namespace VRRehab.Interactive.Task12
                 Quaternion randomYaw = Quaternion.AngleAxis(Random.Range(0f, 360f), groundNormal);
                 Quaternion finalRot = randomYaw * groundRotation;
 
+                MakeRoomForSprout();
                 sproutedInstance = Instantiate(chosenPrefab, spawnPoint, finalRot);
                 sproutedInstance.name = spawnMushroom ? $"Sprouted_MushroomCluster_{Time.frameCount}" : $"Sprouted_FlowerPatch_{Time.frameCount}";
+                liveSprouts.Enqueue(sproutedInstance);
+
+                var lifecycle = sproutedInstance.GetComponent<SproutingPlantLifecycle>();
+                if (lifecycle != null) lifecycle.AnnounceSprouted(); // missão "Magia Botânica"
             }
 
             // 4. Inicia ciclo de respawn (some imediatamente e reaparece no ninho após 3s)
@@ -183,6 +180,38 @@ namespace VRRehab.Interactive.Task12
             }
 
             return sproutedInstance;
+        }
+
+        /// <summary>Máximo de canteiros brotados vivos na cena (todos os pinhões juntos): leveza em VR.</summary>
+        public const int MaxSproutsInScene = 10;
+        private static readonly Queue<GameObject> liveSprouts = new Queue<GameObject>(MaxSproutsInScene + 1);
+        public static int LiveSproutCount
+        {
+            get
+            {
+                int n = 0;
+                foreach (GameObject g in liveSprouts) if (g != null) n++;
+                return n;
+            }
+        }
+
+        /// <summary>Pool cheio: o canteiro mais antigo some para dar lugar ao novo.</summary>
+        private static void MakeRoomForSprout()
+        {
+            while (liveSprouts.Count > 0 && liveSprouts.Peek() == null) liveSprouts.Dequeue();
+            while (liveSprouts.Count >= MaxSproutsInScene)
+            {
+                GameObject oldest = liveSprouts.Dequeue();
+                if (oldest != null) Destroy(oldest);
+                while (liveSprouts.Count > 0 && liveSprouts.Peek() == null) liveSprouts.Dequeue();
+            }
+        }
+
+        private static void PlayAt(AudioClip clip, Vector3 pos, float volume)
+        {
+            if (clip == null) return;
+            if (VRFeedbackManager.Instance != null) VRFeedbackManager.Instance.PlaySound(clip, pos, volume, 0.97f, 1.03f);
+            else AudioSource.PlayClipAtPoint(clip, pos, volume);
         }
 
         private IEnumerator DisappearAndRespawnRoutine()

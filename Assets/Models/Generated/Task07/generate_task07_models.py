@@ -257,7 +257,7 @@ def build_inflatable_balloon(export_path):
         (0.300, 0.000),  # Top apex tip
     ]
 
-    segments = 24
+    segments = 20  # VR: era 24 + Subsurf (2.5k tris); perfil já é suave com sombreamento smooth
     ring_verts = []
 
     for z_pos, radius in profile[:-1]:
@@ -302,12 +302,10 @@ def build_inflatable_balloon(export_path):
 
     balloon_obj.data.materials.append(mat_balloon)
 
-    sub = balloon_obj.modifiers.new("Subsurf", 'SUBSURF')
-    sub.levels = 1
-    sub.render_levels = 2
+    # (Subsurf removido: quadruplicava os triângulos de um item que pode ter 8 cópias simultâneas)
 
     # Tied knot bead detail at base
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.008, segments=12, ring_count=8, location=(0.0, 0.0, 0.006))
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.008, segments=8, ring_count=6, location=(0.0, 0.0, 0.006))
     knot_obj = bpy.context.active_object
     knot_obj.name = "Knot_Bead"
     knot_obj.scale = (1.2, 1.0, 0.7)

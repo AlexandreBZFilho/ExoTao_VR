@@ -59,6 +59,30 @@ namespace VRRehab.Interactive.Task14
             }
         }
 
+        /// <summary>Laço único da trilha: anima todas as moedas vivas (rotação, flutuação e atração magnética).</summary>
+        private void Update()
+        {
+            if (Instance != this) return;
+            float dt = Time.deltaTime, time = Time.time;
+            var coins = CollectibleOrbCoin.ActiveCoins;
+            for (int i = coins.Count - 1; i >= 0; i--)
+            {
+                CollectibleOrbCoin coin = coins[i];
+                if (coin == null) { coins.RemoveAt(i); continue; }
+                coin.Tick(dt, time);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance != this) return;
+            Instance = null;
+            // Sem gerenciador, cada moeda volta a se animar sozinha
+            var coins = CollectibleOrbCoin.ActiveCoins;
+            for (int i = 0; i < coins.Count; i++)
+                if (coins[i] != null) coins[i].enabled = true;
+        }
+
         public void RegisterCoinSpawned()
         {
             totalCoinsInLevel++;
@@ -89,6 +113,18 @@ namespace VRRehab.Interactive.Task14
 
             CheckMilestones();
         }
+
+        /// <summary>
+        /// Pontos de bônus (missão concluída, totem de checkpoint). NÃO conta como moeda coletada: antes o bônus
+        /// entrava em RegisterCoinCollected, contava como moeda na missão "Magia Botânica" e no progresso da trilha.
+        /// </summary>
+        public void AddBonusPoints(int points)
+        {
+            currentScore += points;
+            OnBonusPointsEvent?.Invoke(points, currentScore);
+        }
+
+        public static event Action<int, int> OnBonusPointsEvent; // pontos do bônus, placar total
 
         private void CheckMilestones()
         {

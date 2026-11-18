@@ -62,7 +62,10 @@ namespace VRRehab.Interactive.Task15
                 initialChestRotation = chestLidPivot.localRotation;
 
             if (beaconLight != null)
+            {
                 beaconLight.intensity = 0f;
+                beaconLight.shadows = LightShadows.None; // VR: luz pontual com sombra custa 6 passes extras por olho
+            }
         }
 
         private void Start()
@@ -214,8 +217,7 @@ namespace VRRehab.Interactive.Task15
             // Recompensa de pontos no CoinScoreManager da floresta
             if (CoinScoreManager.Instance != null)
             {
-                CoinScoreManager.Instance.RegisterCoinCollected(
-                    CollectibleOrbCoin.CoinType.BonusDiamond, bonusScoreValue, 1);
+                CoinScoreManager.Instance.AddBonusPoints(bonusScoreValue); // bônus não conta como moeda
             }
 
             // Notifica o Drone Pet para celebrar
@@ -295,9 +297,10 @@ namespace VRRehab.Interactive.Task15
                 activateParticles.Play();
             }
 
-            // 6. Pulso contínuo de luz sutil no baú aberto
+            // 6. Pulso de luz sutil no baú aberto por alguns segundos; depois fica fixo e a corrotina termina
+            //    (nada rodando todo frame para sempre em VR)
             float pulseTimer = 0f;
-            while (true)
+            while (pulseTimer < PulseSeconds * 2.5f)
             {
                 pulseTimer += Time.deltaTime * 2.5f;
                 if (beaconLight != null)
@@ -306,7 +309,11 @@ namespace VRRehab.Interactive.Task15
                 }
                 yield return null;
             }
+            if (beaconLight != null) beaconLight.intensity = 2.2f;
+            activationRoutine = null;
         }
+
+        private const float PulseSeconds = 6f;
 
         /// <summary>
         /// Força o estado aberto imediato (para inspeção e captura de Visual QA).

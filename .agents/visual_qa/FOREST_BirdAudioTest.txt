@@ -1,0 +1,10 @@
+=== Teste de áudio do pássaro (2026-11-16 02:26:24) ===
+poleiros: 3; distância de reação: 3.2 m; cooldown do pio: 15 s
+[PASSOU] 1) último poleiro, paciente parado a 1,5 m por 60 s: 1 pio(s) em 5400 frames (esperado 1; a versão antiga tocava 1 por frame = 5400)
+[PASSOU] 2) 200 hovers do laser seguidos (mesmo encontro, depois do cooldown): 0 pio(s) extras (esperado 0: um pio por encontro)
+[PASSOU] 3) afasta (rearma) e volta depois do cooldown, fica 2 s: 1 pio(s) (esperado 1), rearmou ao se afastar=True
+[PASSOU] 4) 4 idas e voltas em 8 s (dentro do cooldown): 0 pio(s) (esperado 0)
+[PASSOU] 5) 5 minutos de vai e vem a cada 3 s: 17 pios em 300 s (máximo possível com cooldown de 15 s: 20), menor intervalo entre pios 18.0 s
+[PASSOU] 6) poleiro inicial, paciente chega perto e fica 10 s: 1 pio(s) (esperado 1), estado depois = Alerted (decolou; o voo em si só roda em Play)
+[PASSOU] 7) AudioSource: loop=False playOnAwake=False volume=0.16 spatialBlend=1 maxDistance=10
+--- RESULTADO: 7 passaram, 0 falharam

@@ -1,0 +1,28 @@
+=== Teste de pontuação da cesta (2026-11-16 14:02:13) ===
+Método: Physics.Simulate (passo 0.02 s) na cena Menu_Principal, gatilhos/contatos emulados por sobreposição a cada passo.
+captura: D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\BASKET_scoreboard_1_inicial.png
+[PASSOU] a) bola caindo limpa pelo aro: pontos +3 (esperado +3), sequência 1, tocou aro=False, mensagem "SWISH! +3"
+captura: D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\BASKET_scoreboard_2_swish.png
+[PASSOU] b) bate no aro e entra: deslocamento 0.095 m: tocou o aro e entrou, pontos +2 (esperado +2), mensagem "CESTA! +2  x2"
+[PASSOU] c1) bate no aro e erra: pontos +0 (esperado 0), tocou aro=True, sequência 2 -> 0 (esperado 0), flag do aro depois=False (esperado False); tocou em [Hoop_Rim_Segment, floor_tile (8), Pessoa_Virtual_sem3D], parou em (4.97, 0.11, 3.03)
+[PASSOU] c2) mesma bola, próxima cesta limpa depois do erro: pontos +3 (esperado +3: a flag do aro do arremesso anterior não vaza)
+[PASSOU] c3) arremesso longe da cesta: pontos +0 (esperado 0), sequência 0 (esperado 0)
+[PASSOU] d1) bola rápida, 8 m/s na vertical (quica no chão e volta pelo aro: só 1 cesta por arremesso): pontos +3 (esperado +3), velocidade máx 10.2 m/s
+[PASSOU] d2) bola muito rápida, 11 m/s: pontos +3 (esperado +3), velocidade máx 12.6 m/s
+[PASSOU] d3) arremesso em arco a 2 m de distância: pontos +3 (esperado +3 ou +2), tocou aro=False, velocidade máx 5.6 m/s
+[PASSOU] e1) bola subindo pela rede: pontos +0 (esperado 0), altura máx acima do aro 1.12 m
+[PASSOU] e2) bola cruzando a rede de lado, por baixo do aro: pontos +0 (esperado 0)
+[PASSOU] f) três cestas seguidas somam e a sequência sobe: pontos 9 (esperado 09), sequência 3 (esperado 3), mensagem "SWISH! +3  x3"
+captura: D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\BASKET_scoreboard_3_sequencia.png
+[PASSOU] g) ResetGame zera pontos e sequência e mantém o recorde: pontos 0, sequência 0, recorde 17
+[PASSOU] placar sem sobreposição com textos no pior caso: 0 sobreposições, 0 fora da placa
+   Text_Title "ARCADE HOOP": 33.5 x 3.6 cm, fonte 0.45
+   Text_Streak_Value "x24": 17.8 x 7.5 cm, fonte 0.95
+   Text_Score_Value "188": 16.7 x 7.7 cm, fonte 0.95
+   Text_HighScore_Value "999": 18.4 x 7.7 cm, fonte 0.95
+   Text_Streak_Label "SEQUÊNCIA": 18.4 x 3.4 cm, fonte 0.32
+   Text_Score_Label "PONTOS": 13.1 x 2.6 cm, fonte 0.32
+   Text_High_Label "RECORDE": 14.6 x 2.6 cm, fonte 0.32
+   Text_Status_Notice "SWISH! +3  x24": 30.4 x 3.2 cm, fonte 0.40
+
+--- RESULTADO: 13 passaram, 0 falharam

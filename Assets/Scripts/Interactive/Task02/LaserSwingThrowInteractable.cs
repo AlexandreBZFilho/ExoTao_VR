@@ -397,19 +397,19 @@ namespace VRRehab.Ergonomics
         {
             Vector3 pos = transform.position;
 
-            // Se estiver na Floresta com terreno ativo
-            if (Terrain.activeTerrain != null)
+            // Cenas com terreno (Floresta): saiu do mapa ou caiu mais de 1,5 m abaixo do chão real -> volta ao ponto seguro.
+            // (TerrainGroundUtil consulta o bloco certo entre os vários Terrains da cena.)
+            if (VRRehab.Core.TerrainGroundUtil.HasTerrain)
             {
-                float terrainY = Terrain.activeTerrain.SampleHeight(pos) + Terrain.activeTerrain.transform.position.y;
-                if (pos.y < terrainY - 1.2f)
+                if (!VRRehab.Core.TerrainGroundUtil.TryGetHeight(pos, out float terrainY) || pos.y < terrainY - 1.5f)
                 {
                     RecoverFromOutOfBounds();
-                    return;
                 }
+                return;
             }
 
-            // Se caiu abaixo do limiar crítico do piso da sala ou do mundo
-            if (pos.y < -1.5f || (Terrain.activeTerrain == null && pos.y < respawnFloorThresholdY - 0.2f))
+            // Cenas sem terreno (Menu): caiu abaixo do piso da sala ou do mundo
+            if (pos.y < -1.5f || pos.y < respawnFloorThresholdY - 0.2f)
             {
                 RecoverFromOutOfBounds();
             }

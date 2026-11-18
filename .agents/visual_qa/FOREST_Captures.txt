@@ -1,0 +1,10 @@
+D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\FOREST_view1_front.png
+D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\FOREST_view2_side_grounding.png
+D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\FOREST_view3_closeup_mushrooms.png
+D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\FOREST_bird_legs_front.png
+D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\FOREST_bird_legs_side.png
+D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\FOREST_view3_closeup_mushrooms_1.png
+D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\FOREST_view3_closeup_mushrooms_2.png
+D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\FOREST_view3_closeup_mushrooms_3.png
+D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\FOREST_bird_legs_front.png
+D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\FOREST_bird_legs_side.png

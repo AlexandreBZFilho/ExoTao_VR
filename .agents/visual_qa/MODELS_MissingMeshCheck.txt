@@ -1,0 +1,4 @@
+MeshFilter sem malha (prefabs + Menu + Floresta): 3
+  cena Floresta_e_Rio -> Cenário/Fence/FENCE/PT_Medieval_Village_Gate_01/PT_Medieval_Village_Gate_01_fixed
+  cena Floresta_e_Rio -> Cenário/Fence/FENCE/PT_Medieval_Village_Gate_01/PT_Medieval_Village_Gate_01_left_moblie
+  cena Floresta_e_Rio -> Cenário/Fence/FENCE/PT_Medieval_Village_Gate_01/PT_Medieval_Village_Gate_01_right_mobile

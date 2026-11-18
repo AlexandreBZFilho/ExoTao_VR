@@ -1,0 +1,4 @@
+pernas criadas (Leg_Left / Leg_Right), corpo elevado 3.5 cm, pés em Y = 0
+AudioSource do prefab: loop=False playOnAwake=False volume=0.16 blend=1 maxDistance=10 rolloff=Logarithmic
+triângulos do pássaro com pernas: 582 (limite 1800)
+prefab do pássaro salvo

@@ -249,23 +249,16 @@ namespace VRRehab.Ergonomics
                 return true;
             }
 
-            // 2. Proteção Anti-Queda debaixo do Terreno na cena da Floresta
-            if (Terrain.activeTerrain != null)
+            // 2. Cenas com terreno (Floresta): fora de todos os blocos do mapa, ou mais de 1,5 m abaixo do chão real.
+            //    (TerrainGroundUtil consulta o bloco certo; Terrain.activeTerrain devolvia a altura de outro bloco.)
+            if (VRRehab.Core.TerrainGroundUtil.HasTerrain)
             {
-                float terrainY = Terrain.activeTerrain.SampleHeight(currentPos) + Terrain.activeTerrain.transform.position.y;
-                if (currentPos.y < terrainY - 1.2f)
-                {
-                    return true;
-                }
+                if (!VRRehab.Core.TerrainGroundUtil.TryGetHeight(currentPos, out float terrainY)) return true;
+                return currentPos.y < terrainY - 1.5f;
             }
 
-            // 3. Cota mínima absoluta em Y (ex: no Menu Principal ou queda no vazio)
-            if (currentPos.y < respawnFloorThresholdY)
-            {
-                return true;
-            }
-
-            return false;
+            // 3. Cenas sem terreno (Menu Principal): cota mínima absoluta em Y (caiu no chão da sala ou no vazio)
+            return currentPos.y < respawnFloorThresholdY;
         }
 
         /// <summary>

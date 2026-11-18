@@ -202,7 +202,7 @@ if __name__ == '__main__':
         write_wav(os.path.join(out_dir, filename), samples)
         
     write_wav(os.path.join(out_dir, "lantern_ignite_whoosh.wav"), synthesize_lantern_ignite())
-    write_wav(os.path.join(out_dir, "bird_chirp_cheerful.wav"), synthesize_bird_chirp())
-    write_wav(os.path.join(out_dir, "bird_wing_flutter.wav"), synthesize_wing_flutter())
+    # Os áudios do pássaro agora são gerados por generate_bird_soft_audio.py (pio suave, pico -12 dB).
+    # Não regenerar aqui: a versão antiga era estridente (2.8-4.3 kHz a -0.6 dB).
     
     print("All Task 13 audio assets synthesized successfully.")

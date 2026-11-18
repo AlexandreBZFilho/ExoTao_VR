@@ -1,0 +1,44 @@
+=== Auditoria de polígonos dos modelos gerados (2026-11-16 13:57) ===
+Orçamento VR do plano: itens de mão <= 600 tris, itens médios/estáticos <= 1800 tris.
+Modelos: 32 | acima do orçamento: 3 | triângulos totais: 29842
+
+ACIMA DO ORÇAMENTO:
+    1740 tris (limite 1100, mão (bola com costuras em geometria))  Assets/Models/Generated/Task07/BalloonGunDispenser.fbx
+    1840 tris (limite 1800, médio)  Assets/Models/Generated/Task09/ExoMascotBobblehead.fbx
+    1828 tris (limite 1800, médio)  Assets/Models/Generated/Task09/FireworksLaunchButton.fbx
+
+MeshCollider em prefab com Rigidbody dinâmico (proibido): 0
+
+Todos (por pasta):
+  ok    232 tris  [mão]  Assets/Models/Generated/Task02/ReticleTargetRing.fbx
+  ok    180 tris  [mão]  Assets/Models/Generated/Task06/CassetteDeckSlot.fbx
+  ok    104 tris  [mão]  Assets/Models/Generated/Task06/CassetteOrganizerRack.fbx
+  ok    376 tris  [mão]  Assets/Models/Generated/Task06/RetroCassetteTape.fbx
+  !!   1740 tris  [mão (bola com costuras em geometria)]  Assets/Models/Generated/Task07/BalloonGunDispenser.fbx
+  ok    560 tris  [mão (bola com costuras em geometria)]  Assets/Models/Generated/Task07/InflatableBalloon.fbx
+  ok   1788 tris  [médio]  Assets/Models/Generated/Task08/ArcadeBasketballHoop.fbx
+  ok   1408 tris  [médio]  Assets/Models/Generated/Task08/ArcadeSpawnButton.fbx
+  ok   1040 tris  [mão (bola com costuras em geometria)]  Assets/Models/Generated/Task08/MiniBasketball.fbx
+  ok   1768 tris  [médio]  Assets/Models/Generated/Task09/EnvironmentControlLever.fbx
+  !!   1840 tris  [médio]  Assets/Models/Generated/Task09/ExoMascotBobblehead.fbx
+  !!   1828 tris  [médio]  Assets/Models/Generated/Task09/FireworksLaunchButton.fbx
+  ok   4212 tris  [cenário]  Assets/Models/Generated/Task10/PortalOrbDiorama_Forest.fbx
+  ok   1772 tris  [médio]  Assets/Models/Generated/Task10/PortalPedestalSocket.fbx
+  ok    384 tris  [mão]  Assets/Models/Generated/Task11/GoldenBonusApple.fbx
+  ok    384 tris  [mão]  Assets/Models/Generated/Task11/InteractiveRedApple.fbx
+  ok   1324 tris  [médio]  Assets/Models/Generated/Task11/WickerCollectionBasket.fbx
+  ok   1524 tris  [médio]  Assets/Models/Generated/Task12/BouncyMushroomCluster.fbx
+  ok    276 tris  [mão]  Assets/Models/Generated/Task12/GlowingPineconeSeed.fbx
+  ok    152 tris  [mão]  Assets/Models/Generated/Task12/SeedNestPedestal.fbx
+  ok   1638 tris  [médio]  Assets/Models/Generated/Task12/SproutingFlowerPatch.fbx
+  ok    326 tris  [médio]  Assets/Models/Generated/Task13/LowPolyForestBird.fbx
+  ok    202 tris  [médio]  Assets/Models/Generated/Task13/RunePathLantern.fbx
+  ok    618 tris  [médio]  Assets/Models/Generated/Task13/XylophoneMushroom.fbx
+  ok    552 tris  [mão]  Assets/Models/Generated/Task14/BonusDiamondCoin.fbx
+  ok    156 tris  [mão]  Assets/Models/Generated/Task14/EnergyStarCoin.fbx
+  ok    776 tris  [médio]  Assets/Models/Generated/Task15/CheckpointRewardTotem.fbx
+  ok    364 tris  [troféu]  Assets/Models/Generated/Task16/Trophy_DisplayStand.fbx
+  ok    772 tris  [troféu]  Assets/Models/Generated/Task16/Trophy_DroneCrownHat.fbx
+  ok    460 tris  [troféu]  Assets/Models/Generated/Task16/Trophy_GoldenApple.fbx
+  ok    428 tris  [troféu]  Assets/Models/Generated/Task16/Trophy_LuminousBonsai.fbx
+  ok    658 tris  [troféu]  Assets/Models/Generated/Task16/Trophy_StarCup.fbx

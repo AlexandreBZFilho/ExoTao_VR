@@ -379,7 +379,7 @@ def build_mushroom_cluster(export_path):
     for mname, mx, my, sh, rbot, rtop, cap_r, cap_h, cx, cy, spot_n in mush_configs:
         # Stem: direct child of root
         sbm = bmesh.new()
-        n_seg = 12
+        n_seg = 10
         slices = 5
         ring_verts = []
         for s in range(slices + 1):
@@ -425,8 +425,8 @@ def build_mushroom_cluster(export_path):
         cbm = bmesh.new()
         bmesh.ops.create_uvsphere(
             cbm,
-            u_segments=16,
-            v_segments=12,
+            u_segments=12,   # VR: era 16x12
+            v_segments=8,
             radius=cap_r
         )
         for v in cbm.verts:
@@ -453,7 +453,7 @@ def build_mushroom_cluster(export_path):
         bmesh.ops.create_cone(
             gbm,
             cap_ends=True,
-            segments=14,
+            segments=12,
             radius1=cap_r * 0.90,
             radius2=rtop * 1.1,
             depth=0.014
@@ -486,8 +486,8 @@ def build_mushroom_cluster(export_path):
             
             res_sphere = bmesh.ops.create_uvsphere(
                 spbm,
-                u_segments=8,
-                v_segments=6,
+                u_segments=6,   # VR: era 8x6 (22 pintas)
+                v_segments=3,
                 radius=spot_rad
             )
             for v in res_sphere['verts']:

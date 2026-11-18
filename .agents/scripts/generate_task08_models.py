@@ -170,8 +170,8 @@ def build_arcade_basketball_hoop(output_path):
     bpy.ops.mesh.primitive_torus_add(
         major_radius=0.2025,
         minor_radius=0.0125,
-        major_segments=48,
-        minor_segments=16,
+        major_segments=32,   # VR: era 48x16
+        minor_segments=8,
         location=(0, rim_center_y, rim_center_z),
         rotation=(0, 0, 0)
     )
@@ -188,7 +188,7 @@ def build_arcade_basketball_hoop(output_path):
         v = p2 - p1
         length = v.length
         bpy.ops.mesh.primitive_cylinder_add(
-            vertices=12,
+            vertices=8,
             radius=0.007,
             depth=length,
             location=mid
@@ -218,8 +218,8 @@ def build_arcade_basketball_hoop(output_path):
         bpy.ops.mesh.primitive_torus_add(
             major_radius=curr_rad,
             minor_radius=0.0035,
-            major_segments=32,
-            minor_segments=8,
+            major_segments=20,   # VR: era 32x8 por anel da rede
+            minor_segments=4,
             location=(0, rim_center_y, r_z)
         )
         n_ring = bpy.context.active_object
@@ -243,7 +243,7 @@ def build_arcade_basketball_hoop(output_path):
         length = v.length
         
         bpy.ops.mesh.primitive_cylinder_add(
-            vertices=8,
+            vertices=6,   # VR: era 8
             radius=0.003,
             depth=length,
             location=(mid_x, mid_y, mid_z)
@@ -301,8 +301,8 @@ def build_mini_basketball(output_path):
 
     # Main ball sphere: diameter 0.18m (radius 0.09m)
     bpy.ops.mesh.primitive_uv_sphere_add(
-        segments=48,
-        ring_count=32,
+        segments=20,   # VR: era 48x32 (8.7k tris na bola inteira)
+        ring_count=12,
         radius=0.09,
         location=(0, 0, 0)
     )
@@ -317,8 +317,8 @@ def build_mini_basketball(output_path):
     bpy.ops.mesh.primitive_torus_add(
         major_radius=0.0895,
         minor_radius=0.0032,
-        major_segments=48,
-        minor_segments=12,
+        major_segments=20,
+        minor_segments=3,
         location=(0, 0, 0),
         rotation=(0, 0, 0)
     )
@@ -330,8 +330,8 @@ def build_mini_basketball(output_path):
     bpy.ops.mesh.primitive_torus_add(
         major_radius=0.0895,
         minor_radius=0.0032,
-        major_segments=48,
-        minor_segments=12,
+        major_segments=20,
+        minor_segments=3,
         location=(0, 0, 0),
         rotation=(math.radians(90), 0, 0)
     )
@@ -343,8 +343,8 @@ def build_mini_basketball(output_path):
     bpy.ops.mesh.primitive_torus_add(
         major_radius=0.0895,
         minor_radius=0.0032,
-        major_segments=48,
-        minor_segments=12,
+        major_segments=20,
+        minor_segments=3,
         location=(0, 0, 0),
         rotation=(0, math.radians(90), 0)
     )
@@ -357,8 +357,8 @@ def build_mini_basketball(output_path):
         bpy.ops.mesh.primitive_torus_add(
             major_radius=0.075,
             minor_radius=0.0028,
-            major_segments=48,
-            minor_segments=12,
+            major_segments=20,
+            minor_segments=3,
             location=(side * 0.048, 0, 0),
             rotation=(0, math.radians(90), 0)
         )

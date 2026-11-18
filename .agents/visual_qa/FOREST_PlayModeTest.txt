@@ -1,0 +1,103 @@
+=== Testes em Play Mode da Floresta_e_Rio (2026-11-16 13:50:46) ===
+Cada teste roda no Play Mode real (Awake/Start, corrotinas, física, eventos do XRI). Uma 'mão de teste' do XRI pega e solta os objetos.
+
+Física: passo fixo 0.0200 s, alvo 90 FPS
+## 0. Estado inicial (2,5 s depois do Play)
+[PASS] 0a) SessionQuestManager ativo: [IC] Drone_Guia_IA_ExoBot
+      missões: marcha 0, amigo 0, botânica 0, moedas 0, placar 0
+[PASS] 0b) 'Magia Botânica' NÃO completa sozinha ao dar Play: botânica 0, completa=False (antes os 2 canteiros de demonstração completavam a missão no Start)
+[PASS] 0c) 'Amigo da Floresta' começa em 0: amigo 0
+[PASS] 0d) maçã decorativa dentro da cesta não pontua nem some sozinha: cestas pontuadas no início=0, depois de 6 s=0, Apple_In_Basket existe=True
+[PASS] 0e) painel de missões do drone ligado e visível: 'Marcha Ativa' 0/15 barra=0.00 | 'Amigo da Floresta' 0/2 barra=0.00 | 'Magia Botanica' 0/8 barra=0.00
+      foto do painel: D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\FOREST_quest_panel_inicio.png
+
+## 1. Árvore sacudível (gatilho do laser na copa)
+[PASS] 1a) 3 árvores sacudíveis na cena: 3 árvores
+      ShakeableFruitTree_1: colisor SphereCollider trigger=False bounds=(53.50, 7.07, 58.50) ext=(2.00, 2.00, 2.00)
+      ShakeableFruitTree_2: colisor SphereCollider trigger=False bounds=(45.50, 7.07, 67.50) ext=(2.00, 2.00, 2.00)
+      ShakeableFruitTree_3: colisor SphereCollider trigger=False bounds=(37.50, 7.07, 63.50) ext=(2.00, 2.00, 2.00)
+[PASS] 1b) gatilho na árvore derruba 2 a 4 maçãs: 3 maçãs
+[PASS] 1c) cooldown impede sacudir de novo na hora: segunda sacudida imediata bloqueada=True
+[PASS] 1d) maçãs caídas param no chão (nem presas na copa, nem enterradas): InteractiveRedApple_535_1 gap -0.02 m vel 0.29, InteractiveRedApple_535_2 gap -0.03 m vel 0.29, InteractiveRedApple_535_0 gap -0.03 m vel 0.14
+[PASS] 1e) maçãs ficam dentro do mapa, perto da árvore: dentro do mapa=True, mais longe a 3.87 m do tronco
+[PASS] 1f) 'casa' da maçã derrubada fica no chão (não no meio da copa): altura da casa acima do chão: 0.06, 0.06, 0.06
+[PASS] 1g) limite de 12 maçãs derrubadas na cena (4 rodadas x 3 árvores): 12 maçãs vivas
+
+## 2. Pegar a maçã e arremessar balançando
+[PASS] 2a) laser/mão pega a maçã: selecionada=True, rb cinemático=False
+[PASS] 2b) maçã acompanha a mão enquanto segurada: distância maçã-mão 0.000 m
+      rastro do balanço:
+        f2443 t=27.699 mão (40.46, 4.05, 64.54) maçã (40.48, 4.04, 64.53) vel (0.00, 0.00, 0.00) kin=False sel=True
+        f2444 t=27.710 mão (40.43, 4.06, 64.56) maçã (40.48, 4.04, 64.53) vel (0.00, 0.00, 0.00) kin=False sel=True
+        f2445 t=27.721 mão (40.40, 4.07, 64.57) maçã (40.48, 4.04, 64.53) vel (-0.28, 0.11, 0.13) kin=False sel=True
+        f2446 t=27.732 mão (40.37, 4.09, 64.58) maçã (40.48, 4.04, 64.53) vel (-0.28, 0.11, 0.13) kin=False sel=True
+        f2447 t=27.743 mão (40.34, 4.10, 64.60) maçã (40.48, 4.04, 64.53) vel (-1.20, 0.48, 0.56) kin=False sel=True
+        f2448 t=27.754 mão (40.31, 4.11, 64.61) maçã (40.46, 4.05, 64.54) vel (-1.20, 0.48, 0.56) kin=False sel=True
+        f2449 t=27.765 mão (40.29, 4.12, 64.62) maçã (40.45, 4.06, 64.55) vel (-1.79, 0.72, 0.83) kin=False sel=True
+        f2450 t=27.776 mão (40.26, 4.13, 64.63) maçã (40.43, 4.06, 64.56) vel (-1.79, 0.72, 0.83) kin=False sel=True
+        f2451 t=27.788 mão (40.23, 4.14, 64.65) maçã (40.40, 4.07, 64.57) vel (-2.17, 0.87, 1.01) kin=False sel=True
+        f2452 t=27.799 mão (40.20, 4.15, 64.66) maçã (40.38, 4.08, 64.58) vel (-2.17, 0.87, 1.01) kin=False sel=True
+        f2453 t=27.810 mão (40.17, 4.16, 64.67) maçã (40.35, 4.09, 64.59) vel (-2.41, 0.97, 1.12) kin=False sel=True
+        f2454 t=27.821 mão (40.14, 4.18, 64.69) maçã (40.33, 4.10, 64.60) vel (-1.27, 0.51, 0.59) kin=False sel=True
+        f2455 t=27.832 mão (40.12, 4.19, 64.70) maçã (40.31, 4.11, 64.61) vel (-1.27, 0.51, 0.59) kin=False sel=True
+        f2456 t=27.843 mão (40.09, 4.20, 64.71) maçã (40.29, 4.12, 64.62) vel (-2.62, 1.05, 1.22) kin=False sel=True
+        f2457 t=27.854 mão (40.06, 4.21, 64.73) maçã (40.26, 4.13, 64.63) vel (-2.62, 1.05, 1.22) kin=False sel=True
+        f2458 t=27.865 mão (40.03, 4.22, 64.74) maçã (40.24, 4.14, 64.65) vel (-2.70, 1.08, 1.25) kin=False sel=True
+        f2459 t=27.876 mão (40.00, 4.23, 64.75) maçã (40.21, 4.15, 64.66) vel (-2.70, 1.08, 1.25) kin=False sel=True
+        f2460 t=27.888 mão (39.97, 4.24, 64.77) maçã (40.17, 4.16, 64.67) vel (-2.75, 1.10, 1.28) kin=False sel=True
+        f2461 t=27.899 mão (39.94, 4.26, 64.78) maçã (40.14, 4.18, 64.69) vel (-2.75, 1.10, 1.28) kin=False sel=True
+        f2462 t=27.910 mão (39.92, 4.27, 64.79) maçã (40.11, 4.19, 64.70) vel (-2.79, 1.12, 1.29) kin=False sel=True
+        f2463 t=27.921 mão (39.89, 4.28, 64.81) maçã (40.08, 4.20, 64.72) vel (-1.40, 0.56, 0.65) kin=False sel=True
+        f2464 t=27.932 mão (39.86, 4.29, 64.82) maçã (40.07, 4.21, 64.72) vel (-1.40, 0.56, 0.65) kin=False sel=True
+        f2465 t=27.943 mão (39.84, 4.30, 64.83) maçã (40.05, 4.21, 64.73) vel (-2.82, 1.13, 1.30) kin=False sel=True
+        SOLTOU f2466 vel imediata (-3.10, 1.24, 1.44) kin=False sel=False
+        +1 f2467 vel (-3.10, 0.85, 1.44) pos (39.88, 4.27, 64.81) kin=False
+        +2 f2468 vel (-3.10, 0.65, 1.44) pos (39.85, 4.28, 64.82) kin=False
+        +3 f2469 vel (-3.10, 0.46, 1.44) pos (39.81, 4.28, 64.84) kin=False
+        +4 f2470 vel (-3.10, 0.46, 1.44) pos (39.78, 4.29, 64.86) kin=False
+
+[PASS] 2c) ao soltar, sai voando na direção do balanço: velocidade (-3.10, 1.24, 1.44) = 3.64 m/s (mão a 3 m/s, multiplicador do soltar), alinhamento cos=1.00
+[PASS] 2d) física normal depois de soltar (sem flutuar): cinemático=False, gravidade=True
+[PASS] 2e) maçã voa, cai e para no chão: andou 3.74 m na horizontal, parou com gap -0.03 m em (36.62, 3.05, 66.32)
+
+## 3. Cesta de vime
+[PASS] 3a) maçã AINDA SEGURA dentro da boca da cesta não pontua: pontuou 0 vez(es) segurada
+      antes de soltar: maçã (53.80, 3.43, 63.80), boca (53.80, 3.37, 63.80) raio 0.25
+      +0.1s maçã (53.80, 3.38, 63.80) vel (0.00, -0.77, 0.00) kin=False sel=False dist boca 0.01
+      +0.2s maçã (53.80, 3.31, 63.82) vel (0.02, -0.83, 0.26) kin=False sel=False dist boca 0.07
+      +0.3s maçã (53.80, 3.19, 63.85) vel (0.01, -1.31, 0.17) kin=False sel=False dist boca 0.19
+      +0.4s maçã (53.80, 3.07, 63.86) vel (0.01, 0.00, 0.10) kin=False sel=False dist boca 0.31
+      +0.5s maçã (53.80, 3.08, 63.87) vel (0.00, 0.00, 0.07) kin=False sel=False dist boca 0.30
+      +0.6s maçã (53.80, 3.08, 63.87) vel (0.00, 0.00, 0.05) kin=False sel=False dist boca 0.31
+[PASS] 3b) solta dentro da cesta: pontua 1 vez: cesta WickerCollectionBasket_1: +1, placar da cesta 10
+[PASS] 3c) missão 'Amigo da Floresta' sobe 1: 0 -> 1
+[PASS] 3d) maçã pontuada some da cesta depois (libera espaço): ainda existe=False
+
+## 4. Proteção contra cair para baixo do mapa
+[PASS] 4a) maçã enfiada 4 m abaixo do terreno não fica perdida embaixo do mapa: depois de 2 s: gap -0.02 m, dentro do mapa=True, a 0.02 m da casa
+[PASS] 4b) maçã que sai pela borda do mapa volta para a casa no chão: depois de 2 s: a 0.02 m da casa (36.31, 3.07, 62.80), gap -0.02 m
+
+## 5. Moedas x bônus (missão 'Magia Botânica')
+[PASS] 5a) moeda coletada conta 1 na missão: marcha 0, amigo 1, botânica 0, moedas 0, placar 0 -> marcha 0, amigo 1, botânica 1, moedas 1, placar 10
+
+## 6. Totem de checkpoint
+[PASS] 6a) totem tem alvo para o gatilho do laser: [TASK-15] CheckpointRewardTotem/Totem_VisualModel/Totem_LeverPivot
+[PASS] 6b) gatilho ativa o totem e abre o baú: ativado=True, tampa girou 80°
+[PASS] 6c) luz do totem acende sem sombra: intensidade 2.6, sombras None
+[PASS] 6d) bônus do totem soma 100 pontos e NÃO conta como moeda: marcha 0, amigo 1, botânica 1, moedas 1, placar 10 -> marcha 0, amigo 1, botânica 1, moedas 1, placar 110
+[PASS] 6e) pulso da luz termina (nada rodando para sempre): corrotina encerrada
+
+## 7. Pinhão mágico (arremessar e brotar)
+[PASS] 7a) 3 pinhões nos pedestais: 3
+[PASS] 7b) pinhão é pego: selecionado=True
+[PASS] 7c) arremessado, brota um canteiro ao bater no chão: Sprouted_FlowerPatch_5452 em (58.13, 3.02, 64.11)
+[PASS] 7d) canteiro brota no chão e dentro do mapa: pivô +0.02 m do chão
+[PASS] 7e) brotar completa a missão 'Magia Botânica': marcha 0, amigo 1, botânica 1, moedas 1, placar 110 -> marcha 0, amigo 1, botânica 8 (ok), moedas 1, placar 160
+[PASS] 7f) pinhão reaparece no pedestal depois de 3 s: a 0.048 m da casa, visível=True, 0.69 m acima do chão (no pedestal), cinemático=False
+[PASS] 7g) limite de 10 canteiros brotados (14 brotações): 10 canteiros vivos
+
+## 8. Painel de missões depois dos testes
+[PASS] 8a) painel do drone mostra exatamente o progresso das missões: 'Marcha Ativa' painel='0/15' (esperado '0/15') barra=0.00 | 'Amigo da Floresta' painel='1/2' (esperado '1/2') barra=0.50 | 'Magia Botanica' painel='[v] CONCLUIDA' (esperado '[v] CONCLUIDA') barra=1.00 || marcha 0, amigo 1, botânica 8 (ok), moedas 1, placar 160
+      foto do painel: D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\FOREST_quest_panel_depois.png
+
+--- RESULTADO: 37 passaram, 0 falharam ---

@@ -158,6 +158,11 @@ namespace VRRehab.Interactive.Task15
             SproutingPlantLifecycle.OnPlantSproutedEvent -= HandlePlantSprouted;
         }
 
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
+
         private void LocatePlayer()
         {
             Camera mainCam = Camera.main;
@@ -280,8 +285,7 @@ namespace VRRehab.Interactive.Task15
             // 2. Concede pontos no CoinScoreManager
             if (CoinScoreManager.Instance != null)
             {
-                CoinScoreManager.Instance.RegisterCoinCollected(
-                    CollectibleOrbCoin.CoinType.BonusDiamond, quest.bonusPoints, 1);
+                CoinScoreManager.Instance.AddBonusPoints(quest.bonusPoints); // bônus não conta como moeda
             }
 
             // 3. Notifica o Drone Pet para celebrar

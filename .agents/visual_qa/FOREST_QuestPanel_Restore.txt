@@ -1,0 +1,10 @@
+Textura UI_ProgressBar_White.png reimportada como sprite único
+  sprite UI_ProgressBar_White.png: ok
+Textura UI_QuestPanel_Bg.png reimportada como sprite único
+  sprite UI_QuestPanel_Bg.png: ok
+Painel recriado: [IC] Drone_Guia_IA_ExoBot/Canvas_Holograma_Clinico/Painel_Missoes_Floresta (14 gráficos, raycastTarget desligado)
+Tamanho no mundo: 0.51 m x 0.43 m
+  Row_Quest_1: Marcha Ativa | 0/15
+  Row_Quest_2: Amigo da Floresta | 0/2
+  Row_Quest_3: Magia Botanica | 0/8
+Foto: D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\FOREST_quest_panel_drone.png

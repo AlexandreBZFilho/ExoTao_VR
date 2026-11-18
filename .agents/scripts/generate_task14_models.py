@@ -235,8 +235,8 @@ def build_bonus_diamond_coin(output_path):
     bpy.ops.mesh.primitive_torus_add(
         major_radius=0.105,
         minor_radius=0.006,
-        major_segments=32,
-        minor_segments=8,
+        major_segments=24,   # VR: era 32x8
+        minor_segments=6,
         location=(0, 0, 0)
     )
     ring = bpy.context.active_object
@@ -256,8 +256,8 @@ def build_bonus_diamond_coin(output_path):
         
         bpy.ops.mesh.primitive_uv_sphere_add(
             radius=0.012,
-            segments=16,
-            ring_count=8,
+            segments=8,   # VR: era 16x8
+            ring_count=6,
             location=pos
         )
         node = bpy.context.active_object

@@ -1,0 +1,33 @@
+=== Inspeção do pássaro ===
+Pássaros na cena: 1
+- [TASK-13] ForestFaunaFlora_Group/GuideBird_Perch/LowPolyForestBird_Guide pos (54.33, 4.53, 65.37) escala (1.00, 1.00, 1.00) prefab=Assets/Prefabs/Interactive/LowPolyForestBird.prefab
+     lp (54.33, 4.53, 65.37) tris=0
+    /Bird_Beak lp (0.00, 0.00, 0.00) tris=12 bounds y[0.122..0.148] mats=1
+    /Bird_Body lp (0.00, 0.00, 0.00) tris=268 bounds y[0.000..0.171] mats=1
+    /Bird_Eyes lp (0.00, 0.00, 0.00) tris=40 bounds y[0.136..0.148] mats=1
+    /Wing_L lp (0.04, 0.10, -0.01) tris=3 bounds y[0.068..0.105] mats=1
+    /Wing_R lp (-0.04, 0.10, -0.01) tris=3 bounds y[0.068..0.105] mats=1
+    TOTAL tris: 326
+    wingLeft = Wing_L @
+    wingRight = Wing_R @
+    birdBody = Bird_Body @
+    chirpSfx = bird_chirp_cheerful @Assets/Audio/Generated/Task13/bird_chirp_cheerful.wav
+    flutterSfx = bird_wing_flutter @Assets/Audio/Generated/Task13/bird_wing_flutter.wav
+    audioSource = null
+    perchTransforms = [0]
+    perchPositions = [3]
+       [0] (54.33, 4.53, 65.37)
+       [1] (47.20, 5.48, 63.80)
+       [2] (35.50, 4.48, 68.30)
+    perchRotations = [3]
+    currentWaypointIndex = 0
+    flightSpeed = 3.6
+    flightArcHeight = 1.4
+    flapFrequency = 24
+    maxFlapAngle = 42
+    triggerOnProximity = True
+    proximityTriggerDist = 3.2
+    AudioSource: loop=False playOnAwake=False vol=1 blend=1 max=25 clip=null
+    Collider: SphereCollider trigger=False bounds (0.30, 0.30, 0.30)
+    D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\FOREST_bird_before_front.png
+    D:\Alunos\Alexandre\Projeto IC\.agents\visual_qa\FOREST_bird_before_side.png

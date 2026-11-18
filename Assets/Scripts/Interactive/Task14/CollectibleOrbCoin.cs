@@ -63,7 +63,17 @@ namespace VRRehab.Interactive.Task14
         private bool isCollected = false;
         private float attractionDuration = 0f;
         private Transform playerTarget;
+        private float nextPlayerSearchTime;
         private Collider coinCollider;
+
+        /// <summary>Além desta distância (m) do paciente a moeda não roda lógica nenhuma (nem gira).</summary>
+        private const float ActiveRadius = 30f;
+
+        /// <summary>
+        /// Todas as moedas vivas. O CoinScoreManager anima todas num único laço (um Update para a trilha inteira);
+        /// sem gerenciador na cena, cada moeda se anima sozinha.
+        /// </summary>
+        public static readonly System.Collections.Generic.List<CollectibleOrbCoin> ActiveCoins = new System.Collections.Generic.List<CollectibleOrbCoin>();
         private XRSimpleInteractable xrInteractable;
 
         public CoinType Type => coinType;
@@ -71,6 +81,7 @@ namespace VRRehab.Interactive.Task14
 
         private void Awake()
         {
+            ActiveCoins.Add(this);
             initialBasePosition = transform.position;
             randomTimeOffset = Random.Range(0f, 10f);
             coinCollider = GetComponent<Collider>();
@@ -120,10 +131,13 @@ namespace VRRehab.Interactive.Task14
         private void Start()
         {
             FindPlayerTarget();
+            // Com o gerenciador na cena, quem chama Tick() é ele (laço único); este componente para de receber Update
+            if (CoinScoreManager.Instance != null) enabled = false;
         }
 
         private void OnDestroy()
         {
+            ActiveCoins.Remove(this);
             if (xrInteractable != null)
             {
                 xrInteractable.hoverEntered.RemoveListener(OnLaserHoverEntered);
@@ -180,69 +194,79 @@ namespace VRRehab.Interactive.Task14
 
         private void Update()
         {
+            Tick(Time.deltaTime, Time.time);
+        }
+
+        /// <summary>
+        /// Um passo de animação/atração da moeda. Chamado pelo laço único do CoinScoreManager (ou pelo próprio Update
+        /// quando não há gerenciador). Distâncias sempre ao quadrado; longe do paciente a moeda não faz nada.
+        /// </summary>
+        public void Tick(float deltaTime, float time)
+        {
             if (isCollected) return;
 
+            // Alvo do jogador (busca espaçada: GameObject.Find todo frame é caro)
+            if (playerTarget == null && time >= nextPlayerSearchTime)
+            {
+                nextPlayerSearchTime = time + 2f;
+                FindPlayerTarget();
+            }
+
+            Vector3 targetChestPos = Vector3.zero;
+            float sqrDist = 0f;
+            if (playerTarget != null)
+            {
+                targetChestPos = playerTarget.position + (Vector3.up * chestHeightOffset);
+                sqrDist = (transform.position - targetChestPos).sqrMagnitude;
+                if (!isAttracting && sqrDist > ActiveRadius * ActiveRadius) return; // longe: nem gira
+            }
+
             // 1. Rotação do corpo principal no eixo vertical do mundo
-            transform.Rotate(0f, rotationSpeed * Time.deltaTime, 0f, Space.World);
+            transform.Rotate(0f, rotationSpeed * deltaTime, 0f, Space.World);
 
             // 2. Rotação do anel orbital em velocidade e eixo distintos para a moeda bônus
             if (orbitRingTransform != null)
             {
-                orbitRingTransform.Rotate(Vector3.up, orbitRingRotationSpeed * Time.deltaTime, Space.Self);
+                orbitRingTransform.Rotate(Vector3.up, orbitRingRotationSpeed * deltaTime, Space.Self);
             }
 
-            // 3. Atualiza alvo do jogador se ainda não inicializado
+            // Sem alvo disponível: só flutua no lugar
             if (playerTarget == null)
             {
-                FindPlayerTarget();
-            }
-
-            // Se o alvo não estiver disponível, apenas executa o bobbing no lugar
-            if (playerTarget == null)
-            {
-                ApplyBobbing();
+                ApplyBobbing(time);
                 return;
             }
 
-            // Posição magnética no peito do paciente
-            Vector3 targetChestPos = playerTarget.position + (Vector3.up * chestHeightOffset);
-            float distToTarget = Vector3.Distance(transform.position, targetChestPos);
-
-            // 4. Detecção e Atração Magnética
+            // 3. Detecção e Atração Magnética
             if (!isAttracting)
             {
-                // Verifica se entrou no raio de atração do paciente
-                if (distToTarget <= magneticAttractionRadius)
+                if (sqrDist <= magneticAttractionRadius * magneticAttractionRadius)
                 {
                     StartMagneticAttraction();
                 }
                 else
                 {
-                    ApplyBobbing();
+                    ApplyBobbing(time);
                 }
             }
             else
             {
-                // Executa movimento magnético suave acelerado até o peito
-                attractionDuration += Time.deltaTime;
+                // Movimento magnético suave acelerado até o peito
+                attractionDuration += deltaTime;
                 float progress = Mathf.Clamp01(attractionDuration * 1.8f);
                 float speed = Mathf.Lerp(minAttractionSpeed, maxAttractionSpeed, progress * progress);
+                transform.position = Vector3.MoveTowards(transform.position, targetChestPos, speed * deltaTime);
 
-                // Curva de deslocamento com ligeira atração em arco
-                Vector3 newPos = Vector3.MoveTowards(transform.position, targetChestPos, speed * Time.deltaTime);
-                transform.position = newPos;
-
-                // Checa distância de coleta ao colidir/alcançar o tronco
-                if (distToTarget <= collectionDistanceThreshold)
+                if (sqrDist <= collectionDistanceThreshold * collectionDistanceThreshold)
                 {
                     Collect(isLaserCollect: false);
                 }
             }
         }
 
-        private void ApplyBobbing()
+        private void ApplyBobbing(float time)
         {
-            float yOffset = Mathf.Sin((Time.time + randomTimeOffset) * bobFrequency) * bobAmplitude;
+            float yOffset = Mathf.Sin((time + randomTimeOffset) * bobFrequency) * bobAmplitude;
             transform.position = new Vector3(initialBasePosition.x, initialBasePosition.y + yOffset, initialBasePosition.z);
         }
 

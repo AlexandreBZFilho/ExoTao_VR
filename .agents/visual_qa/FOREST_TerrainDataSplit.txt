@@ -1,0 +1,4 @@
+Copiado: Assets/Polytope Studio/Lowpoly_Demos/Environment_Free/Helpers/Terrain/New Terrain.asset -> Assets/Terrains/Floresta_e_Rio/Floresta_Terrain_Centro.asset
+  Terrain Terrain: agora usa Assets/Terrains/Floresta_e_Rio/Floresta_Terrain_Centro.asset
+  TerrainCollider Terrain: agora usa Assets/Terrains/Floresta_e_Rio/Floresta_Terrain_Centro.asset
+Referências trocadas: 2 | ainda apontando para a Polytope: 0

@@ -1,44 +1,58 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using VRRehab.Ergonomics;
-using VRRehab.Core;
 
 namespace VRRehab.Interactive.Task08
 {
     /// <summary>
-    /// Controlador principal do Minigame de Basquete Arcade.
-    /// Gerencia:
-    /// 1. Duplo sensor de passagem (TriggerTop + TriggerBottom) para pontuação de cima para baixo;
-    /// 2. Detecção de cesta limpa (Swish! +3 pontos) vs com aro (+2 pontos);
-    /// 3. Placar digital 3D luminoso via TextMeshPro com Pontos, Sequência (Streak) e Recorde (HighScore);
-    /// 4. Efeitos procedurais: tremor elástico da rede, pulso de emissão neon no aro, partículas e buzina arcade;
-    /// 5. Integração com IAimAssistTarget para arremessos assistidos por ThrowAimAssist.
+    /// Controlador do Minigame de Basquete Arcade.
+    /// 1. Duplo sensor de passagem: a bola precisa ENTRAR pelo sensor de cima DESCENDO e depois sair pelo sensor
+    ///    de baixo, ainda descendo e dentro do aro. Bola subindo pela rede ou passando por fora não pontua.
+    /// 2. Cesta limpa (sem tocar o aro) = SWISH +3; com toque no aro = +2.
+    /// 3. Placar: PONTOS, SEQUÊNCIA e RECORDE (TextMeshPro) + faixa de mensagem temporária.
+    /// 4. Efeitos: rede elástica, pulso de emissão no aro (MaterialPropertyBlock), partículas e sons suaves.
+    /// 5. IAimAssistTarget para o ThrowAimAssist.
+    /// Sem Update: tudo acontece nos eventos dos sensores.
     /// </summary>
     [DisallowMultipleComponent]
     [SelectionBase]
     public class BasketballHoopScorer : MonoBehaviour, IAimAssistTarget
     {
         private const string HighScoreKey = "VRRehab_Basketball_HighScore";
+        private const string IdleNotice = "ARREMESSE!";
+        private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
+
+        /// <summary>Cesta ativa na cena (as bolas avisam aqui quando um arremesso erra).</summary>
+        public static BasketballHoopScorer ActiveInstance { get; private set; }
+
+        /// <summary>Relógio do minigame. Substituível em testes de editor (onde Time.time não avança).</summary>
+        public static System.Func<float> ClockOverride;
+        public static float Now => ClockOverride != null ? ClockOverride() : Time.time;
 
         [Header("Sensores de Cesta")]
-        [Tooltip("Trigger no plano superior da boca do aro.")]
+        [Tooltip("Trigger logo acima da boca do aro.")]
         [SerializeField] private Collider topTriggerCollider;
 
-        [Tooltip("Trigger no plano inferior da rede do aro.")]
+        [Tooltip("Trigger na saída da rede, abaixo do aro.")]
         [SerializeField] private Collider bottomTriggerCollider;
 
         [Tooltip("Collider físico sólido do aro metálico onde ocorrem colisões.")]
         [SerializeField] private Collider rimSolidCollider;
 
+        [Header("Geometria do Aro (espaço local da cesta)")]
+        [Tooltip("Centro do aro no espaço local desta cesta.")]
+        [SerializeField] private Vector3 rimCenterLocal = new Vector3(0f, -0.13f, -0.3425f);
+        [Tooltip("Raio do aro (m).")]
+        [SerializeField] private float rimRadius = 0.19f;
+
         [Header("Pontuação & Configuração")]
         [SerializeField] private int pointsRegular = 2;
         [SerializeField] private int pointsSwish = 3;
-        [SerializeField] private float maxTransitSeconds = 0.85f;
+        [Tooltip("Tempo máximo (s) entre passar pelo sensor de cima e sair pelo de baixo.")]
+        [SerializeField] private float maxTransitSeconds = 1.2f;
 
-        [Header("Placar Digital 3D (TextMeshPro)")]
+        [Header("Placar (TextMeshPro)")]
         [SerializeField] private TMP_Text scoreText;
         [SerializeField] private TMP_Text streakText;
         [SerializeField] private TMP_Text highScoreText;
@@ -50,11 +64,12 @@ namespace VRRehab.Interactive.Task08
         [SerializeField] private ParticleSystem celebrationParticles;
         [SerializeField] private Light rimGlowLight;
 
-        [Header("Efeitos Sonoros (SFX)")]
+        [Header("Efeitos Sonoros (volumes confortáveis)")]
         [SerializeField] private AudioSource hoopAudioSource;
         [SerializeField] private AudioClip sfxSwish;
         [SerializeField] private AudioClip sfxRimClang;
         [SerializeField] private AudioClip sfxBuzzer;
+        [Range(0.05f, 0.6f)] [SerializeField] private float sfxVolume = 0.4f;
 
         [Header("Configuração de Aim Assist")]
         [SerializeField] private Vector3 aimAssistOffset = new Vector3(0f, 0.05f, 0.34f);
@@ -65,10 +80,12 @@ namespace VRRehab.Interactive.Task08
         private int currentScore = 0;
         private int currentStreak = 0;
         private int highScore = 0;
+        private bool initialized;
         private Coroutine netAnimationCoroutine;
         private Coroutine rimPulseCoroutine;
         private Coroutine noticeCoroutine;
         private Vector3 originalNetScale = Vector3.one;
+        private MaterialPropertyBlock rimBlock;
 
         #region IAimAssistTarget Implementation
         public Vector3 AimTargetPosition => transform.TransformPoint(aimAssistOffset);
@@ -80,80 +97,115 @@ namespace VRRehab.Interactive.Task08
         public int CurrentScore => currentScore;
         public int CurrentStreak => currentStreak;
         public int HighScore => highScore;
+        public Vector3 RimCenterWorld => transform.TransformPoint(rimCenterLocal);
+        public float RimRadius => rimRadius;
+        public string NoticeText => statusNoticeText != null ? statusNoticeText.text : string.Empty;
+
+        /// <summary>Corrotinas de efeito só rodam em jogo (no editor o estado é aplicado direto).</summary>
+        private bool CanAnimate => isActiveAndEnabled && Application.isPlaying;
 
         private void Awake()
         {
+            EnsureInitialized();
+        }
+
+        /// <summary>Inicialização idempotente (Awake em jogo; chamada direta nos testes de editor).</summary>
+        public void EnsureInitialized()
+        {
+            if (initialized) return;
+            initialized = true;
+
             if (hoopAudioSource == null)
             {
                 hoopAudioSource = GetComponent<AudioSource>();
-                if (hoopAudioSource == null)
-                {
-                    hoopAudioSource = gameObject.AddComponent<AudioSource>();
-                    hoopAudioSource.spatialBlend = 1.0f;
-                    hoopAudioSource.minDistance = 1.0f;
-                    hoopAudioSource.maxDistance = 20.0f;
-                    hoopAudioSource.playOnAwake = false;
-                }
+                if (hoopAudioSource == null) hoopAudioSource = gameObject.AddComponent<AudioSource>();
             }
+            hoopAudioSource.playOnAwake = false;
+            hoopAudioSource.loop = false;
+            hoopAudioSource.spatialBlend = 1.0f;
+            hoopAudioSource.dopplerLevel = 0f;
+            hoopAudioSource.minDistance = 1.0f;
+            hoopAudioSource.maxDistance = 12.0f;
 
-            if (netTransform != null)
-            {
-                originalNetScale = netTransform.localScale;
-            }
+            ActiveInstance = this;
+            if (netTransform != null) originalNetScale = netTransform.localScale;
+            if (rimGlowLight != null) rimGlowLight.shadows = LightShadows.None;
+            rimBlock = new MaterialPropertyBlock();
 
             highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
+            if (statusNoticeText != null) statusNoticeText.text = IdleNotice;
             UpdateScoreboardUI();
         }
 
         private void OnEnable()
         {
+            ActiveInstance = this;
             AimAssistTargetRegistry.Register(this);
         }
 
         private void OnDisable()
         {
+            if (ActiveInstance == this) ActiveInstance = null;
             AimAssistTargetRegistry.Unregister(this);
         }
 
-        #region Triggers de Passagem
-        /// <summary>
-        /// Chamado pelo trigger superior quando a bola entra.
-        /// </summary>
-        public void OnTriggerTopEnter(Collider other)
+        #region Sensores de Passagem
+        /// <summary>Distância horizontal (no plano do aro) do centro da bola ao eixo do aro.</summary>
+        private float HorizontalDistanceToRimAxis(Vector3 worldPos)
         {
-            BasketballBallAudio ball = other.GetComponentInParent<BasketballBallAudio>();
-            if (ball != null)
-            {
-                ball.topTriggerEnterTimestamp = Time.time;
-            }
+            Vector3 local = transform.InverseTransformPoint(worldPos) - rimCenterLocal;
+            local.y = 0f;
+            return Vector3.Scale(local, transform.lossyScale).magnitude;
         }
 
-        /// <summary>
-        /// Chamado pelo trigger inferior quando a bola sai da rede.
-        /// </summary>
-        public void OnTriggerBottomEnter(Collider other)
+        /// <summary>Sensor de cima: a bola precisa estar DESCENDO e por cima da boca do aro.</summary>
+        public void OnTriggerTopEnter(Collider other)
         {
             BasketballBallAudio ball = other.GetComponentInParent<BasketballBallAudio>();
             if (ball == null) return;
 
-            // Valida se a bola veio do TriggerTop de cima para baixo dentro do tempo hábil
-            float dt = Time.time - ball.topTriggerEnterTimestamp;
-            if (ball.topTriggerEnterTimestamp > 0f && dt > 0.02f && dt <= maxTransitSeconds)
-            {
-                bool isSwish = !ball.hasTouchedRimThisShot;
-                RegisterBasket(isSwish, ball);
-            }
+            bool descending = ball.Velocity.y < 0.05f;
+            bool overMouth = HorizontalDistanceToRimAxis(ball.transform.position) <= rimRadius + 0.06f;
+            ball.topTriggerEnterTimestamp = descending && overMouth ? Now : -1f;
+        }
 
-            // Reseta rastreamento da bola
-            ball.ResetShotTracking();
+        /// <summary>Sensor de baixo: valida a passagem de cima para baixo por dentro do aro e pontua.</summary>
+        public void OnTriggerBottomEnter(Collider other)
+        {
+            BasketballBallAudio ball = other.GetComponentInParent<BasketballBallAudio>();
+            if (ball == null) return;
+            if (ball.HasScoredThisShot) { ball.topTriggerEnterTimestamp = -1f; return; } // uma cesta por arremesso
+
+            float topTime = ball.topTriggerEnterTimestamp;
+            ball.topTriggerEnterTimestamp = -1f;
+            if (topTime < 0f) return; // não passou pela boca do aro descendo (ex.: bola subindo pela rede)
+
+            bool inTime = Now - topTime <= maxTransitSeconds;
+            bool descending = ball.Velocity.y < 0f;
+            // Arremesso em arco sai pela rede deslocado para trás (não há colisor de rede): tolera até o raio do aro
+            bool insideNet = HorizontalDistanceToRimAxis(ball.transform.position) <= rimRadius + 0.02f;
+            if (!inTime || !descending || !insideNet) return;
+
+            bool isSwish = !ball.TouchedRimRecently;
+            ball.NotifyScored();
+
+            // A rede "segura" a bola: corta a velocidade horizontal para ela cair embaixo da cesta, não atravessar a sala
+            Rigidbody body = ball.AttachedRigidbody;
+            if (body != null && !body.isKinematic)
+            {
+                Vector3 v = body.linearVelocity;
+                body.linearVelocity = new Vector3(v.x * 0.25f, v.y, v.z * 0.25f);
+            }
+            RegisterBasket(isSwish);
         }
         #endregion
 
-        #region Lógica de Pontuação e Celebração
-        private void RegisterBasket(bool isSwish, BasketballBallAudio ball)
+        #region Pontuação e Celebração
+        private void RegisterBasket(bool isSwish)
         {
-            int pointsAwarded = isSwish ? pointsSwish : pointsRegular;
-            currentScore += pointsAwarded;
+            EnsureInitialized();
+
+            currentScore += isSwish ? pointsSwish : pointsRegular;
             currentStreak++;
 
             if (currentScore > highScore)
@@ -165,86 +217,69 @@ namespace VRRehab.Interactive.Task08
 
             UpdateScoreboardUI();
 
-            // Áudio
             if (hoopAudioSource != null)
             {
-                if (isSwish)
-                {
-                    if (sfxSwish != null) hoopAudioSource.PlayOneShot(sfxSwish, 1.0f);
-                    if (sfxBuzzer != null) hoopAudioSource.PlayOneShot(sfxBuzzer, 0.75f);
-                }
-                else
-                {
-                    if (sfxRimClang != null) hoopAudioSource.PlayOneShot(sfxRimClang, 0.65f);
-                    if (sfxSwish != null) hoopAudioSource.PlayOneShot(sfxSwish, 0.90f);
-                    if (sfxBuzzer != null) hoopAudioSource.PlayOneShot(sfxBuzzer, 0.70f);
-                }
+                if (!isSwish && sfxRimClang != null) hoopAudioSource.PlayOneShot(sfxRimClang, sfxVolume * 0.6f);
+                if (sfxSwish != null) hoopAudioSource.PlayOneShot(sfxSwish, sfxVolume);
+                if (sfxBuzzer != null) hoopAudioSource.PlayOneShot(sfxBuzzer, sfxVolume * 0.6f);
             }
 
-            // Animação procedural da rede
-            if (netTransform != null)
+            if (netTransform != null && CanAnimate)
             {
                 if (netAnimationCoroutine != null) StopCoroutine(netAnimationCoroutine);
                 netAnimationCoroutine = StartCoroutine(NetRippleAnimationRoutine());
             }
 
-            // Pulso de emissão do aro
-            Color pulseColor = isSwish ? new Color(0.0f, 1.0f, 0.65f) : new Color(1.0f, 0.55f, 0.05f);
-            if (rimPulseCoroutine != null) StopCoroutine(rimPulseCoroutine);
-            rimPulseCoroutine = StartCoroutine(RimPulseRoutine(pulseColor));
-
-            // Partículas de confete
-            if (celebrationParticles != null)
+            if (CanAnimate)
             {
-                celebrationParticles.Play();
+                Color pulseColor = isSwish ? new Color(0.0f, 1.0f, 0.65f) : new Color(1.0f, 0.55f, 0.05f);
+                if (rimPulseCoroutine != null) StopCoroutine(rimPulseCoroutine);
+                rimPulseCoroutine = StartCoroutine(RimPulseRoutine(pulseColor));
             }
 
-            // Notificação temporária no visor do placar
-            string notice = isSwish ? "★ SWISH! +3 ★" : "CESTA! +2";
-            if (currentStreak > 1) notice += $" (STREAK x{currentStreak})";
-            ShowStatusNotice(notice, isSwish ? Color.yellow : Color.cyan);
+            if (celebrationParticles != null) celebrationParticles.Play();
 
-            Debug.Log($"[BASKETBALL] Cesta pontuada! {(isSwish ? "SWISH (+3)" : "Regular (+2)")} | Total: {currentScore} | Streak: {currentStreak}");
+            string notice = isSwish ? $"SWISH! +{pointsSwish}" : $"CESTA! +{pointsRegular}";
+            if (currentStreak > 1) notice += $"  x{currentStreak}";
+            ShowStatusNotice(notice, isSwish ? new Color(1f, 0.92f, 0.2f) : new Color(0.2f, 0.95f, 1f));
+        }
+
+        /// <summary>Arremesso errado (avisado pela bola no primeiro impacto fora da cesta): zera a sequência.</summary>
+        public void RegisterMiss()
+        {
+            if (currentStreak == 0) return;
+            currentStreak = 0;
+            UpdateScoreboardUI();
         }
 
         private void UpdateScoreboardUI()
         {
-            if (scoreText != null)
-            {
-                scoreText.text = currentScore.ToString("D2");
-            }
-            if (streakText != null)
-            {
-                streakText.text = $"x{currentStreak}";
-            }
-            if (highScoreText != null)
-            {
-                highScoreText.text = highScore.ToString("D2");
-            }
+            if (scoreText != null) scoreText.text = currentScore.ToString("D2");
+            if (streakText != null) streakText.text = "x" + currentStreak;
+            if (highScoreText != null) highScoreText.text = highScore.ToString("D2");
         }
 
         private void ShowStatusNotice(string msg, Color col)
         {
             if (statusNoticeText == null) return;
-            if (noticeCoroutine != null) StopCoroutine(noticeCoroutine);
-            noticeCoroutine = StartCoroutine(NoticeRoutine(msg, col));
-        }
-
-        private IEnumerator NoticeRoutine(string msg, Color col)
-        {
             statusNoticeText.text = msg;
             statusNoticeText.color = col;
-            statusNoticeText.gameObject.SetActive(true);
+            if (!CanAnimate) return;
+            if (noticeCoroutine != null) StopCoroutine(noticeCoroutine);
+            noticeCoroutine = StartCoroutine(NoticeRoutine());
+        }
 
-            yield return new WaitForSeconds(2.0f);
-
-            statusNoticeText.text = "ARCADE HOOP";
+        private IEnumerator NoticeRoutine()
+        {
+            yield return new WaitForSeconds(2.2f);
+            statusNoticeText.text = IdleNotice;
             statusNoticeText.color = Color.white;
+            noticeCoroutine = null;
         }
 
         private IEnumerator NetRippleAnimationRoutine()
         {
-            float duration = 0.65f;
+            const float duration = 0.65f;
             float elapsed = 0f;
 
             while (elapsed < duration)
@@ -252,106 +287,69 @@ namespace VRRehab.Interactive.Task08
                 elapsed += Time.deltaTime;
                 float t = elapsed / duration;
 
-                // Estica para baixo no impacto e oscila senoidalmente
+                // Estica para baixo no impacto e oscila
                 float stretchY = 1.0f + 0.35f * Mathf.Exp(-5.0f * t) * Mathf.Cos(t * Mathf.PI * 8.0f);
                 float waveXZ = 1.0f + 0.12f * Mathf.Exp(-4.0f * t) * Mathf.Sin(t * Mathf.PI * 10.0f);
-
-                netTransform.localScale = new Vector3(
-                    originalNetScale.x * waveXZ,
-                    originalNetScale.y * stretchY,
-                    originalNetScale.z * waveXZ
-                );
-
+                netTransform.localScale = new Vector3(originalNetScale.x * waveXZ, originalNetScale.y * stretchY, originalNetScale.z * waveXZ);
                 yield return null;
             }
 
             netTransform.localScale = originalNetScale;
+            netAnimationCoroutine = null;
         }
 
         private IEnumerator RimPulseRoutine(Color pulseColor)
         {
             if (rimRenderer == null) yield break;
+            if (rimBlock == null) rimBlock = new MaterialPropertyBlock();
+            rimRenderer.GetPropertyBlock(rimBlock);
 
-            MaterialPropertyBlock block = new MaterialPropertyBlock();
-            rimRenderer.GetPropertyBlock(block);
-
-            if (rimGlowLight != null)
-            {
-                rimGlowLight.color = pulseColor;
-                rimGlowLight.intensity = 3.0f;
-            }
-
-            float duration = 0.5f;
+            const float duration = 0.5f;
             float elapsed = 0f;
-
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
                 float t = elapsed / duration;
-                float intensity = Mathf.Lerp(4.0f, 1.0f, t);
 
-                block.SetColor("_EmissionColor", pulseColor * intensity);
-                rimRenderer.SetPropertyBlock(block);
+                rimBlock.SetColor(EmissionColorId, pulseColor * Mathf.Lerp(4.0f, 1.0f, t));
+                rimRenderer.SetPropertyBlock(rimBlock);
 
                 if (rimGlowLight != null)
                 {
+                    rimGlowLight.color = pulseColor;
                     rimGlowLight.intensity = Mathf.Lerp(3.0f, 0.4f, t);
                 }
-
                 yield return null;
             }
 
-            block.SetColor("_EmissionColor", new Color(1.0f, 0.35f, 0.02f) * 1.5f);
-            rimRenderer.SetPropertyBlock(block);
+            rimBlock.SetColor(EmissionColorId, new Color(1.0f, 0.35f, 0.02f) * 1.5f);
+            rimRenderer.SetPropertyBlock(rimBlock);
 
             if (rimGlowLight != null)
             {
                 rimGlowLight.color = new Color(1.0f, 0.4f, 0.1f);
                 rimGlowLight.intensity = 0.6f;
             }
+            rimPulseCoroutine = null;
         }
         #endregion
 
-        /// <summary>
-        /// Reseta os pontos da rodada atual mantendo o recorde.
-        /// </summary>
+        /// <summary>Zera os pontos e a sequência da rodada, mantendo o recorde.</summary>
         public void ResetGame()
         {
+            EnsureInitialized();
             currentScore = 0;
             currentStreak = 0;
             UpdateScoreboardUI();
-            ShowStatusNotice("READY - SHOOT!", Color.green);
+            ShowStatusNotice("VALENDO!", new Color(0.3f, 1f, 0.45f));
         }
 
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = new Color(0f, 1f, 0.8f, 0.5f);
             Gizmos.DrawWireSphere(AimTargetPosition, aimAssistRadius);
-            Gizmos.color = new Color(0f, 1f, 0.8f, 1f);
-            Gizmos.DrawSphere(AimTargetPosition, 0.04f);
-        }
-    }
-
-    /// <summary>
-    /// Componente auxiliar para encaminhar eventos de trigger para o HoopScorer principal.
-    /// </summary>
-    public class HoopSensorForwarder : MonoBehaviour
-    {
-        public enum SensorType { Top, Bottom }
-        public SensorType sensorType;
-        public BasketballHoopScorer scorer;
-
-        private void OnTriggerEnter(Collider other)
-        {
-            if (scorer == null) return;
-            if (sensorType == SensorType.Top)
-            {
-                scorer.OnTriggerTopEnter(other);
-            }
-            else
-            {
-                scorer.OnTriggerBottomEnter(other);
-            }
+            Gizmos.color = new Color(1f, 0.5f, 0f, 1f);
+            Gizmos.DrawWireSphere(RimCenterWorld, rimRadius);
         }
     }
 }
