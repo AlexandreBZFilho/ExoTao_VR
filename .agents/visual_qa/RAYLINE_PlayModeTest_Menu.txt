@@ -1,0 +1,40 @@
+Laser escondido ao segurar — cena Menu — 2026-11-26 08:23
+
+[PASS] XRInteractionManager na cena: XR Interaction Manager
+[PASS] Raios com laser ativos: 2: Pessoa_Virtual_sem3D/XR Origin (XR Rig)/Camera Offset/Left Controller, Pessoa_Virtual_sem3D/XR Origin (XR Rig)/Camera Offset/Right Controller
+[PASS] Componente no raio 'Left Controller': Pessoa_Virtual_sem3D/XR Origin (XR Rig)/Camera Offset/Left Controller
+[PASS] Componente no raio 'Right Controller': Pessoa_Virtual_sem3D/XR Origin (XR Rig)/Camera Offset/Right Controller
+[PASS] Objetos pegáveis para testar: TrophyItem_DroneCrown, Tape_EmeraldZen_Rack, Tape_NeonSunset_Rack, Tape_LunaCantina_Rack
+[PASS] Laser é desenhado normalmente antes de pegar (referência): lineRenderer.enabled=True, pontos=2
+[PASS] [TrophyItem_DroneCrown] apontar (hover) mantém o laser: lineVisual.enabled=True
+[PASS] [TrophyItem_DroneCrown] pego pelo raio 'Left Controller': hasSelection=True
+[PASS] [TrophyItem_DroneCrown] laser escondido ao pegar: lineVisual.enabled=False, lineRenderer.enabled=False
+[PASS] [TrophyItem_DroneCrown] laser continua escondido no frame seguinte: lineVisual.enabled=False
+[PASS] [TrophyItem_DroneCrown] laser volta ao soltar: lineVisual.enabled=True
+[PASS] [TrophyItem_DroneCrown] laser desenhando de novo depois de soltar: antes de pegar=True, depois de soltar=True (pontos=2)
+[PASS] [Tape_EmeraldZen_Rack] apontar (hover) mantém o laser: lineVisual.enabled=True
+[PASS] [Tape_EmeraldZen_Rack] pego pelo raio 'Right Controller': hasSelection=True
+[PASS] [Tape_EmeraldZen_Rack] laser escondido ao pegar: lineVisual.enabled=False, lineRenderer.enabled=False
+[PASS] [Tape_EmeraldZen_Rack] laser continua escondido no frame seguinte: lineVisual.enabled=False
+[PASS] [Tape_EmeraldZen_Rack] laser volta ao soltar: lineVisual.enabled=True
+[PASS] [Tape_EmeraldZen_Rack] laser desenhando de novo depois de soltar: antes de pegar=True, depois de soltar=True (pontos=2)
+[PASS] [Tape_NeonSunset_Rack] apontar (hover) mantém o laser: lineVisual.enabled=True
+[PASS] [Tape_NeonSunset_Rack] pego pelo raio 'Left Controller': hasSelection=True
+[PASS] [Tape_NeonSunset_Rack] laser escondido ao pegar: lineVisual.enabled=False, lineRenderer.enabled=False
+[PASS] [Tape_NeonSunset_Rack] laser continua escondido no frame seguinte: lineVisual.enabled=False
+[PASS] [Tape_NeonSunset_Rack] laser volta ao soltar: lineVisual.enabled=True
+[PASS] [Tape_NeonSunset_Rack] laser desenhando de novo depois de soltar: antes de pegar=True, depois de soltar=True (pontos=2)
+[PASS] [Tape_LunaCantina_Rack] apontar (hover) mantém o laser: lineVisual.enabled=True
+[PASS] [Tape_LunaCantina_Rack] pego pelo raio 'Right Controller': hasSelection=True
+[PASS] [Tape_LunaCantina_Rack] laser escondido ao pegar: lineVisual.enabled=False, lineRenderer.enabled=False
+[PASS] [Tape_LunaCantina_Rack] laser continua escondido no frame seguinte: lineVisual.enabled=False
+[PASS] [Tape_LunaCantina_Rack] laser volta ao soltar: lineVisual.enabled=True
+[PASS] [Tape_LunaCantina_Rack] laser desenhando de novo depois de soltar: antes de pegar=True, depois de soltar=True (pontos=2)
+[PASS] Segurar o Drone '[IC] Drone_Guia_IA_ExoBot' esconde o laser: hasSelection=True, lineVisual.enabled=False
+[PASS] Soltar o Drone mostra o laser de novo: lineVisual.enabled=True
+[PASS] Clicar no botão/interativo 'Eject_Button' (CassetteEjectButton) NÃO esconde o laser: lineVisual.enabled=True
+(sem área de teleporte ativa nesta cena — teste de teleporte pulado)
+[PASS] Instalador de reserva não precisou adicionar nada (prefabs já têm): adicionados=0
+[PASS] Sem componente duplicado: raios com duplicata=0
+
+--- RESULTADO: 35 passaram, 0 falharam ---

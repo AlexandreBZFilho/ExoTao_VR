@@ -1,0 +1,40 @@
+Laser escondido ao segurar — cena Floresta — 2026-11-26 08:24
+
+[PASS] XRInteractionManager na cena: XR Interaction Manager
+[PASS] Raios com laser ativos: 2: Pessoa_Virtual_sem3D/XR Origin (XR Rig)/Camera Offset/Left Controller, Pessoa_Virtual_sem3D/XR Origin (XR Rig)/Camera Offset/Right Controller
+[PASS] Componente no raio 'Left Controller': Pessoa_Virtual_sem3D/XR Origin (XR Rig)/Camera Offset/Left Controller
+[PASS] Componente no raio 'Right Controller': Pessoa_Virtual_sem3D/XR Origin (XR Rig)/Camera Offset/Right Controller
+[PASS] Objetos pegáveis para testar: GlowingPineconeSeed_1, StarterGoldenApple, StarterRedApple_0, StarterRedApple_2
+[PASS] Laser é desenhado normalmente antes de pegar (referência): lineRenderer.enabled=True, pontos=2
+[PASS] [GlowingPineconeSeed_1] apontar (hover) mantém o laser: lineVisual.enabled=True
+[PASS] [GlowingPineconeSeed_1] pego pelo raio 'Left Controller': hasSelection=True
+[PASS] [GlowingPineconeSeed_1] laser escondido ao pegar: lineVisual.enabled=False, lineRenderer.enabled=False
+[PASS] [GlowingPineconeSeed_1] laser continua escondido no frame seguinte: lineVisual.enabled=False
+[PASS] [GlowingPineconeSeed_1] laser volta ao soltar: lineVisual.enabled=True
+[PASS] [GlowingPineconeSeed_1] laser desenhando de novo depois de soltar: antes de pegar=True, depois de soltar=True (pontos=2)
+[PASS] [StarterGoldenApple] apontar (hover) mantém o laser: lineVisual.enabled=True
+[PASS] [StarterGoldenApple] pego pelo raio 'Right Controller': hasSelection=True
+[PASS] [StarterGoldenApple] laser escondido ao pegar: lineVisual.enabled=False, lineRenderer.enabled=False
+[PASS] [StarterGoldenApple] laser continua escondido no frame seguinte: lineVisual.enabled=False
+[PASS] [StarterGoldenApple] laser volta ao soltar: lineVisual.enabled=True
+[PASS] [StarterGoldenApple] laser desenhando de novo depois de soltar: antes de pegar=True, depois de soltar=True (pontos=2)
+[PASS] [StarterRedApple_0] apontar (hover) mantém o laser: lineVisual.enabled=True
+[PASS] [StarterRedApple_0] pego pelo raio 'Left Controller': hasSelection=True
+[PASS] [StarterRedApple_0] laser escondido ao pegar: lineVisual.enabled=False, lineRenderer.enabled=False
+[PASS] [StarterRedApple_0] laser continua escondido no frame seguinte: lineVisual.enabled=False
+[PASS] [StarterRedApple_0] laser volta ao soltar: lineVisual.enabled=True
+[PASS] [StarterRedApple_0] laser desenhando de novo depois de soltar: antes de pegar=True, depois de soltar=True (pontos=2)
+[PASS] [StarterRedApple_2] apontar (hover) mantém o laser: lineVisual.enabled=True
+[PASS] [StarterRedApple_2] pego pelo raio 'Right Controller': hasSelection=True
+[PASS] [StarterRedApple_2] laser escondido ao pegar: lineVisual.enabled=False, lineRenderer.enabled=False
+[PASS] [StarterRedApple_2] laser continua escondido no frame seguinte: lineVisual.enabled=False
+[PASS] [StarterRedApple_2] laser volta ao soltar: lineVisual.enabled=True
+[PASS] [StarterRedApple_2] laser desenhando de novo depois de soltar: antes de pegar=True, depois de soltar=True (pontos=2)
+[PASS] Segurar o Drone '[IC] Drone_Guia_IA_ExoBot' esconde o laser: hasSelection=True, lineVisual.enabled=False
+[PASS] Soltar o Drone mostra o laser de novo: lineVisual.enabled=True
+[PASS] Clicar no botão/interativo 'XylophoneMushroom_A4' (XRSimpleInteractable) NÃO esconde o laser: lineVisual.enabled=True
+(sem área de teleporte ativa nesta cena — teste de teleporte pulado)
+[PASS] Instalador de reserva não precisou adicionar nada (prefabs já têm): adicionados=0
+[PASS] Sem componente duplicado: raios com duplicata=0
+
+--- RESULTADO: 35 passaram, 0 falharam ---

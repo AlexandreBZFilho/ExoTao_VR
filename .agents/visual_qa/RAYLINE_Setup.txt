@@ -1,0 +1,3 @@
+Assets/Prefabs/Pessoa_Virtual_sem3D loading.prefab: 2 raios com laser, componente adicionado em 2
+Assets/Prefabs/Pessoa_Virtual_sem3D.prefab: 2 raios com laser, componente adicionado em 2
+Assets/Prefabs/Pessoa_Virtual.prefab: 2 raios com laser, componente adicionado em 2
