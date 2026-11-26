@@ -720,10 +720,10 @@ MonoBehaviour:
   laserThrowWooshClip: {fileID: 8300000, guid: c02283a1f14b43d29a54bb88319f02a2, type: 3}
   tapeId: tape_gold_02
   tapeTitle: Luna Cantina
-  tapeGenre: Cantina Latina Retro
+  tapeGenre: Jazz Lounge de Cantina
   themeColor: {r: 0.95, g: 0.78, b: 0.22, a: 1}
-  musicClip: {fileID: 8300000, guid: 3355289ea2b210b4ca6fbbf553e69736, type: 3}
-  trackBpm: 105
+  musicClip: {fileID: 8300000, guid: 57e51d9cbfdaf2544ab03e04e5dd9a24, type: 3}
+  trackBpm: 93
   spoolLeft: {fileID: 7952476480798974504}
   spoolRight: {fileID: 5937309284909905929}
   spoolRotationSpeed: 240

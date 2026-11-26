@@ -424,10 +424,10 @@ MonoBehaviour:
   laserThrowWooshClip: {fileID: 8300000, guid: c02283a1f14b43d29a54bb88319f02a2, type: 3}
   tapeId: tape_emerald_04
   tapeTitle: Emerald Zen
-  tapeGenre: Nature Zen Acoustic
+  tapeGenre: Ambient Zen (Koto)
   themeColor: {r: 0.15, g: 0.85, b: 0.45, a: 1}
-  musicClip: {fileID: 8300000, guid: 7c963075317d74344bc2d3f041411b25, type: 3}
-  trackBpm: 65
+  musicClip: {fileID: 8300000, guid: 7d3c575868ab3114192d07c1e3b4fd12, type: 3}
+  trackBpm: 57
   spoolLeft: {fileID: 5817470596062285902}
   spoolRight: {fileID: 5321873968932398249}
   spoolRotationSpeed: 240

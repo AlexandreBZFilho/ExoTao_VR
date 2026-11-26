@@ -1,0 +1,94 @@
+{
+  "controlSameTrackShifted1s": 0.909,
+  "method": "correlacao normalizada do envelope de energia (dB, janelas de 50 ms) de 3 s a 33 s, sem a tendencia lenta (media movel 2 s), melhor deslocamento em +-2 s; controle: a mesma faixa contra ela mesma deslocada 1 s",
+  "tracks": {
+    "Cyber Horizon": {
+      "path": "Assets/Audio/Music/tape_cyber_horizon.ogg",
+      "seconds": 172.0,
+      "centroidHz": 3664.5,
+      "estimatedBpm": 55.0,
+      "beatStrength": 0.919
+    },
+    "Neon Sunset": {
+      "path": "Assets/Audio/Music/tape_neon_sunset.ogg",
+      "seconds": 217.3,
+      "centroidHz": 1094.6,
+      "estimatedBpm": 71.8,
+      "beatStrength": 0.53
+    },
+    "Luna Cantina": {
+      "path": "Assets/Audio/Music/tape_luna_cantina.ogg",
+      "seconds": 165.2,
+      "centroidHz": 2222.3,
+      "estimatedBpm": 123.0,
+      "beatStrength": 0.699
+    },
+    "Emerald Zen": {
+      "path": "Assets/Audio/Music/tape_emerald_zen.ogg",
+      "seconds": 201.7,
+      "centroidHz": 1100.7,
+      "estimatedBpm": 120.2,
+      "beatStrength": 0.173
+    },
+    "Radio padrao (Music_SciFi_Menu)": {
+      "path": "Assets/Resources/Audio/Music_SciFi_Menu.mp3",
+      "seconds": 124.8,
+      "centroidHz": 2609.8,
+      "estimatedBpm": 58.7,
+      "beatStrength": 0.512
+    }
+  },
+  "pairs": [
+    {
+      "a": "Cyber Horizon",
+      "b": "Neon Sunset",
+      "envelopeCorrelation": 0.174
+    },
+    {
+      "a": "Cyber Horizon",
+      "b": "Luna Cantina",
+      "envelopeCorrelation": 0.14
+    },
+    {
+      "a": "Cyber Horizon",
+      "b": "Emerald Zen",
+      "envelopeCorrelation": 0.151
+    },
+    {
+      "a": "Cyber Horizon",
+      "b": "Radio padrao (Music_SciFi_Menu)",
+      "envelopeCorrelation": 0.15
+    },
+    {
+      "a": "Neon Sunset",
+      "b": "Luna Cantina",
+      "envelopeCorrelation": 0.199
+    },
+    {
+      "a": "Neon Sunset",
+      "b": "Emerald Zen",
+      "envelopeCorrelation": 0.186
+    },
+    {
+      "a": "Neon Sunset",
+      "b": "Radio padrao (Music_SciFi_Menu)",
+      "envelopeCorrelation": 0.17
+    },
+    {
+      "a": "Luna Cantina",
+      "b": "Emerald Zen",
+      "envelopeCorrelation": 0.173
+    },
+    {
+      "a": "Luna Cantina",
+      "b": "Radio padrao (Music_SciFi_Menu)",
+      "envelopeCorrelation": 0.117
+    },
+    {
+      "a": "Emerald Zen",
+      "b": "Radio padrao (Music_SciFi_Menu)",
+      "envelopeCorrelation": 0.118
+    }
+  ],
+  "maxCorrelation": 0.199
+}

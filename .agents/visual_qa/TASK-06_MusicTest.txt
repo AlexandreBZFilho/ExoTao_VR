@@ -1,0 +1,37 @@
+=== TASK-06 (retoque) — Músicas das fitas: ligação e teste estático (2026-11-25 23:00:08) ===
+## 1. Import
+[PASS] 1) Import de tape_cyber_horizon.ogg: Streaming, Vorbis q=0.50, preload=False
+[PASS] 1) Import de tape_neon_sunset.ogg: Streaming, Vorbis q=0.50, preload=False
+[PASS] 1) Import de tape_luna_cantina.ogg: Streaming, Vorbis q=0.50, preload=False
+[PASS] 1) Import de tape_emerald_zen.ogg: Streaming, Vorbis q=0.50, preload=False
+## 2. Prefabs das fitas
+   CassetteTape_CyberHorizon.prefab: 'Cyber Horizon' -> tape_cyber_horizon.ogg, 110 BPM, "Synthwave Anos 80" (atualizado)
+   CassetteTape_NeonSunset.prefab: 'Neon Sunset' -> tape_neon_sunset.ogg, 72 BPM, "Lo-Fi Jazz de Fim de Tarde" (atualizado)
+   CassetteTape_LunaCantina.prefab: 'Luna Cantina' -> tape_luna_cantina.ogg, 93 BPM, "Jazz Lounge de Cantina" (atualizado)
+   CassetteTape_EmeraldZen.prefab: 'Emerald Zen' -> tape_emerald_zen.ogg, 57 BPM, "Ambient Zen (Koto)" (atualizado)
+## 3. Teste estático
+[PASS] 3a) Cyber Horizon: clip certo, não nulo, >= 60 s: Assets/Audio/Music/tape_cyber_horizon.ogg (172.0 s, 3.26 MB), guid b57407605364652459bcf2561077153e, md5 5171179bcd41bd1a155706bec55bab01
+[PASS] 3b) Cyber Horizon: diferente da música padrão do rádio: rádio md5 3ad9e0f934d6934249d195e71b817d05
+[PASS] 3c) Cyber Horizon: trackBpm e gênero coerentes: 110 BPM, "Synthwave Anos 80" ("Newer Wave" Kevin MacLeod)
+[PASS] 3a) Neon Sunset: clip certo, não nulo, >= 60 s: Assets/Audio/Music/tape_neon_sunset.ogg (217.3 s, 3.32 MB), guid fac0695b256ae3743b2f248041d28efd, md5 63b6648a572863539695188a39af3500
+[PASS] 3b) Neon Sunset: diferente da música padrão do rádio: rádio md5 3ad9e0f934d6934249d195e71b817d05
+[PASS] 3c) Neon Sunset: trackBpm e gênero coerentes: 72 BPM, "Lo-Fi Jazz de Fim de Tarde" ("Study And Relax" Kevin MacLeod)
+[PASS] 3a) Luna Cantina: clip certo, não nulo, >= 60 s: Assets/Audio/Music/tape_luna_cantina.ogg (165.2 s, 3.07 MB), guid 57e51d9cbfdaf2544ab03e04e5dd9a24, md5 5501487d4af23163c9bdcf192281f535
+[PASS] 3b) Luna Cantina: diferente da música padrão do rádio: rádio md5 3ad9e0f934d6934249d195e71b817d05
+[PASS] 3c) Luna Cantina: trackBpm e gênero coerentes: 93 BPM, "Jazz Lounge de Cantina" ("Local Forecast" Kevin MacLeod)
+[PASS] 3a) Emerald Zen: clip certo, não nulo, >= 60 s: Assets/Audio/Music/tape_emerald_zen.ogg (201.7 s, 3.47 MB), guid 7d3c575868ab3114192d07c1e3b4fd12, md5 54aada3a8cf117ddea95fd3deac42504
+[PASS] 3b) Emerald Zen: diferente da música padrão do rádio: rádio md5 3ad9e0f934d6934249d195e71b817d05
+[PASS] 3c) Emerald Zen: trackBpm e gênero coerentes: 57 BPM, "Ambient Zen (Koto)" ("Ripples" Kevin MacLeod)
+[PASS] 3d) 4 guids distintos e 4 MD5 distintos: 5171179bcd41bd1a155706bec55bab01 / 63b6648a572863539695188a39af3500 / 5501487d4af23163c9bdcf192281f535 / 54aada3a8cf117ddea95fd3deac42504
+[PASS] 3e) Som diferente: correlação de envelope < 0,3 entre todos os pares (inclui a música do rádio): maior correlação entre pares 0.199; controle (mesma faixa deslocada 1 s) 0.909 — detalhes em TASK-06_MusicAnalysis.json
+## 4. Cena Menu_Principal
+[PASS] 4a) Exatamente 4 fitas, uma de cada: Neon Sunset@raiz, Emerald Zen@raiz, Luna Cantina@raiz, Cyber Horizon@raiz
+[PASS] 4b) Nenhum override de musicClip/trackBpm/tapeGenre nas instâncias (usam o prefab): ok
+[PASS] 4c) Instância Neon Sunset usa a música nova: Assets/Audio/Music/tape_neon_sunset.ogg
+[PASS] 4c) Instância Emerald Zen usa a música nova: Assets/Audio/Music/tape_emerald_zen.ogg
+[PASS] 4c) Instância Luna Cantina usa a música nova: Assets/Audio/Music/tape_luna_cantina.ogg
+[PASS] 4c) Instância Cyber Horizon usa a música nova: Assets/Audio/Music/tape_cyber_horizon.ogg
+[PASS] 4d) Purga: 0 objetos na origem e 0 duplicatas: origem 0, duplicatas 0
+   cena NÃO salva (nada mudou)
+
+--- RESULTADO: 25 passaram, 0 falharam ---

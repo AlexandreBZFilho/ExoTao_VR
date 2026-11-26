@@ -1,0 +1,31 @@
+=== Testes em Play Mode — TASK-06 Músicas das fitas (2026-11-25 23:14:28) ===
+Encaixe/retirada pela XRInteractionManager (como o XRI faz) e Eject pelo método do botão físico.
+Áudio: ativo, taxa 48000 Hz.
+
+[PASS] 0a) Deck e 4 fitas na cena: deck=True, fitas=4
+[PASS] 0b) Música padrão do rádio = Music_SciFi_Menu: Music_SciFi_Menu
+[PASS] 0c) As 4 fitas têm músicas distintas e diferentes da padrão: Cyber Horizon=tape_cyber_horizon, Emerald Zen=tape_emerald_zen, Luna Cantina=tape_luna_cantina, Neon Sunset=tape_neon_sunset
+      deck começou com 'Cyber Horizon' -> Eject
+      'Cyber Horizon' é devolvida a 0.41 m do deck
+      'Emerald Zen' é devolvida a 0.40 m do deck
+      'Luna Cantina' é devolvida a 0.34 m do deck
+      'Neon Sunset' é devolvida a 0.38 m do deck
+[PASS] 0d) Sem fita: rádio toca a música padrão: Music_SciFi_Menu, tocando=True
+[PASS] 1) Encaixar 'Cyber Horizon' troca a música do rádio: tocando 'tape_cyber_horizon' (esperado 'tape_cyber_horizon'), isPlaying=True, volume 0.42 (esperado 0.42), tempo 0.7 s de 172.0 s, 110 BPM, "Synthwave Anos 80"
+[PASS] 1b) 'Cyber Horizon' continua tocando (streaming avança): t=1.73 s
+[PASS] 1c) Tirar 'Cyber Horizon' do deck volta a música padrão: Music_SciFi_Menu | deck: vazio, fita a 0.42 m, selecionada por: 
+[PASS] 1) Encaixar 'Emerald Zen' troca a música do rádio: tocando 'tape_emerald_zen' (esperado 'tape_emerald_zen'), isPlaying=True, volume 0.42 (esperado 0.42), tempo 0.7 s de 201.7 s, 57 BPM, "Ambient Zen (Koto)"
+[PASS] 1b) 'Emerald Zen' continua tocando (streaming avança): t=1.75 s
+[PASS] 1c) Tirar 'Emerald Zen' do deck volta a música padrão: Music_SciFi_Menu | deck: vazio, fita a 0.40 m, selecionada por: 
+[PASS] 1) Encaixar 'Luna Cantina' troca a música do rádio: tocando 'tape_luna_cantina' (esperado 'tape_luna_cantina'), isPlaying=True, volume 0.42 (esperado 0.42), tempo 0.7 s de 165.2 s, 93 BPM, "Jazz Lounge de Cantina"
+[PASS] 1b) 'Luna Cantina' continua tocando (streaming avança): t=1.73 s
+[PASS] 1c) Tirar 'Luna Cantina' do deck volta a música padrão: Music_SciFi_Menu | deck: vazio, fita a 0.34 m, selecionada por: 
+[PASS] 1) Encaixar 'Neon Sunset' troca a música do rádio: tocando 'tape_neon_sunset' (esperado 'tape_neon_sunset'), isPlaying=True, volume 0.42 (esperado 0.42), tempo 0.7 s de 217.3 s, 72 BPM, "Lo-Fi Jazz de Fim de Tarde"
+[PASS] 1b) 'Neon Sunset' continua tocando (streaming avança): t=1.73 s
+[PASS] 1c) Tirar 'Neon Sunset' do deck volta a música padrão: Music_SciFi_Menu | deck: vazio, fita a 0.38 m, selecionada por: 
+[PASS] 2) Trocar uma fita pela outra muda a música: tape_cyber_horizon -> tape_luna_cantina
+[PASS] 3) Eject (botão físico) volta a Music_SciFi_Menu: Music_SciFi_Menu, deck vazio=True
+[PASS] 4) Continuam exatamente 4 fitas (nada duplicado): 4
+[PASS] 5) Nenhum LoadScene nos scripts novos: 
+
+--- RESULTADO: 20 passaram, 0 falharam ---

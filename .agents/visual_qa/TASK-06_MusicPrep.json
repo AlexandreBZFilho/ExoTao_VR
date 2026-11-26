@@ -1,0 +1,58 @@
+{
+  "targetLufs": -21.0,
+  "limiterCeilingDb": -7.0,
+  "tracks": [
+    {
+      "source": "Newer Wave.mp3",
+      "file": "Assets/Audio/Music/tape_cyber_horizon.ogg",
+      "seconds": 172.0,
+      "sampleRate": 44100,
+      "gainDb": -8.9,
+      "limiterMaxReductionDb": 0.0,
+      "lufsAfter": -21.04,
+      "samplePeakDbfsAfter": -8.44,
+      "truePeakDbAfter": -8.43,
+      "spectralCentroidHz": 3664.5,
+      "bytes": 3418827
+    },
+    {
+      "source": "Study And Relax.mp3",
+      "file": "Assets/Audio/Music/tape_neon_sunset.ogg",
+      "seconds": 217.31,
+      "sampleRate": 44100,
+      "gainDb": -2.29,
+      "limiterMaxReductionDb": 0.0,
+      "lufsAfter": -21.0,
+      "samplePeakDbfsAfter": -7.29,
+      "truePeakDbAfter": -7.28,
+      "spectralCentroidHz": 1094.6,
+      "bytes": 3483380
+    },
+    {
+      "source": "Local Forecast.mp3",
+      "file": "Assets/Audio/Music/tape_luna_cantina.ogg",
+      "seconds": 165.18,
+      "sampleRate": 44100,
+      "gainDb": -12.83,
+      "limiterMaxReductionDb": 0.0,
+      "lufsAfter": -21.01,
+      "samplePeakDbfsAfter": -11.68,
+      "truePeakDbAfter": -11.59,
+      "spectralCentroidHz": 2222.3,
+      "bytes": 3218118
+    },
+    {
+      "source": "Ripples.mp3",
+      "file": "Assets/Audio/Music/tape_emerald_zen.ogg",
+      "seconds": 201.72,
+      "sampleRate": 44100,
+      "gainDb": -3.19,
+      "limiterMaxReductionDb": 3.7,
+      "lufsAfter": -21.05,
+      "samplePeakDbfsAfter": -6.79,
+      "truePeakDbAfter": -6.78,
+      "spectralCentroidHz": 1100.7,
+      "bytes": 3640126
+    }
+  ]
+}

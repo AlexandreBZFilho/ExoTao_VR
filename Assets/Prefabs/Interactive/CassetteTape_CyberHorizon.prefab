@@ -892,9 +892,9 @@ MonoBehaviour:
   laserThrowWooshClip: {fileID: 8300000, guid: c02283a1f14b43d29a54bb88319f02a2, type: 3}
   tapeId: tape_cyan_01
   tapeTitle: Cyber Horizon
-  tapeGenre: Sci-Fi Synthwave
+  tapeGenre: Synthwave Anos 80
   themeColor: {r: 0, g: 0.85, b: 1, a: 1}
-  musicClip: {fileID: 8300000, guid: 88661c075e606a44695803d9512b011e, type: 3}
+  musicClip: {fileID: 8300000, guid: b57407605364652459bcf2561077153e, type: 3}
   trackBpm: 110
   spoolLeft: {fileID: 5304327035394910145}
   spoolRight: {fileID: 7491579485558408954}

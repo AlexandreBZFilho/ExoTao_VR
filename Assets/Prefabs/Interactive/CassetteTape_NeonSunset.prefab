@@ -424,10 +424,10 @@ MonoBehaviour:
   laserThrowWooshClip: {fileID: 8300000, guid: c02283a1f14b43d29a54bb88319f02a2, type: 3}
   tapeId: tape_magenta_03
   tapeTitle: Neon Sunset
-  tapeGenre: Lo-Fi Chill Rehab
+  tapeGenre: Lo-Fi Jazz de Fim de Tarde
   themeColor: {r: 0.95, g: 0.15, b: 0.65, a: 1}
-  musicClip: {fileID: 8300000, guid: ea80add4db368c84da3eab235d81f492, type: 3}
-  trackBpm: 80
+  musicClip: {fileID: 8300000, guid: fac0695b256ae3743b2f248041d28efd, type: 3}
+  trackBpm: 72
   spoolLeft: {fileID: 6206419697122614939}
   spoolRight: {fileID: 1909242795880024694}
   spoolRotationSpeed: 240

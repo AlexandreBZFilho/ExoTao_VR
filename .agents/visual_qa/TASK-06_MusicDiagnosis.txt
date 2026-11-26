@@ -1,0 +1,21 @@
+=== TASK-06 (retoque) — Diagnóstico das músicas das fitas (2026-11-25, somente leitura, antes de qualquer mudança) ===
+
+Prefabs (Assets/Prefabs/Interactive) e o musicClip de cada um:
+  CassetteTape_CyberHorizon.prefab  tape_cyan_01     genre "Sci-Fi Synthwave"      bpm 110  musicClip guid 88661c075e606a44695803d9512b011e = Assets/Resources/Audio/Music_SciFi_Menu.mp3
+  CassetteTape_LunaCantina.prefab   tape_gold_02     genre "Cantina Latina Retro"  bpm 105  musicClip guid 3355289ea2b210b4ca6fbbf553e69736 = Assets/FloatGrids/Demo/Music/Construyendo en el Espacio - Luna Cantina.mp3
+  CassetteTape_NeonSunset.prefab    tape_magenta_03  genre "Lo-Fi Chill Rehab"     bpm 80   musicClip guid ea80add4db368c84da3eab235d81f492 = Assets/Audio/Generated/Task06/lofi_sunset_groove.wav
+  CassetteTape_EmeraldZen.prefab    tape_emerald_04  genre "Nature Zen Acoustic"   bpm 65   musicClip guid 7c963075317d74344bc2d3f041411b25 = Assets/Audio/Generated/Task06/ambient_zen_flow.wav
+
+MD5 / tamanho:
+  3ad9e0f934d6934249d195e71b817d05  4995694  Assets/Resources/Audio/Music_SciFi_Menu.mp3            (música padrão do rádio)
+  3ad9e0f934d6934249d195e71b817d05  4995694  ...FloatGrids/Demo/Music/Construyendo en el Espacio - Luna Cantina.mp3  -> BYTE A BYTE IGUAL à música do rádio
+  997a2f9a48ef3118bfc52320ba4b227f   705644  Task06/lofi_sunset_groove.wav  (loop sintético de 4 s)
+  ef2653d933eb7fc2042b2ae32265f9c8   705644  Task06/ambient_zen_flow.wav    (loop sintético de 4 s)
+  Sobras não referenciadas (mantidas, não usadas): track_cyber_horizon.wav = synthwave_pulse.wav; track_neon_sunset.wav = lofi_sunset_groove.wav;
+  track_emerald_zen.wav = ambient_zen_flow.wav; track_luna_cantina.wav = outro loop de 4 s.
+
+Confirmado: Cyber Horizon e Luna Cantina tocam exatamente a música padrão do rádio; Neon Sunset e Emerald Zen são loops de 4 s.
+O código (MusicCassetteTape / RadioCassetteSocket.CrossfadeRoutine) está correto: o problema é só de dados.
+
+Cena Menu_Principal.unity: nenhum override de "musicClip" (grep = 0).
+Ferramentas: ffmpeg/ffprobe NÃO instalados; Python 3.12 sem numpy -> processamento feito num venv isolado (numpy, scipy, soundfile) na pasta temporária.
