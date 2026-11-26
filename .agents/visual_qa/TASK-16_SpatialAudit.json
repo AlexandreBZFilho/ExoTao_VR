@@ -1,0 +1,21 @@
+{
+  "taskId": "TASK-16 (retoque da estante)",
+  "generatedAt": "2026-11-26T00:15:21",
+  "instanceCounts": { "TrophyShelfManager": 1, "ShelfTrophyGrabInteractable": 4 },
+  "objectsAtOriginZero": [],
+  "isOriginClean": true,
+  "duplicateObjectsFound": [],
+  "purgeAfter": { "originCleaned": 0, "duplicatesCleaned": 0 },
+  "stand": { "position": [9.573, 1.194, -0.195], "rotationY": 270.0, "widthMeters": 0.7, "slotSpacingMeters": 0.17, "support": "modern_shelves_3 (1)", "groundGapMeters": 0.0000, "nearestNeighbor": "Building/book_pile_2 (8)", "clearanceMeters": 0.097 },
+  "pairwiseClearances": [
+    { "a": "GoldenApple", "b": "LuminousBonsai", "centerDistance": 0.170, "colliderGap": 0.060 },
+    { "a": "GoldenApple", "b": "StarCup", "centerDistance": 0.340, "colliderGap": 0.220 },
+    { "a": "GoldenApple", "b": "DroneCrown", "centerDistance": 0.510, "colliderGap": 0.380 },
+    { "a": "LuminousBonsai", "b": "StarCup", "centerDistance": 0.170, "colliderGap": 0.040 },
+    { "a": "LuminousBonsai", "b": "DroneCrown", "centerDistance": 0.340, "colliderGap": 0.200 },
+    { "a": "StarCup", "b": "DroneCrown", "centerDistance": 0.170, "colliderGap": 0.020 }
+  ],
+  "hasOverlap": false,
+  "labelsWithFontSize1": 0,
+  "shelfStability": { "restColliderMaxPenetrationMeters": 0.0000, "note": "deslocamento da raiz e deriva dos troféus medidos em Play Mode: TASK-16_PlayModeTest.txt" }
+}

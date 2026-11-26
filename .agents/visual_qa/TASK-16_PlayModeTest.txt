@@ -1,0 +1,62 @@
+=== Testes em Play Mode — TASK-16 Estante de Troféus (retoque) (2026-11-26 00:15:52) ===
+Mão de teste do XRI (ScriptedTestInteractor) pegando e soltando pelo XRInteractionManager. Passo de jogo fixo de 1/90 s.
+
+[PASS] 0a) 1 estante e 4 troféus: estantes 1, troféus 4
+      Coroa começa NA CABEÇA DO DRONE (save diz coroado).
+[PASS] 0b) Troféus da estante começam encaixados, cinemáticos e parados no pedestal: 
+[PASS] 0b2) Coroa no Drone: placa 'Coroa no Drone' no pedestal vazio: 'Coroa no Drone'
+[PASS] 0c) Rótulos nas placas, com acento, dentro da placa (fontSize real, nada de 1): Maçã Dourada | Bonsai Radiante | Taça Estelar | Coroa no Drone | tamanhos 0.130, 0.130, 0.130, 0.130
+[PASS] 0d) Luzes da estante sem sombra: 
+[PASS] 0e) Partículas de desbloqueio <= 40: 
+
+## 1. Pegar, levar 1,5 m e soltar longe
+[PASS] 1a) Maçã Dourada: pego: 
+[PASS] 1b) Cartão de informação aparece segurando/apontando: visível=True, título 'Maçã Dourada'
+[PASS] 1c) Maçã Dourada: estante parada enquanto o troféu está na mão: maior deslocamento 0.000 mm (-)
+[PASS] 1d) Maçã Dourada: volta ao pedestal sozinho em <= 2,5 s e fica parado: voltou em 1.09 s, erro 0.0 mm, cinemático=True
+[PASS] 1e) Cartão some depois que o laser sai e o troféu é solto: visível=False
+[PASS] 1f) Maçã Dourada: raiz/âncoras/base/placas não se moveram (nem 1 mm): 0.000 mm (-)
+[PASS] 1a) Bonsai Radiante: pego: 
+[PASS] 1c) Bonsai Radiante: estante parada enquanto o troféu está na mão: maior deslocamento 0.000 mm (-)
+[PASS] 1d) Bonsai Radiante: volta ao pedestal sozinho em <= 2,5 s e fica parado: voltou em 1.10 s, erro 0.0 mm, cinemático=True
+[PASS] 1f) Bonsai Radiante: raiz/âncoras/base/placas não se moveram (nem 1 mm): 0.000 mm (-)
+[PASS] 1a) Taça Estelar: pego: 
+[PASS] 1c) Taça Estelar: estante parada enquanto o troféu está na mão: maior deslocamento 0.000 mm (-)
+[PASS] 1d) Taça Estelar: volta ao pedestal sozinho em <= 2,5 s e fica parado: voltou em 1.09 s, erro 0.0 mm, cinemático=True
+[PASS] 1f) Taça Estelar: raiz/âncoras/base/placas não se moveram (nem 1 mm): 0.000 mm (-)
+      Coroa do Drone está no Drone: testada na seção 6.
+
+## 2. Encaixe imediato (solto a ~0,12 m do pedestal, devagar)
+[PASS] 2a) Encaixa em <= 0,4 s: 0.23 s
+
+## 3. Largar no chão
+[PASS] 3a) Caiu no chão e voltou em <= 1,5 s (a partir de passar da cota do chão): total 0.80 s, após passar de y 0.35: 0.80 s, menor y 0.35
+
+## 4. Repouso (3 s)
+[PASS] 4a) Nenhum troféu se mexe em repouso (<= 1 mm em 3 s, girando no lugar): 0.000 mm
+[PASS] 4b) Nenhum colisor se sobrepondo em repouso: penetração máx. 0.00 mm (-)
+
+## 5. Troféu bloqueado
+[PASS] 5a) Bloqueado: silhueta, não pegável, placa 'Bloqueado' com cadeado: pegável=False, material M_Trophy_LockedSilhouette, placa 'Bloqueado'
+[PASS] 5b) Desbloqueado de novo: material normal e pegável: 
+
+## 6. Coroa do Drone
+      antes de pegar: equipada=True, selecionada por [], enabled=True, registrada=True, camadas 1, mão camadas -1
+      depois de pegar: equipada=False, selecionada por [~TestHand], pai 
+[PASS] 6d) Pegar a coroa da cabeça do Drone desencaixa: 
+[PASS] 6e) Solta longe: volta ao pedestal, de volta na estante: em 1.52 s, placa 'Coroa do Drone'
+      levando a coroa até a cabeça do Drone (6.7 m)
+      coroa a 0.17 m da cabeça após 2.7 s
+[PASS] 6a) Encostar na cabeça do Drone encaixa a coroa: equipada=True, pai DroneHeadSocket
+[PASS] 6b) Placa 'Coroa no Drone' e anel apagado: placa 'Coroa no Drone'
+[PASS] 6c) Coroa no Drone não é puxada de volta para a estante: 
+      Coroa deixada no Drone, como no início (o save do paciente é restaurado no fim).
+[PASS] 6f) Depois de tudo: a estante continua exatamente no lugar: 0.000 mm (-)
+
+## 7. Cartão de informação e desempenho
+[PASS] 7a) Hover mostra o cartão; some ~0,3 s depois de sair: mostrou=True, aos 0,15 s ainda visível=True, depois=False
+[PASS] 7b) 300 frames de idle (giro + halos + cartão) com 0 bytes alocados: 0 bytes
+[PASS] 7c) Sem LoadScene, renderer.material ou TODO nos scripts da Task16: ok
+[PASS] 7d) Nenhum MeshCollider em objeto com Rigidbody da estante: 
+
+--- RESULTADO: 36 passaram, 0 falharam ---

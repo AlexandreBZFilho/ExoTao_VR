@@ -1,0 +1,20 @@
+=== TASK-16 retoque [D] — 2026-11-26 00:15:12 (largura 0.7 m, espaçamento 0.17 m) ===
+1) Import: base v2, 3 texturas, 4 sons.
+2) Materiais: metal escuro, latão, anel emissivo, silhueta, halo, cadeado, cartão, faíscas, PM_Trophy (atrito 0,6 / quique 0,05).
+   Fonte LiberationSans SDF: glifos PT-BR todos presentes.
+3) Prefab TrophyDisplayStand salvo: base 1168 tris, 4 troféus com ShelfTrophyGrabInteractable, rótulos nas placas, cartão, TrophyAudio.
+   GoldenApple: 460 tris, colisor 0.100x0.170x0.100 centro y 0.085
+   LuminousBonsai: 428 tris, colisor 0.120x0.190x0.120 centro y 0.095
+   StarCup: 658 tris, colisor 0.140x0.210x0.110 centro y 0.105
+   DroneCrown: 772 tris, colisor 0.160x0.100x0.160 centro y 0.050
+Purga ANTES: 0 na origem, 0 duplicatas.
+Estantes antigas na cena: 1.
+Restos soltos removidos: 0.
+Estante no modern_shelves_3 (1): (9.573, 1.194, -0.195), rotY 270.0, frente para o XR Origin (4.500, -0.026, 2.310) (30 pontos válidos avaliados).
+Purga DEPOIS: 0 na origem, 0 duplicatas.
+Cena salva.
+Auditoria: apoio 'modern_shelves_3 (1)', gap 0.0 mm, folga 0.097 m de 'Building/book_pile_2 (8)', penetração máx. em repouso 0.00 mm, estantes 1, troféus 4.
+   captura TASK-16_Shelf_Front.png
+   captura TASK-16_Shelf_Side_Grounding.png
+   captura TASK-16_Shelf_Closeup_Plaques.png
+   captura TASK-16_Shelf_Panorama_Room.png

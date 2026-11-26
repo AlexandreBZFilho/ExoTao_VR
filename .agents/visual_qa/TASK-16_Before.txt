@@ -1,0 +1,194 @@
+=== TASK-16 [A] BEFORE - Play Mode real, Menu_Principal (2026-11-25 23:49:36) ===
+
+=== 0) contagens ===
+TrophyShelfManager: 1
+DroneCrownWearable: 1
+RehabProgressionSaveSystem: 1
+Raizes 'TrophyDisplayStand*': 1
+Camera.main: (4.500, 1.799, 2.310) XROrigin: (4.500, 0.099, 2.310) rotY=0.0
+
+=== 1) estante: pose, filhos, base ===
+Raiz 'TrophyDisplayStand_Instance' pos=(9.583, 1.217, -0.055) rotEuler=(0.000, 270.000, 0.000) scale=(1.000, 1.000, 1.000) forward(+Z)=(-1.000, 0.000, 0.000)
+  comp raiz: Transform
+  comp raiz: BoxCollider
+  comp raiz: TrophyShelfManager
+  BoxCollider raiz: center=(0.000, 0.023, 0.000) size=(0.520, 0.045, 0.140) isTrigger=False
+  AABB renderers da estante: min=(9.513, 1.196, -0.315) max=(9.653, 1.462, 0.205) size=(0.140, 0.267, 0.520)
+  TrophyDisplayStand_Instance local=(9.583, 1.217, -0.055) world=(9.583, 1.217, -0.055) active=True
+    Visual local=(0.000, 0.000, 0.000) world=(9.583, 1.217, -0.055) active=True
+      DisplayPlaques local=(0.000, 0.000, 0.000) world=(9.583, 1.217, -0.055) active=True
+      DisplayPlinth local=(0.000, 0.000, 0.000) world=(9.583, 1.217, -0.055) active=True
+      VelvetPads local=(0.000, 0.000, 0.000) world=(9.583, 1.217, -0.055) active=True
+    SlotAnchor_0_GoldenApple local=(-0.180, 0.045, 0.008) world=(9.575, 1.262, -0.235) active=True
+      TrophyItem_GoldenApple local=(0.000, 0.000, 0.000) world=(9.575, 1.262, -0.235) active=True
+        Visual local=(0.000, 0.000, 0.000) world=(9.575, 1.262, -0.235) active=True
+          GoldenApple local=(0.000, 0.000, 0.000) world=(9.575, 1.262, -0.235) active=True
+          Pedestal local=(0.000, 0.000, 0.000) world=(9.575, 1.262, -0.235) active=True
+          Plaque local=(0.000, 0.000, 0.000) world=(9.575, 1.262, -0.235) active=True
+    Label_GoldenApple local=(-0.180, 0.024, -0.071) world=(9.654, 1.241, -0.235) active=True
+    SlotAnchor_1_LuminousBonsai local=(-0.060, 0.045, 0.008) world=(9.575, 1.262, -0.115) active=True
+      TrophyItem_LuminousBonsai local=(-0.002, 0.000, 0.001) world=(9.573, 1.262, -0.117) active=True
+        Visual local=(0.000, 0.000, 0.000) world=(9.573, 1.262, -0.117) active=True
+          BonsaiTrunk local=(0.000, 0.000, 0.000) world=(9.573, 1.262, -0.117) active=True
+          CrystalLeaves local=(0.000, 0.000, 0.000) world=(9.573, 1.262, -0.117) active=True
+          JadePot local=(0.000, 0.000, 0.000) world=(9.573, 1.262, -0.117) active=True
+    Label_LuminousBonsai local=(-0.060, 0.024, -0.071) world=(9.654, 1.241, -0.115) active=True
+    SlotAnchor_2_StarCup local=(0.060, 0.045, 0.008) world=(9.575, 1.262, 0.005) active=True
+      TrophyItem_StarCup local=(0.000, 0.000, 0.000) world=(9.575, 1.262, 0.005) active=True
+        Visual local=(0.000, 0.000, 0.000) world=(9.575, 1.262, 0.005) active=True
+          GoldenCup local=(0.000, 0.000, 0.000) world=(9.575, 1.262, 0.005) active=True
+          MarbleBase local=(0.000, 0.000, 0.000) world=(9.575, 1.262, 0.005) active=True
+          StarEmblem local=(0.000, 0.000, 0.000) world=(9.575, 1.262, 0.005) active=True
+    Label_StarCup local=(0.060, 0.024, -0.071) world=(9.654, 1.241, 0.005) active=True
+    SlotAnchor_3_DroneCrown local=(0.180, 0.045, 0.008) world=(9.575, 1.262, 0.125) active=True
+    Label_DroneCrown local=(0.180, 0.024, -0.071) world=(9.654, 1.241, 0.125) active=True
+    TrophyAudio local=(0.000, 0.000, 0.000) world=(9.583, 1.217, -0.055) active=True
+
+=== 2) manager e slots ===
+autoRespawnDelay=3.5
+  slot GoldenApple: title='Maca Dourada' trophy=TrophyItem_GoldenApple anchor=SlotAnchor_0_GoldenApple (9.575, 1.262, -0.235) plaque=Label_GoldenApple particles=nao
+  slot LuminousBonsai: title='Bonsai Radiante' trophy=TrophyItem_LuminousBonsai anchor=SlotAnchor_1_LuminousBonsai (9.575, 1.262, -0.115) plaque=Label_LuminousBonsai particles=nao
+  slot StarCup: title='Taca Estelar' trophy=TrophyItem_StarCup anchor=SlotAnchor_2_StarCup (9.575, 1.262, 0.005) plaque=Label_StarCup particles=nao
+  slot DroneCrown: title='Coroa do Drone' trophy=TrophyItem_DroneCrown anchor=SlotAnchor_3_DroneCrown (9.575, 1.262, 0.125) plaque=Label_DroneCrown particles=nao
+  AudioSource na raiz: False (o AudioSource do manager vive na raiz)
+
+=== 3) trofeus: colisores, pivos, rigidbody, ergonomic grab ===
+Trofeu GoldenApple 'TrophyDisplayStand_Instance/SlotAnchor_0_GoldenApple/TrophyItem_GoldenApple' pos=(9.575, 1.262, -0.235) local=(0.000, 0.000, 0.000) rotEuler=(0.000, 270.000, 0.000)
+  Rigidbody: mass=0.8 kinematic=False gravity=True interp=None cdm=Continuous sleeping=True drag=0 angDrag=0.05
+  Grab: movementType=VelocityTracking throwOnDetach=True layers=1 colliders=1
+  render AABB size=(0.104, 0.153, 0.104) center=(9.575, 1.332, -0.235) minY-pivotY=-0.007
+  Collider 'TrophyItem_GoldenApple' Box center=(0.000, 0.085, 0.000) size=(0.100, 0.170, 0.100) trigger=False worldAABB size=(0.100, 0.170, 0.100) center=(9.575, 1.347, -0.235) material=none
+Trofeu LuminousBonsai 'TrophyDisplayStand_Instance/SlotAnchor_1_LuminousBonsai/TrophyItem_LuminousBonsai' pos=(9.573, 1.262, -0.117) local=(-0.002, 0.000, 0.001) rotEuler=(359.764, 270.061, 1.968)
+  Rigidbody: mass=0.9 kinematic=False gravity=True interp=None cdm=Continuous sleeping=True drag=0 angDrag=0.05
+  Grab: movementType=VelocityTracking throwOnDetach=True layers=1 colliders=1
+  render AABB size=(0.116, 0.189, 0.117) center=(9.573, 1.352, -0.125) minY-pivotY=-0.005
+  Collider 'TrophyItem_LuminousBonsai' Box center=(0.000, 0.095, 0.000) size=(0.120, 0.190, 0.120) trigger=False worldAABB size=(0.121, 0.195, 0.127) center=(9.574, 1.357, -0.121) material=none
+Trofeu StarCup 'TrophyDisplayStand_Instance/SlotAnchor_2_StarCup/TrophyItem_StarCup' pos=(9.575, 1.262, 0.005) local=(0.000, 0.000, 0.000) rotEuler=(0.170, 269.990, 358.582)
+  Rigidbody: mass=1.1 kinematic=False gravity=True interp=None cdm=Continuous sleeping=True drag=0 angDrag=0.05
+  Grab: movementType=VelocityTracking throwOnDetach=True layers=1 colliders=1
+  render AABB size=(0.103, 0.211, 0.155) center=(9.575, 1.357, 0.008) minY-pivotY=-0.011
+  Collider 'TrophyItem_StarCup' Box center=(0.000, 0.105, 0.000) size=(0.140, 0.210, 0.110) trigger=False worldAABB size=(0.111, 0.214, 0.145) center=(9.575, 1.367, 0.008) material=none
+Trofeu DroneCrown '[IC] Drone_Guia_IA_ExoBot/DroneHeadSocket/TrophyItem_DroneCrown' pos=(3.947, 1.706, 3.659) local=(0.000, 0.000, 0.000) rotEuler=(0.000, 157.723, 0.000)
+  Rigidbody: mass=0.5 kinematic=True gravity=True interp=None cdm=Continuous sleeping=False drag=0 angDrag=0.05
+  Grab: movementType=VelocityTracking throwOnDetach=True layers=1 colliders=1
+  render AABB size=(0.203, 0.114, 0.205) center=(3.947, 1.754, 3.659) minY-pivotY=-0.009
+  Collider 'TrophyItem_DroneCrown' Box center=(0.000, 0.050, 0.000) size=(0.160, 0.100, 0.160) trigger=False worldAABB size=(0.209, 0.100, 0.209) center=(3.947, 1.756, 3.659) material=none
+-- sobreposicao entre pares de colisores (solidos) no repouso (ComputePenetration):
+  SOBREPOE: TrophyDisplayStand_Instance x TrophyDisplayStand_Instance/SlotAnchor_0_GoldenApple/TrophyItem_GoldenApple profundidade=0.0 cm dir=(0.000, -1.000, 0.000)
+  SOBREPOE: TrophyDisplayStand_Instance x TrophyDisplayStand_Instance/SlotAnchor_1_LuminousBonsai/TrophyItem_LuminousBonsai profundidade=0.2 cm dir=(0.000, -1.000, 0.000)
+  SOBREPOE: TrophyDisplayStand_Instance x TrophyDisplayStand_Instance/SlotAnchor_2_StarCup/TrophyItem_StarCup profundidade=0.2 cm dir=(0.000, -1.000, 0.000)
+  SOBREPOE: TrophyDisplayStand_Instance/SlotAnchor_1_LuminousBonsai/TrophyItem_LuminousBonsai x TrophyDisplayStand_Instance/SlotAnchor_2_StarCup/TrophyItem_StarCup profundidade=0.8 cm dir=(-0.001, 0.025, -1.000)
+  total de pares sobrepostos: 4 (de 4 colisores solidos)
+-- posicao x local de cada trofeu: GoldenApple=-0.180, LuminousBonsai=-0.062, StarCup=0.060, DroneCrown=3.714
+   GoldenApple: AABB mundo dos colisores size=(0.100, 0.170, 0.100)
+   LuminousBonsai: AABB mundo dos colisores size=(0.121, 0.195, 0.127)
+   StarCup: AABB mundo dos colisores size=(0.111, 0.214, 0.145)
+   DroneCrown: AABB mundo dos colisores size=(0.209, 0.100, 0.209)
+
+=== 4) textos Label_* ===
+TrophyDisplayStand_Instance/Label_GoldenApple text='Maca Dourada' font='Inter-Regular SDF' fontSize=1 autoSize=False min/max=18/72 overflow=Overflow wrap=True align=Center color=RGBA(0.950, 0.850, 0.350, 1.000)
+   rect=(0.12, 0.04) pivot=(0.50, 0.50) parent='TrophyDisplayStand_Instance' world=(9.654, 1.241, -0.235) scale=(1.000, 1.000, 1.000) forward=(1.000, 0.000, 0.000)
+   textBounds size=(0.118, 0.847, 0.000)  preferred=0.69x0.85 rendererAABB size=(0.000, 0.805, 0.111) -> FORA DO LUGAR (gigante)
+TrophyDisplayStand_Instance/Label_LuminousBonsai text='Bonsai Radiante' font='Inter-Regular SDF' fontSize=1 autoSize=False min/max=18/72 overflow=Overflow wrap=True align=Center color=RGBA(0.950, 0.850, 0.350, 1.000)
+   rect=(0.12, 0.04) pivot=(0.50, 0.50) parent='TrophyDisplayStand_Instance' world=(9.654, 1.241, -0.115) scale=(1.000, 1.000, 1.000) forward=(1.000, 0.000, 0.000)
+   textBounds size=(0.120, 0.968, 0.000)  preferred=0.76x0.97 rendererAABB size=(0.000, 0.926, 0.112) -> FORA DO LUGAR (gigante)
+TrophyDisplayStand_Instance/Label_StarCup text='Taca Estelar' font='Inter-Regular SDF' fontSize=1 autoSize=False min/max=18/72 overflow=Overflow wrap=True align=Center color=RGBA(0.950, 0.850, 0.350, 1.000)
+   rect=(0.12, 0.04) pivot=(0.50, 0.50) parent='TrophyDisplayStand_Instance' world=(9.654, 1.241, 0.005) scale=(1.000, 1.000, 1.000) forward=(1.000, 0.000, 0.000)
+   textBounds size=(0.118, 0.726, 0.000)  preferred=0.59x0.73 rendererAABB size=(0.000, 0.684, 0.114) -> FORA DO LUGAR (gigante)
+TrophyDisplayStand_Instance/Label_DroneCrown text='Coroa do Drone' font='Inter-Regular SDF' fontSize=1 autoSize=False min/max=18/72 overflow=Overflow wrap=True align=Center color=RGBA(0.950, 0.850, 0.350, 1.000)
+   rect=(0.12, 0.04) pivot=(0.50, 0.50) parent='TrophyDisplayStand_Instance' world=(9.654, 1.241, 0.125) scale=(1.000, 1.000, 1.000) forward=(1.000, 0.000, 0.000)
+   textBounds size=(0.118, 0.968, 0.000)  preferred=0.76x0.97 rendererAABB size=(0.000, 0.928, 0.111) -> FORA DO LUGAR (gigante)
+
+=== 5) tris, materiais e shaders (assets) ===
+Assets/Prefabs/Interactive/TrophyDisplayStand.prefab: tris=2682 materiais: M_Trophy_PlaqueBrass[Standard, inst=True]; M_Trophy_WoodDark[Standard, inst=True]; M_Trophy_DisplayVelvet[Standard, inst=True]; M_Trophy_GoldPolished[Standard, inst=True]; Inter-Regular SDF Material[TextMeshPro/Distance Field, inst=False]; M_Trophy_BonsaiTrunk[Standard, inst=True]; M_Trophy_CrystalBiolum[Standard, inst=True]; M_Trophy_JadePot[Standard, inst=True]; M_Trophy_MarbleBase[Standard, inst=True]; M_Trophy_StarEmblem[Standard, inst=True]; M_Trophy_GemRuby[Standard, inst=True]; M_Trophy_GemSapphire[Standard, inst=True]; M_Trophy_RoyalVelvet[Standard, inst=True]
+Assets/Prefabs/Interactive/Trophy_GoldenApple.prefab: tris=460 materiais: M_Trophy_GoldPolished[Standard, inst=True]; M_Trophy_WoodDark[Standard, inst=True]; M_Trophy_PlaqueBrass[Standard, inst=True]
+Assets/Prefabs/Interactive/Trophy_LuminousBonsai.prefab: tris=428 materiais: M_Trophy_BonsaiTrunk[Standard, inst=True]; M_Trophy_CrystalBiolum[Standard, inst=True]; M_Trophy_JadePot[Standard, inst=True]
+Assets/Prefabs/Interactive/Trophy_StarCup.prefab: tris=658 materiais: M_Trophy_GoldPolished[Standard, inst=True]; M_Trophy_MarbleBase[Standard, inst=True]; M_Trophy_StarEmblem[Standard, inst=True]
+Assets/Prefabs/Interactive/Trophy_DroneCrownHat.prefab: tris=772 materiais: M_Trophy_GoldPolished[Standard, inst=True]; M_Trophy_GemRuby[Standard, inst=True]; M_Trophy_GemSapphire[Standard, inst=True]; M_Trophy_RoyalVelvet[Standard, inst=True]
+
+=== 6) moveis (counter|desk|drawer|shelf|shelves|table|cabinet|bookcase) - AABB por renderers ===
+  Building/coffee_table pos=(7.150, 0.000, -1.751) rotY=1 AABB min=(6.288, 0.000, -2.097) max=(8.012, 0.381, -1.405) size=(1.723, 0.381, 0.692)
+  Building/counter_1 pos=(0.591, 0.000, 4.466) rotY=90 AABB min=(0.194, 0.000, 3.966) max=(1.199, 0.949, 4.966) size=(1.005, 0.949, 1.000)
+  Building/counter_2_b pos=(9.260, 0.000, -1.925) rotY=269 AABB min=(8.894, 0.000, -2.429) max=(9.668, 0.949, -1.420) size=(0.773, 0.949, 1.008)
+  Building/counter_3_a pos=(9.356, 0.000, 4.617) rotY=90 AABB min=(8.973, 0.905, 4.116) max=(9.738, 0.949, 5.118) size=(0.765, 0.044, 1.002)
+  Building/counter_3_a (1) pos=(5.170, 0.000, 7.443) rotY=360 AABB min=(4.667, 0.905, 7.058) max=(5.673, 0.949, 7.828) size=(1.005, 0.044, 0.769)
+  Building/counter_3_c pos=(9.358, 0.000, 3.617) rotY=270 AABB min=(8.976, 0.000, 3.116) max=(9.740, 0.949, 4.118) size=(0.765, 0.949, 1.002)
+  Building/counter_3_c (1) pos=(9.353, 0.000, 5.617) rotY=90 AABB min=(8.971, 0.000, 5.116) max=(9.736, 0.949, 6.118) size=(0.765, 0.949, 1.002)
+  Building/counter_3_c (2) pos=(4.170, 0.000, 7.436) rotY=360 AABB min=(3.667, 0.000, 7.051) max=(4.673, 0.949, 7.820) size=(1.005, 0.949, 0.769)
+  Building/counter_3_c (3) pos=(6.170, 0.000, 7.450) rotY=180 AABB min=(5.667, 0.000, 7.065) max=(6.673, 0.949, 7.835) size=(1.005, 0.949, 0.769)
+  Demo_Basketball_Table pos=(0.689, 1.008, 5.872) rotY=30 AABB min=(0.562, 0.915, 5.745) max=(0.816, 1.101, 5.998) size=(0.253, 0.185, 0.253)
+  Building/drawer_simple pos=(0.584, 0.000, 5.355) rotY=89 AABB min=(0.330, 0.001, 5.070) max=(0.834, 0.918, 5.640) size=(0.504, 0.917, 0.570)
+  Building/drawer_simple (1) pos=(0.584, 0.000, 6.016) rotY=93 AABB min=(0.322, 0.001, 5.725) max=(1.025, 0.918, 6.307) size=(0.703, 0.917, 0.582)
+  Building/full_desk_3 (1) pos=(0.630, 0.000, -0.020) rotY=90 AABB min=(0.244, -0.002, -0.802) max=(6.649, 1.406, 7.319) size=(6.405, 1.409, 8.121)  [AABB > 2.4 m: IGNORAR]
+  Building/modern_shelves_3 (1) pos=(9.611, 0.000, 0.027) rotY=270 AABB min=(9.473, 0.002, -0.595) max=(9.749, 2.289, 0.649) size=(0.276, 2.287, 1.245)
+  Building/table_lamp pos=(9.588, 0.949, 4.355) rotY=261 AABB min=(9.436, 0.947, 4.267) max=(9.664, 1.318, 4.442) size=(0.229, 0.372, 0.175)
+  Building/table_lamp (1) pos=(5.375, 0.949, 7.448) rotY=127 AABB min=(5.281, 0.947, 7.297) max=(5.528, 1.318, 7.542) size=(0.247, 0.372, 0.245)
+
+=== 7) modern_shelves_3 (1): superficies internas e vizinhanca ===
+  renderer 'modern_shelves_3 (1)' min=(9.473, 0.002, -0.595) max=(9.749, 2.289, 0.649) size=(0.276, 2.287, 1.245)
+  collider 'modern_shelves_3 (1)' MeshCollider min=(9.473, 0.002, -0.595) max=(9.749, 2.289, 0.649) trigger=False
+  AABB movel: min=(9.473, 0.002, -0.595) max=(9.749, 2.289, 0.649)
+  Vizinhos (renderers de outros objetos a < 0.9 m horizontais, y entre 0.8 e 2.4):
+    Building/wall_medium (11) gapHoriz=0.151 y=0.00..3.00 size=(0.200, 3.000, 2.000)
+    Building/book_pile_1_alt (2) gapHoriz=0.000 y=0.83..1.04 size=(0.498, 0.209, 0.506)
+    Building/tv gapHoriz=0.796 y=0.95..1.59 size=(0.204, 0.647, 0.994)
+    Building/book_pile_2 (9) gapHoriz=0.000 y=1.19..1.44 size=(0.324, 0.250, 0.280)
+    Building/counter_2_b gapHoriz=0.825 y=0.00..0.95 size=(0.773, 0.949, 1.008)
+    Building/wall_medium (7) gapHoriz=0.151 y=0.00..3.00 size=(0.200, 3.000, 2.000)
+    Building/book_pile_2 (8) gapHoriz=0.000 y=1.56..1.81 size=(0.327, 0.250, 0.283)
+
+=== 8) Encaixe de base 0.86x0.22 e 0.72x0.22 (folga horizontal maxima obtivel, altura util 0.30 m) em superficies candidatas ===
+  counter_1 nivel y=0.949 [x 0.86..1.20, z 3.97..4.97] peca 0.86x0.22: folga max=0.00 m em (0.968, 0.949, 4.396) (eixo Z)
+  counter_1 nivel y=0.949 [x 0.86..1.20, z 3.97..4.97] peca 0.72x0.22: folga max=0.12 m em (1.048, 0.949, 4.326) (eixo Z)
+  counter_2_b nivel y=0.949 [x 8.89..9.67, z -2.43..-1.42] peca 0.86x0.22: folga max=0.04 m em (9.524, 0.949, -1.999) (eixo Z)
+  counter_2_b nivel y=0.949 [x 8.89..9.67, z -2.43..-1.42] peca 0.72x0.22: folga max=0.08 m em (9.254, 0.949, -2.319) (eixo X)
+  counter_3_a nivel y=0.949 [x 8.97..9.74, z 4.12..5.12] peca 0.86x0.22: folga max=NAO CABE
+  counter_3_a nivel y=0.949 [x 8.97..9.74, z 4.12..5.12] peca 0.72x0.22: folga max=NAO CABE
+  counter_3_a (1) nivel y=0.949 [x 4.67..5.67, z 7.06..7.83] peca 0.86x0.22: folga max=NAO CABE
+  counter_3_a (1) nivel y=0.949 [x 4.67..5.67, z 7.06..7.83] peca 0.72x0.22: folga max=NAO CABE
+  counter_3_c nivel y=0.949 [x 8.98..9.74, z 3.12..4.12] peca 0.86x0.22: folga max=NAO CABE
+  counter_3_c nivel y=0.949 [x 8.98..9.74, z 3.12..4.12] peca 0.72x0.22: folga max=NAO CABE
+  counter_3_c (1) nivel y=0.949 [x 8.97..9.74, z 5.12..6.12] peca 0.86x0.22: folga max=NAO CABE
+  counter_3_c (1) nivel y=0.949 [x 8.97..9.74, z 5.12..6.12] peca 0.72x0.22: folga max=NAO CABE
+  counter_3_c (2) nivel y=0.949 [x 3.67..4.67, z 7.05..7.82] peca 0.86x0.22: folga max=NAO CABE
+  counter_3_c (2) nivel y=0.949 [x 3.67..4.67, z 7.05..7.82] peca 0.72x0.22: folga max=NAO CABE
+  counter_3_c (3) nivel y=0.949 [x 5.67..6.67, z 7.07..7.83] peca 0.86x0.22: folga max=NAO CABE
+  counter_3_c (3) nivel y=0.949 [x 5.67..6.67, z 7.07..7.83] peca 0.72x0.22: folga max=0.00 m em (5.777, 0.949, 7.425) (eixo Z)
+  Demo_Basketball_Table nivel y=1.101 [x 0.56..0.82, z 5.74..6.00] peca 0.86x0.22: folga max=NAO CABE
+  Demo_Basketball_Table nivel y=1.101 [x 0.56..0.82, z 5.74..6.00] peca 0.72x0.22: folga max=NAO CABE
+  drawer_simple nivel y=0.918 [x 0.33..0.83, z 5.07..5.64] peca 0.86x0.22: folga max=NAO CABE
+  drawer_simple nivel y=0.918 [x 0.33..0.83, z 5.07..5.64] peca 0.72x0.22: folga max=NAO CABE
+  drawer_simple (1) nivel y=0.918 [x 0.32..1.03, z 5.72..6.31] peca 0.86x0.22: folga max=NAO CABE
+  drawer_simple (1) nivel y=0.918 [x 0.32..1.03, z 5.72..6.31] peca 0.72x0.22: folga max=NAO CABE
+  table_lamp nivel y=1.318 [x 9.44..9.66, z 4.27..4.44] peca 0.86x0.22: folga max=NAO CABE
+  table_lamp nivel y=1.318 [x 9.44..9.66, z 4.27..4.44] peca 0.72x0.22: folga max=NAO CABE
+  table_lamp (1) nivel y=1.318 [x 5.28..5.53, z 7.30..7.54] peca 0.86x0.22: folga max=NAO CABE
+  table_lamp (1) nivel y=1.318 [x 5.28..5.53, z 7.30..7.54] peca 0.72x0.22: folga max=NAO CABE
+
+=== 9) BUG do teleporte: pose da raiz antes/depois de pegar um trofeu ===
+Paciente (camera) em (4.500, 1.799, 2.310); distancia horizontal ate a estante=5.61 m; dot(frente +Z da estante, direcao ao paciente)=0.91 (1 = de frente, -1 = de costas)
+ANTES: raiz=(9.583, 1.217, -0.055) rotY=270.0
+  [GoldenApple] pego: trofeu_antes=(9.575, 1.262, -0.235); raiz 1 frame depois=(9.583, 1.217, -0.055) deslocamento_da_raiz=0.0 cm
+      raiz 1 s depois=(9.583, 1.217, -0.055) deslocamento_da_raiz=0.0 cm; trofeu agora=(9.573, 1.264, -0.239)
+      captura TASK-16_Before_2.png tirada da mesma camera do Before_1 (viewPos=(7.407, 1.500, 0.957))
+      solto longe, +6 s: raiz=(9.583, 1.217, -0.055) deslocamento_acumulado=0.0 cm; trofeu em (9.873, 1.319, -0.256), distancia ao slot=30.4 cm
+  [LuminousBonsai] pego: trofeu_antes=(9.587, 1.262, -0.123); raiz 1 frame depois=(9.583, 1.217, -0.055) deslocamento_da_raiz=0.0 cm
+      raiz 1 s depois=(9.583, 1.217, -0.055) deslocamento_da_raiz=0.0 cm; trofeu agora=(9.585, 1.263, -0.126)
+      solto longe, +6 s: raiz=(9.583, 1.217, -0.055) deslocamento_acumulado=0.0 cm; trofeu em (9.865, 1.317, -0.226), distancia ao slot=31.5 cm
+  [StarCup] pego: trofeu_antes=(9.576, 1.262, 0.009); raiz 1 frame depois=(9.583, 1.217, -0.055) deslocamento_da_raiz=0.0 cm
+      raiz 1 s depois=(9.583, 1.217, -0.055) deslocamento_da_raiz=0.0 cm; trofeu agora=(9.576, 1.262, 0.009)
+      solto longe, +6 s: raiz=(9.583, 1.217, -0.055) deslocamento_acumulado=0.0 cm; trofeu em (9.895, 1.258, -0.073), distancia ao slot=33.0 cm
+  [DroneCrown] pego: trofeu_antes=(3.947, 1.706, 3.659); raiz 1 frame depois=(9.583, 1.217, -0.055) deslocamento_da_raiz=0.0 cm
+      raiz 1 s depois=(9.583, 1.217, -0.055) deslocamento_da_raiz=0.0 cm; trofeu agora=(3.947, 1.734, 3.659)
+      solto longe, +6 s: raiz=(9.583, 1.217, -0.055) deslocamento_acumulado=0.0 cm; trofeu em (9.575, 1.263, 0.124), distancia ao slot=0.1 cm
+DEPOIS (tudo): raiz=(9.583, 1.217, -0.055) rotY=270.0 deslocamento_total_raiz=0.0 cm
+Maior deslocamento de nao-trofeu (ancoras, base, rotulos): 0.0 cm ()
+CONCLUSAO: bug NAO reproduzido (raiz parada).
+
+=== NOTA IMPORTANTE SOBRE A CONFIRMACAO DO BUG (leia antes de usar os numeros acima) ===
+Durante este scout o working tree de Assets/Scripts/Interactive/Task16/ foi alterado por outro agente (TrophyShelfManager.cs 23:46:38, ShelfTrophyGrabInteractable.cs 23:45:22,
+DroneCrownWearable.cs 23:45:37; diff de TrophyShelfManager = +320/-114). A execucao acima rodou DEPOIS dessas alteracoes (23:49), por isso a raiz ficou parada (0,0 cm) e existe o filho 'TrophyAudio'.
+O bug original esta provado no codigo commitado (git HEAD, TrophyShelfManager.cs): linha 54 'audioSource = gameObject.AddComponent<AudioSource>()' (AudioSource na RAIZ) e
+linha 197 'audioSource.transform.position = position;' dentro de PlayPickupSound, chamado em todo selectEntered (linha 127, lambda). Logo, em HEAD a raiz TrophyDisplayStand_Instance era
+teletransportada para a posicao do trofeu a cada pegada. A copia de trabalho atual NAO tem mais essa escrita (grep: so 'trophyAudio.transform.position' no filho dedicado, linha 409).
+As capturas Before_1/Before_2 mostram o estado da CENA ainda nao reconstruida (rotulos gigantes, base antiga 0,52 m): o prefab/cena nao foram atualizados pelo [D].

@@ -1,0 +1,43 @@
+shelf pos=(9.611, 0.000, 0.027) rotY=270 bounds min=(9.473, 0.002, -0.595) max=(9.749, 2.289, 0.649)
+Niveis horizontais (superficies com normal para cima) no colisor da estante:
+  y=2.289 amostras=868 x 9.483..9.743  z -0.585..0.635
+MeshCollider convex=False sharedMesh=Modern Shelves 3 readable=False
+MeshFilter mesh=Modern Shelves 3 readable=False verts=252 tris=126
+  face voltada p/ baixo (fundo de tabua) y=0.00
+  face voltada p/ baixo (fundo de tabua) y=0.03
+  face voltada p/ baixo (fundo de tabua) y=0.40
+  face voltada p/ baixo (fundo de tabua) y=0.76
+  face voltada p/ baixo (fundo de tabua) y=1.13
+  face voltada p/ baixo (fundo de tabua) y=1.49
+  face voltada p/ baixo (fundo de tabua) y=1.86
+  face voltada p/ baixo (fundo de tabua) y=2.22
+  face voltada p/ cima y=0.10 area=0.343 x 9.473..9.749 z -0.595..0.649
+  face voltada p/ cima y=0.46 area=0.343 x 9.473..9.749 z -0.595..0.649
+  face voltada p/ cima y=0.83 area=0.343 x 9.473..9.749 z -0.595..0.649
+  face voltada p/ cima y=1.19 area=0.343 x 9.473..9.749 z -0.595..0.649
+  face voltada p/ cima y=1.56 area=0.343 x 9.473..9.749 z -0.595..0.649
+  face voltada p/ cima y=1.92 area=0.343 x 9.473..9.749 z -0.595..0.649
+  face voltada p/ cima y=2.29 area=0.343 x 9.473..9.749 z -0.595..0.649
+Altura livre acima de cada nivel (raycast para cima no centro x, varios z):
+  nivel y=2.289: folga ate o fundo da prateleira de cima = >1.0 m
+Objetos (renderers) sobre/ao lado da estante (x dentro do movel +-0.05) entre y=0.8 e 1.9:
+  book_pile_1_alt (2) (pai Building) x 9.379..9.877 y 0.827..1.035 z -0.498..0.007
+  book_pile_2 (9) (pai Building) x 9.440..9.764 y 1.192..1.442 z 0.266..0.546
+  book_pile_2 (8) (pai Building) x 9.441..9.767 y 1.557..1.807 z -0.199..0.085
+Estante atual: pos=(9.583, 1.217, -0.055) rotY=270
+  AABB renderers (sem texto): x 9.493..9.657 y 1.196..1.460 z -0.315..0.205
+Colisor da estante sob o nivel 1.19? OverlapBox em (9.611,1.20,-0.05) {0.2,0.01,0.2}: modern_shelves_3 (1);
+--- ENCAIXE com tudo como obstaculo ---
+  nivel y=0.835 peca 0.86x0.22: folga lateral max (eixo Z) = NAO CABE
+  nivel y=0.835 peca 0.72x0.22: folga lateral max (eixo Z) = NAO CABE
+  nivel y=1.195 peca 0.86x0.22: folga lateral max (eixo Z) = 0.00 m em (9.583, 1.195, -0.165)
+  nivel y=1.195 peca 0.72x0.22: folga lateral max (eixo Z) = 0.12 m em (9.583, 1.195, -0.235)
+  nivel y=1.565 peca 0.86x0.22: folga lateral max (eixo Z) = NAO CABE
+  nivel y=1.565 peca 0.72x0.22: folga lateral max (eixo Z) = NAO CABE
+--- ENCAIXE ignorando book_pile* (livros sao decoracao realocavel) ---
+  nivel y=0.835 peca 0.86x0.22: folga lateral max (eixo Z) = 0.25 m em (9.583, 0.835, -0.165)
+  nivel y=0.835 peca 0.72x0.22: folga lateral max (eixo Z) = 0.25 m em (9.583, 0.835, -0.235)
+  nivel y=1.195 peca 0.86x0.22: folga lateral max (eixo Z) = 0.25 m em (9.583, 1.195, -0.165)
+  nivel y=1.195 peca 0.72x0.22: folga lateral max (eixo Z) = 0.25 m em (9.583, 1.195, -0.235)
+  nivel y=1.565 peca 0.86x0.22: folga lateral max (eixo Z) = 0.25 m em (9.583, 1.565, -0.165)
+  nivel y=1.565 peca 0.72x0.22: folga lateral max (eixo Z) = 0.25 m em (9.583, 1.565, -0.235)

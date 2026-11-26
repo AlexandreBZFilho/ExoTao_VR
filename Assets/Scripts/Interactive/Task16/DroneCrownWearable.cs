@@ -19,6 +19,9 @@ namespace VRRehab.Interactive.Task16
         [Header("Estado")]
         public bool isEquippedOnDrone = false;
 
+        /// <summary>Avisa a estante quando a coroa entra (true) ou sai (false) da cabeça do Drone.</summary>
+        public event Action<bool> EquipChanged;
+
         [Header("Referências")]
         [Tooltip("Ponto de acoplamento da cabeça do Drone Pet")]
         public Transform droneHeadSocketTransform;
@@ -104,9 +107,12 @@ namespace VRRehab.Interactive.Task16
             // Só encaixa se o jogador estiver segurando a coroa ou acabou de soltá-la/arremessá-la:
             // assim o drone voando perto da estante de troféus não "rouba" a coroa sozinho.
             if (isEquippedOnDrone) return;
-            bool isHeadSocket = other.name == "DroneHeadSocket" || other.name == "DroneHeadSocketTrigger" ||
-                                (droneHeadSocketTransform != null && other.transform == droneHeadSocketTransform);
+            bool isHeadSocket = IsHeadSocket(other);
             if (!isHeadSocket) return;
+            // Acabou de ser tirada da cabeça: só pode encaixar de novo depois de SAIR do trigger e de uma carência
+            // (senão o próprio OnTriggerEnter do desencaixe a recolocava na hora e era impossível tirar a coroa).
+            // (salvaguarda: se o OnTriggerExit se perder, a trava some sozinha 2 s depois da carência)
+            if (Time.time < reequipBlockedUntil || (mustLeaveHeadSocket && Time.time < reequipBlockedUntil + 2f)) return;
 
             bool heldOrJustThrown = (grabInteractable != null && grabInteractable.isSelected) ||
                                     Time.time - lastReleaseTime < EquipWindowAfterRelease;
@@ -115,6 +121,19 @@ namespace VRRehab.Interactive.Task16
             droneHeadSocketTransform = other.transform;
             EquipOnDrone(true);
         }
+
+        private void OnTriggerExit(Collider other)
+        {
+            if (IsHeadSocket(other)) mustLeaveHeadSocket = false;
+        }
+
+        private bool IsHeadSocket(Collider other) =>
+            other.name == "DroneHeadSocket" || other.name == "DroneHeadSocketTrigger" ||
+            (droneHeadSocketTransform != null && other.transform == droneHeadSocketTransform);
+
+        private bool mustLeaveHeadSocket;
+        private float reequipBlockedUntil = -1f;
+        private const float ReequipGraceSeconds = 1.0f;
 
         /// <summary>
         /// Acopla a coroa imperial ao topo da cabeça do Drone Pet.
@@ -157,6 +176,7 @@ namespace VRRehab.Interactive.Task16
             {
                 RehabProgressionSaveSystem.Instance.SetDroneCrowned(true);
             }
+            EquipChanged?.Invoke(true);
         }
 
         /// <summary>
@@ -165,6 +185,8 @@ namespace VRRehab.Interactive.Task16
         public void UnequipFromDrone()
         {
             isEquippedOnDrone = false;
+            mustLeaveHeadSocket = true;
+            reequipBlockedUntil = Time.time + ReequipGraceSeconds;
             transform.SetParent(null, true);
 
             if (crownRb != null)
@@ -181,6 +203,7 @@ namespace VRRehab.Interactive.Task16
             {
                 RehabProgressionSaveSystem.Instance.SetDroneCrowned(false);
             }
+            EquipChanged?.Invoke(false);
         }
 
         private void PlayCoronationCeremony()
@@ -237,6 +260,7 @@ namespace VRRehab.Interactive.Task16
                 transform.localRotation = Quaternion.identity;
                 if (crownRb != null) crownRb.isKinematic = true;
                 isEquippedOnDrone = true;
+                EquipChanged?.Invoke(true);
             }
         }
     }
