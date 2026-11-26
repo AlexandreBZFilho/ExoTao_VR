@@ -1,0 +1,60 @@
+=== Testes em Play Mode da TASK-09 — Fogos de Artifício + Bobblehead (2026-11-25 22:35:31) ===
+Play Mode real (Awake/Start, física, corrotinas, eventos do XRI) com 'mão de teste' (ScriptedTestInteractor).
+
+## 0. Cena
+[PASS] 0a) Exatamente 1 botão, 1 bobblehead e 1 alavanca: botão 1, bobblehead 1, alavanca 1
+[PASS] 0b) Room_Fireworks_Launcher antigo removido: 
+
+## 1. Botão de fogos
+[PASS] 1a) Show auto-contido: 2 conjuntos com todas as referências preenchidas (filhos do botão): 2 conjuntos
+[PASS] 1b) EmissionModule da explosão LIGADO: 
+[PASS] 1c) Teto de partículas do show alto (2 conjuntos) <= 250: soma dos maxParticles = 250
+[PASS] 1d) World space, sem colisão de partícula, sem sombra: world=True, sem colisão=True, sem sombra=True
+[PASS] 1e) Material de partícula aditivo com textura (faísca, não esfera sólida): M_Fireworks_Sparkle: Particles/Standard Unlit, DstBlend=1, tex=Firework_Spark, instancing=True
+[PASS] 1f) Todas as luzes do botão sem sombra; flash <= 2,5 e alcance <= 3 m: 2 luzes
+[PASS] 1g) Disparo aceito: ShowsFired=1
+[PASS] 1h) Show alto: ápice >= 0,6 m acima do bico: ápice (9.155, 2.203, -1.848), 1.17 m acima, livre 3.08 m
+[PASS] 1i) Ápice quase vertical (inclinação <= 13°): 12.0°
+[PASS] 1j) Nenhum colisor sólido entre o botão e o ápice: caminho livre
+[PASS] 1k) Foguete voa 0,45-0,8 s e a explosão NÃO aparece antes de ele chegar: voo 0.449 s, partículas de explosão durante o voo = 0
+[PASS] 1l) Explosão acontece quando o foguete chega: 64 partículas na explosão, variante Peony
+[PASS] 1m) Cooldown: segundo disparo antes de 1,2 s é ignorado (sem fila): aceito=False, rejeitados=1
+[PASS] 1n) Depois do cooldown dispara de novo: ShowsFired=2
+[PASS] 1o) Nunca mais de 250 partículas vivas (2 shows sobrepostos): máximo 141, shows simultâneos 2
+[PASS] 1p) Luz do flash nunca projeta sombra: 
+[PASS] 1q) Depois do show tudo para sozinho: partículas 0, luz apagada, shows 0
+[PASS] 1r) 4 variantes de explosão disparam (peônia, anel, salgueiro, purpurina): Peony:65, Ring:49, Willow:56, Glitter:70
+[PASS] 1s) Botão girado 137°: ápice continua acima (efeito segue o botão): ápice (9.155, 2.203, -1.848), 1.17 m acima
+[PASS] 1t) Com móvel 0,55 m acima: 'show baixo' (nada explode dentro do móvel): baixo=True, ponto (8.978, 1.329, -2.025), leque 36 faíscas
+[PASS] 1u) Objeto chamado 'hand/controller' SEM interactor não dispara: ShowsFired 8 -> 8
+[PASS] 1v) Toque da mão (XR interactor) no domo dispara: ShowsFired 8 -> 9
+[PASS] 1w) Gatilho do Vive (Select) dispara: ShowsFired 9 -> 10
+[PASS] 1x) Consultas por frame do botão sem alocação: 0 bytes em 300 chamadas
+
+## 2. Bobblehead
+[PASS] 2a) Começa dormindo (Update desligado em repouso): enabled=False
+[PASS] 2b) Colisor da cabeça é filho do pivô da cabeça; só colisores primitivos: SphereCollider r=0.052 em Bobble_Head_Pivot
+[PASS] 2c) Luzes do bobblehead sem sombra: 
+[PASS] 2d) Mola do pescoço e 2 antenas ligadas (movimento secundário): antenas 2
+[PASS] 2e) Pancada de 25° -> pico >= 18°: pico 22.7° em 0.09 s
+[PASS] 2f) Topo da cabeça vai para o lado empurrado e volta para o outro: lado + 23° / lado − 19°
+[PASS] 2g) Antenas e mola acompanham (movimento secundário): antena até 13.5°, mola esticou até 1.098x
+[PASS] 2h) Ainda balança >= 3° depois de 1,5 s: 6.7° entre 1,4 e 1,75 s
+      amplitude em ~3 s: 1.7°
+[PASS] 2i) Depois de ~8 s: parado (<= 0,2°) e Update desligado: 0.000°, dormindo=True, cabeça voltou 0.00°
+[PASS] 2j) Pancada forte bate no limite (tock) e quica, sem passar de 50°: tocks +1, máx 41.9°, torção 5.9°
+[PASS] 2k) Peteleco empurra para longe do ponto apontado: inclinação lateral -27° (negativo = para longe)
+[PASS] 2l) Gatilho (Select) com a mão = peteleco para longe da mão: inclinação -29°
+[PASS] 2m) Segurar e puxar: a cabeça segue a mão (>= 25° para a frente): puxando=True, inclinação 40°
+[PASS] 2n) Ao soltar, balança para o outro lado: foi até 34° para trás
+[PASS] 2o) Toque da mão em movimento empurra no sentido da mão (10°-35°): pico 25.3°, foi para trás 25°
+[PASS] 2p) Bola arremessada (2 m/s) balança a cabeça proporcionalmente: pico 21.8°
+[PASS] 2q) Sons tocaram: boing, soft (cruzando o centro) e tock (limite): boing 7, soft 42, tock 1
+[PASS] 2r) 300 Updates do bobblehead com 0 bytes alocados: 0 bytes
+
+## 3. Regras gerais
+[PASS] 3a) Sem LoadScene, sem renderer.material/.materials, sem TODO nos scripts refeitos: ok
+[PASS] 3b) Nenhum MeshCollider em objeto com Rigidbody (botão e bobblehead): 
+[PASS] 3c) Áudio 3D sem loop: 4 fontes
+
+--- RESULTADO: 47 passaram, 0 falharam ---

@@ -1,0 +1,280 @@
+
+=== g) DUPLICATAS (contagens) ===
+FireworksButtonInteractable: 1
+   FireworksLaunchButton_Instance pos=(8.978, 0.951, -2.025)
+BobbleheadSpringToy: 1
+   ExoMascotBobblehead_Instance pos=(0.747, 0.920, 5.157)
+AtmosphereLeverInteractable: 1
+   EnvironmentControlLever_Instance pos=(8.974, 0.951, -1.529)
+'Room_Fireworks_Launcher': 1 instancia(s)
+   Room_Fireworks_Launcher world=(8.978, 0.951, -2.025)
+'Burst_Apex_Target': 1 instancia(s)
+   Room_Fireworks_Launcher/Burst_Apex_Target world=(7.796, 2.446, -2.536)
+'Ascent_Sparks_Trail': 1 instancia(s)
+   Room_Fireworks_Launcher/Ascent_Sparks_Trail world=(8.978, 1.001, -2.025)
+'Burst_Explosion_System': 1 instancia(s)
+   Room_Fireworks_Launcher/Burst_Explosion_System world=(7.796, 2.446, -2.536)
+'Burst_Flash_Light': 1 instancia(s)
+   Room_Fireworks_Launcher/Burst_Explosion_System/Burst_Flash_Light world=(7.796, 2.446, -2.536)
+Objetos topo-de-hierarquia a < 1 m de (0,0,0) com Renderer/Collider/script:
+   Gerenciador_HUD pos=(0.000, 0.000, 0.000) size=-
+   GerenciadorPause pos=(0.000, 0.000, 0.000) size=-
+   Building pos=(0.000, 0.000, 0.000) size=(10.200, 6.038, 12.250)
+   EventSystem pos=(0.000, 0.000, 0.000) size=-
+
+=== a) FOGOS - posicoes e sistemas ===
+Botao 'FireworksLaunchButton_Instance' world=(8.978, 0.951, -2.025) rotEuler=(0.000, 270.000, 0.000) forward=(-1.000, 0.000, 0.000) up=(0.000, 1.000, 0.000) scale=(1.000, 1.000, 1.000)
+Burst_Apex_Target world=(7.796, 2.446, -2.536) localNoPai=(1.010, 1.495, 0.800) pai='Room_Fireworks_Launcher' delta_vs_botao=(-1.183, 1.495, -0.511) distHoriz=1.288 alturaAcima=1.495
+   OverlapSphere(0.15) no apex: 0 colisores: 
+   Renderers cujo AABB contem o apex (<6 m): 0: 
+   Linecast(saida da trilha -> apex) bloqueado=False
+   Ascent forward vs direcao ate o apex: 0.0 graus; alcance = startSpeed*lifetime = 3.20 m; distancia ate o apex = 1.94 m; angulo do forward com vertical = 41.7
+   rocketTravelTime(WaitForSeconds fixo)=0.6
+-- Campos serializados do script NA CENA:
+   buttonDomeTransform = Button_Dome (Transform) @FireworksLaunchButton_Instance/Visual_Model/Button_Dome
+   pressedLocalOffset = (0.000, -0.012, 0.000)
+   buttonGlowLight = Button_Glow_Light (Light) @FireworksLaunchButton_Instance/Button_Glow_Light
+   fireworksAscentParticles = Ascent_Sparks_Trail (ParticleSystem) @Room_Fireworks_Launcher/Ascent_Sparks_Trail
+   fireworksBurstParticles = Burst_Explosion_System (ParticleSystem) @Room_Fireworks_Launcher/Burst_Explosion_System
+   fireworksBurstLight = Burst_Flash_Light (Light) @Room_Fireworks_Launcher/Burst_Explosion_System/Burst_Flash_Light
+   burstLocation = Burst_Apex_Target (Transform) @Room_Fireworks_Launcher/Burst_Apex_Target
+   rocketTravelTime = 0.6
+   sfxButtonPress = arcade_button_press (AudioClip) [Assets/Audio/Generated/Task08/arcade_button_press.wav]
+   sfxLaunchWhistle = fireworks_launch_whistle (AudioClip) [Assets/Audio/Generated/Task09/fireworks_launch_whistle.wav]
+   sfxBurstExplosion = fireworks_burst_explosion (AudioClip) [Assets/Audio/Generated/Task09/fireworks_burst_explosion.wav]
+   audioSource = FireworksLaunchButton_Instance (AudioSource) @FireworksLaunchButton_Instance
+-- Hierarquia do botao (cena) com transforms locais:
+   FireworksLaunchButton_Instance lp=(8.978, 0.951, -2.025) lr=(0.000, 270.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(8.978, 0.951, -2.025) [BoxCollider,SphereCollider,AudioSource,FireworksButtonInteractable] active=True
+     Visual_Model lp=(0.000, 0.000, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(8.978, 0.951, -2.025) [] active=True
+       Button_Bezel_Chrome lp=(0.000, 0.044, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(8.978, 0.995, -2.025) [MeshFilter,MeshRenderer] active=True
+       Button_Chassis lp=(0.000, 0.021, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(8.978, 0.972, -2.025) [MeshFilter,MeshRenderer] active=True
+       Button_Dome lp=(0.000, 0.044, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(8.978, 0.995, -2.025) [MeshFilter,MeshRenderer] active=True
+       Button_Glow_Ring lp=(0.000, 0.042, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(8.978, 0.993, -2.025) [MeshFilter,MeshRenderer] active=True
+       Button_Label_Plate lp=(0.000, 0.022, 0.052) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(8.926, 0.973, -2.025) [MeshFilter,MeshRenderer] active=True
+     Button_Glow_Light lp=(0.000, 0.065, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(8.978, 1.016, -2.025) [Light] active=True
+-- Room_Fireworks_Launcher world=(8.978, 0.951, -2.025) rot=(0.000, 195.000, 0.000) filhos:
+   Room_Fireworks_Launcher lp=(8.978, 0.951, -2.025) lr=(0.000, 195.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(8.978, 0.951, -2.025) [] active=True
+     Burst_Apex_Target lp=(1.010, 1.495, 0.800) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(7.796, 2.446, -2.536) [] active=True
+     Ascent_Sparks_Trail lp=(0.000, 0.050, 0.000) lr=(311.722, 51.618, 0.000) ls=(1.000, 1.000, 1.000) wp=(8.978, 1.001, -2.025) [ParticleSystem,ParticleSystemRenderer] active=True
+     Burst_Explosion_System lp=(1.010, 1.495, 0.800) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(7.796, 2.446, -2.536) [ParticleSystem,ParticleSystemRenderer] active=True
+       Burst_Flash_Light lp=(0.000, 0.000, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(7.796, 2.446, -2.536) [Light] active=True
+-- ParticleSystems relacionados:
+  PS 'Room_Fireworks_Launcher/Ascent_Sparks_Trail' world=(8.978, 1.001, -2.025) rotEuler=(311.722, 246.618, 0.000) forward=(-0.611, 0.746, -0.264) activeInHierarchy=True
+     emission.enabled=True rateOverTime=80 bursts=0 
+     main: duration=0.55 loop=False playOnAwake=False startSpeed=8 startLifetime=0.4 startSize=0.04 simulationSpace=Local maxParticles=1000 gravityModifier=0 startColorMode=Color
+     shape: enabled=True type=Cone angle=8 radius=1
+     collision.enabled=False trails.enabled=False lights.enabled=False
+     renderer: material=M_Fireworks_Sparkle shader=Standard renderMode=Billboard shadowCasting=Off receiveShadows=False enableGPUInstancing=True mainTex=none
+     matBlend: renderQueue=2000 _Mode=0 _Color=RGBA(1.000, 0.950, 0.800, 1.000) emission=True
+  PS 'Room_Fireworks_Launcher/Burst_Explosion_System' world=(7.796, 2.446, -2.536) rotEuler=(0.000, 195.000, 0.000) forward=(-0.259, 0.000, -0.966) activeInHierarchy=True
+     emission.enabled=False rateOverTime=10 bursts=1 [t=0 count=0-180 cycles=1]
+     main: duration=1.2 loop=False playOnAwake=False startSpeed=3.8 startLifetime=1.2 startSize=0.09 simulationSpace=Local maxParticles=1000 gravityModifier=0.3 startColorMode=Gradient
+     shape: enabled=True type=Sphere angle=25 radius=0.2
+     collision.enabled=False trails.enabled=False lights.enabled=False
+     renderer: material=M_Fireworks_Sparkle shader=Standard renderMode=Billboard shadowCasting=Off receiveShadows=False enableGPUInstancing=True mainTex=none
+     matBlend: renderQueue=2000 _Mode=0 _Color=RGBA(1.000, 0.950, 0.800, 1.000) emission=True
+  Luz de explosao 'Room_Fireworks_Launcher/Burst_Explosion_System/Burst_Flash_Light' type=Point range=4.5 intensity=1.8 shadows=None enabled=False
+-- Prefab FireworksLaunchButton.prefab:
+ Assets/Prefabs/Interactive/FireworksLaunchButton.prefab
+     buttonDomeTransform = Button_Dome (Transform) @FireworksLaunchButton/Visual_Model/Button_Dome
+     pressedLocalOffset = (0.000, -0.012, 0.000)
+     buttonGlowLight = Button_Glow_Light (Light) @FireworksLaunchButton/Button_Glow_Light
+     fireworksAscentParticles = null
+     fireworksBurstParticles = null
+     fireworksBurstLight = null
+     burstLocation = null
+     rocketTravelTime = 0.6
+     sfxButtonPress = arcade_button_press (AudioClip) [Assets/Audio/Generated/Task08/arcade_button_press.wav]
+     sfxLaunchWhistle = fireworks_launch_whistle (AudioClip) [Assets/Audio/Generated/Task09/fireworks_launch_whistle.wav]
+     sfxBurstExplosion = fireworks_burst_explosion (AudioClip) [Assets/Audio/Generated/Task09/fireworks_burst_explosion.wav]
+     audioSource = FireworksLaunchButton (AudioSource) @FireworksLaunchButton
+     ParticleSystems no prefab: 0
+     Colliders no prefab: FireworksLaunchButton:BoxCollider(trigger=False), FireworksLaunchButton:SphereCollider(trigger=False)
+     FireworksLaunchButton lp=(0.000, 0.000, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.000, 0.000, 0.000) [BoxCollider,SphereCollider,AudioSource,FireworksButtonInteractable] active=True
+       Visual_Model lp=(0.000, 0.000, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.000, 0.000, 0.000) [] active=True
+         Button_Bezel_Chrome lp=(0.000, 0.044, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.000, 0.044, 0.000) [MeshFilter,MeshRenderer] active=True
+         Button_Chassis lp=(0.000, 0.021, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.000, 0.021, 0.000) [MeshFilter,MeshRenderer] active=True
+         Button_Dome lp=(0.000, 0.044, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.000, 0.044, 0.000) [MeshFilter,MeshRenderer] active=True
+         Button_Glow_Ring lp=(0.000, 0.042, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.000, 0.042, 0.000) [MeshFilter,MeshRenderer] active=True
+         Button_Label_Plate lp=(0.000, 0.022, 0.052) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.000, 0.022, 0.052) [MeshFilter,MeshRenderer] active=True
+       Button_Glow_Light lp=(0.000, 0.065, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.000, 0.065, 0.000) [Light] active=True
+-- Material M_Fireworks_Sparkle:
+   shader=Standard renderQueue=2000 _Mode=0 emission=True instancing=True mainTex=none
+-- Texturas Firework_*.png existentes: Assets/Models/Generated/Task09/Firework_Spark.png, Assets/Models/Generated/Task09/Firework_Trail.png, Packages/com.unity.visualeffectgraph/Editor/Templates/UI/3d_Firework.png, Packages/com.unity.visualeffectgraph/Editor/Templates/UI/d_Fireworks@256.png, Packages/com.unity.visualeffectgraph/Editor/Templates/UI/Fireworks@256.png
+-- Audios fireworks/bobble: Assets/Audio/Generated/Task09/bobblehead_limit_tock.wav, Assets/Audio/Generated/Task09/bobblehead_spring_boing.wav, Assets/Audio/Generated/Task09/bobblehead_spring_soft.wav, Assets/Audio/Generated/Task09/fireworks_burst_explosion.wav, Assets/Audio/Generated/Task09/fireworks_launch_whistle.wav
+
+=== b) ESPACO LIVRE em volta do botao de fogos ===
+AABB do botao: min=(8.914, 0.951, -2.089) max=(9.042, 1.016, -1.961)  topo=1.016 base(tampo)=0.951
+Raycast para baixo: counter_2_b (pai: Building) y=0.949
+Raycast para cima (centro e 4 offsets de 0,15 m) a partir do topo:
+   off (0.000, 0.000, 0.000) -> nada em 6 m
+   off (0.150, 0.000, 0.000) -> nada em 6 m
+   off (-0.150, 0.000, 0.000) -> nada em 6 m
+   off (0.000, 0.000, 0.150) -> nada em 6 m
+   off (0.000, 0.000, -0.150) -> nada em 6 m
+Distancia livre acima do botao (minimo dos raios) = 99.000 m
+Raycasts horizontais (8 direcoes) a partir do eixo do botao:
+  altura = tampo + 0.1 m (y=1.051)
+     yaw   0: livre >8 m a 8.000 m
+     yaw  45: wall_medium (11) a 1.304 m
+     yaw  90: wall_medium (10) a 0.922 m
+     yaw 135: wall_medium (10) a 1.304 m
+     yaw 180: wall_medium (12) a 1.875 m
+     yaw 225: wall_medium (13) a 2.652 m
+     yaw 270: livre >8 m a 8.000 m
+     yaw 315: Pessoa_Virtual_sem3D a 5.845 m
+  altura = tampo + 1.0 m (y=1.951)
+     yaw   0: livre >8 m a 8.000 m
+     yaw  45: wall_medium (11) a 1.304 m
+     yaw  90: wall_medium (10) a 0.922 m
+     yaw 135: wall_medium (10) a 1.304 m
+     yaw 180: wall_medium (12) a 1.875 m
+     yaw 225: painting_small (2) a 2.553 m
+     yaw 270: livre >8 m a 8.000 m
+     yaw 315: livre >8 m a 8.000 m
+Direcao horizontal mais livre a 1,0 m: (0.000, 0.000, 1.000) (8.00 m)
+Renderers (AABB) numa coluna de 0,6 m de raio acima do botao ate +3 m (independente de colisor):
+   Building/deco_variant_3 dXZ=0.466 y[0.947,1.062] size=(0.112, 0.114, 0.112) collider=True
+   EnvironmentControlLever_Instance/Visual_Model/Lever_Handle_Pivot dXZ=0.417 y[0.976,1.132] size=(0.051, 0.155, 0.102) collider=True
+   Building/tv dXZ=0.320 y[0.946,1.593] size=(0.204, 0.647, 0.994) collider=True
+Teto (menor min.y de renderer grande >=2x2 m acima do botao) = NaN m  -> pe-direito acima do tampo = NaN m
+
+=== c) BOBBLEHEAD ===
+Bobblehead 'ExoMascotBobblehead_Instance' world=(0.747, 0.920, 5.157) rotEuler=(0.000, 215.000, 0.000) forward=(-0.574, 0.000, -0.819) scale=(1.000, 1.000, 1.000)
+AABB min=(0.680, 0.920, 5.090) max=(0.813, 1.080, 5.224) size=(0.134, 0.160, 0.134)
+Movel de apoio (raycast para baixo): Building/drawer_simple y=0.918 gap=0.002
+Hierarquia completa:
+   ExoMascotBobblehead_Instance lp=(0.747, 0.920, 5.157) lr=(0.000, 215.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.747, 0.920, 5.157) [BoxCollider,SphereCollider,Rigidbody,AudioSource,BobbleheadSpringToy] active=True
+     Visual_Model lp=(0.000, 0.000, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.747, 0.920, 5.157) [] active=True
+       Bobble_Arm_L lp=(0.030, 0.042, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.722, 0.962, 5.174) [MeshFilter,MeshRenderer] active=True
+       Bobble_Arm_R lp=(-0.030, 0.042, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.771, 0.962, 5.140) [MeshFilter,MeshRenderer] active=True
+       Bobble_Chest_Reactor lp=(0.000, 0.052, 0.021) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.734, 0.972, 5.140) [MeshFilter,MeshRenderer] active=True
+       Bobble_Head_Pivot lp=(0.000, 0.088, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.747, 1.008, 5.157) [MeshFilter,MeshRenderer] active=True
+       Bobble_Neck_Spring lp=(0.000, 0.084, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.747, 1.004, 5.157) [MeshFilter,MeshRenderer] active=True
+       Bobble_Pedestal lp=(0.000, 0.009, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.747, 0.929, 5.157) [MeshFilter,MeshRenderer] active=True
+       Bobble_Pedestal_Ring lp=(0.000, 0.012, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.747, 0.932, 5.157) [MeshFilter,MeshRenderer] active=True
+       Bobble_Torso lp=(0.000, 0.048, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.747, 0.968, 5.157) [MeshFilter,MeshRenderer] active=True
+     Visor_Glow_Light lp=(0.000, 0.125, 0.045) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.721, 1.045, 5.120) [Light] active=True
+Colliders:
+   ExoMascotBobblehead_Instance: Box center=(0.000, 0.040, 0.000) size=(0.090, 0.080, 0.090) isTrigger=False worldCenter=(0.747, 0.960, 5.157)
+   ExoMascotBobblehead_Instance: Sphere center=(0.000, 0.125, 0.000) radius=0.045 isTrigger=False worldCenter=(0.747, 1.045, 5.157)
+Rigidbody em 'ExoMascotBobblehead_Instance': isKinematic=True useGravity=True mass=1
+Renderers (nome, tris, material/shader):
+   Bobble_Arm_L tris=60 mat=M_Bobble_Trim/Standard
+   Bobble_Arm_R tris=60 mat=M_Bobble_Trim/Standard
+   Bobble_Chest_Reactor tris=60 mat=M_Bobble_Visor/Standard
+   Bobble_Head_Pivot tris=520 mat=M_Bobble_Armor/Standard|M_Bobble_Visor/Standard|M_Bobble_Trim/Standard|M_Bobble_Ears/Standard
+   Bobble_Neck_Spring tris=60 mat=M_Bobble_Spring/Standard
+   Bobble_Pedestal tris=380 mat=M_Bobble_Pedestal/Standard
+   Bobble_Pedestal_Ring tris=512 mat=M_Bobble_Visor/Standard
+   Bobble_Torso tris=188 mat=M_Bobble_Armor/Standard
+Lights: Visor_Glow_Light type=Point range=0.3 int=1.2 shadows=None
+-- Campos serializados do script NA CENA:
+   headTransform = Bobble_Head_Pivot (Transform) @ExoMascotBobblehead_Instance/Visual_Model/Bobble_Head_Pivot
+   visorRenderer = Bobble_Head_Pivot (MeshRenderer) @ExoMascotBobblehead_Instance/Visual_Model/Bobble_Head_Pivot
+   visorGlowLight = Visor_Glow_Light (Light) @ExoMascotBobblehead_Instance/Visor_Glow_Light
+   naturalFrequency = 13.5
+   dampingRatio = 0.14
+   maxDeflectionAngle = 45
+   sfxBoing = bobblehead_spring_boing (AudioClip) [Assets/Audio/Generated/Task09/bobblehead_spring_boing.wav]
+   audioSource = ExoMascotBobblehead_Instance (AudioSource) @ExoMascotBobblehead_Instance
+   minImpulseForSound = 8
+-- Prefab Assets/Prefabs/Interactive/ExoMascotBobblehead.prefab: hierarquia
+   ExoMascotBobblehead lp=(0.000, 0.000, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.000, 0.000, 0.000) [BoxCollider,SphereCollider,Rigidbody,AudioSource,BobbleheadSpringToy] active=True
+     Visual_Model lp=(0.000, 0.000, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.000, 0.000, 0.000) [] active=True
+       Bobble_Arm_L lp=(0.030, 0.042, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.030, 0.042, 0.000) [MeshFilter,MeshRenderer] active=True
+       Bobble_Arm_R lp=(-0.030, 0.042, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(-0.030, 0.042, 0.000) [MeshFilter,MeshRenderer] active=True
+       Bobble_Chest_Reactor lp=(0.000, 0.052, 0.021) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.000, 0.052, 0.021) [MeshFilter,MeshRenderer] active=True
+       Bobble_Head_Pivot lp=(0.000, 0.088, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.000, 0.088, 0.000) [MeshFilter,MeshRenderer] active=True
+       Bobble_Neck_Spring lp=(0.000, 0.084, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.000, 0.084, 0.000) [MeshFilter,MeshRenderer] active=True
+       Bobble_Pedestal lp=(0.000, 0.009, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.000, 0.009, 0.000) [MeshFilter,MeshRenderer] active=True
+       Bobble_Pedestal_Ring lp=(0.000, 0.012, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.000, 0.012, 0.000) [MeshFilter,MeshRenderer] active=True
+       Bobble_Torso lp=(0.000, 0.048, 0.000) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.000, 0.048, 0.000) [MeshFilter,MeshRenderer] active=True
+     Visor_Glow_Light lp=(0.000, 0.125, 0.045) lr=(0.000, 0.000, 0.000) ls=(1.000, 1.000, 1.000) wp=(0.000, 0.125, 0.045) [Light] active=True
+   script: headTransform = Bobble_Head_Pivot (Transform) @ExoMascotBobblehead/Visual_Model/Bobble_Head_Pivot
+   script: visorRenderer = Bobble_Head_Pivot (MeshRenderer) @ExoMascotBobblehead/Visual_Model/Bobble_Head_Pivot
+   script: visorGlowLight = Visor_Glow_Light (Light) @ExoMascotBobblehead/Visor_Glow_Light
+   script: naturalFrequency = 13.5
+   script: dampingRatio = 0.14
+   script: maxDeflectionAngle = 45
+   script: sfxBoing = bobblehead_spring_boing (AudioClip) [Assets/Audio/Generated/Task09/bobblehead_spring_boing.wav]
+   script: audioSource = ExoMascotBobblehead (AudioSource) @ExoMascotBobblehead
+   script: minImpulseForSound = 8
+
+=== d) ALAVANCA / BOTAO / BOBBLEHEAD - distancias e folgas ===
+Alavanca 'EnvironmentControlLever_Instance' world=(8.974, 0.951, -1.529) rotEuler=(0.000, 270.000, 0.000) forward=(-1.000, 0.000, 0.000)
+Distancia pivo alavanca <-> botao de fogos = 0.496 m; folga entre AABBs = 0.352 m
+Distancia bobblehead <-> botao = 10.924 m
+Distancia bobblehead <-> alavanca = 10.602 m
+[alavanca] movel de apoio = Building/counter_2_b; tampo~0.951
+     vizinho: folga 0.198 m  Building/deco_variant_3 size(0.112, 0.114, 0.112)
+     vizinho: folga 0.264 m  Building/tv size(0.204, 0.647, 0.994)
+     vizinho: folga 0.352 m  FireworksLaunchButton_Instance/Visual_Model/Button_Chassis size(0.128, 0.042, 0.128)
+     vizinho: folga 0.362 m  FireworksLaunchButton_Instance/Visual_Model/Button_Glow_Ring size(0.109, 0.005, 0.109)
+[botao_fogos] movel de apoio = Building/counter_2_b; tampo~0.951
+     vizinho: folga 0.256 m  Building/tv size(0.204, 0.647, 0.994)
+     vizinho: folga 0.352 m  EnvironmentControlLever_Instance/Visual_Model/Lever_Chassis size(0.120, 0.050, 0.160)
+     vizinho: folga 0.354 m  EnvironmentControlLever_Instance/Visual_Model/Lever_Handle_Pivot size(0.051, 0.155, 0.102)
+     vizinho: folga 0.377 m  EnvironmentControlLever_Instance/Visual_Model/Lever_Slot_Guide size(0.024, 0.010, 0.110)
+[bobblehead] movel de apoio = Building/drawer_simple; tampo~0.920
+     vizinho: folga 0.076 m  Building/deco_variant_2 size(0.157, 0.181, 0.157)
+     vizinho: folga 0.124 m  Building/counter_1 size(0.670, 0.949, 1.000)
+     vizinho: folga 0.132 m  Building/counter_1/Ac size(0.341, 0.032, 1.000)
+     vizinho: folga 0.275 m  ArcadeBallSpawner_Instance/Visual_Model size(0.123, 0.052, 0.120)
+
+=== e) SUPERFICIES CANDIDATAS para o bobblehead (item ~0,12 m de diametro, grade 2 cm) ===
+   (ignorado, AABB > 2,4 m) Building/full_desk_3 (1) size=(6.405, 1.409, 8.121)
+   Demo_Basketball_Table: tampo y=1.077  melhorFolga=0.425 m  em (0.742, 1.077, 5.925)  vizinhoMaisProximo='Building/deco_variant_2' AABBmovel size=(0.253, 0.185, 0.253)
+   Building/counter_1: tampo y=0.949  melhorFolga=0.350 m  em (1.134, 0.949, 4.906)  vizinhoMaisProximo='Building/laptop_variant (1)' AABBmovel size=(1.005, 0.949, 1.000)
+   Building/counter_3_c (3): tampo y=0.949  melhorFolga=0.221 m  em (6.607, 0.949, 7.765)  vizinhoMaisProximo='Building/laptop_variant' AABBmovel size=(1.005, 0.949, 0.769)
+   Building/counter_2_b: tampo y=0.949  melhorFolga=0.220 m  em (8.954, 0.949, -2.369)  vizinhoMaisProximo='FireworksLaunchButton_Instance/Visual_Model/Button_Chassis' AABBmovel size=(0.773, 0.949, 1.008)
+   Building/drawer_simple (1): tampo y=0.918  melhorFolga=0.214 m  em (0.382, 0.918, 6.205)  vizinhoMaisProximo='Building/chair_2' AABBmovel size=(0.703, 0.917, 0.582)
+   Building/counter_3_a (1): tampo y=0.949  melhorFolga=0.197 m  em (5.607, 0.949, 7.758)  vizinhoMaisProximo='Building/table_lamp (1)' AABBmovel size=(1.005, 0.044, 0.769)
+   Building/counter_3_c (1): tampo y=0.949  melhorFolga=0.184 m  em (9.671, 0.949, 6.056)  vizinhoMaisProximo='Building/pc_mouse_pad (1)' AABBmovel size=(0.765, 0.949, 1.002)
+   Building/counter_3_c (2): tampo y=0.949  melhorFolga=0.170 m  em (3.727, 0.949, 7.111)  vizinhoMaisProximo='Building/pc_case (2)' AABBmovel size=(1.005, 0.949, 0.769)
+   Building/counter_3_a: tampo y=0.949  melhorFolga=0.142 m  em (9.053, 0.949, 5.036)  vizinhoMaisProximo='Building/chair_3' AABBmovel size=(0.765, 0.044, 1.002)
+   Building/drawer_simple: tampo y=0.918  melhorFolga=0.126 m  em (0.770, 0.918, 5.150)  vizinhoMaisProximo='Building/counter_1' AABBmovel size=(0.504, 0.917, 0.570)
+   Building/counter_3_c: tampo y=0.949  melhorFolga=0.103 m  em (9.096, 0.949, 3.176)  vizinhoMaisProximo='Building/pc_case' AABBmovel size=(0.765, 0.949, 1.002)
+
+=== f) TRIANGULOS dos FBX ===
+FireworksLaunchButton.fbx TOTAL = 1828 tris
+      Button_Bezel_Chrome: 124 tris (submeshes: 124) lp=(0.000, 0.044, 0.000) boundsLocal=(0.100, 0.012, 0.100)
+      Button_Chassis: 220 tris (submeshes: 220) lp=(0.000, 0.021, 0.000) boundsLocal=(0.128, 0.042, 0.128)
+      Button_Dome: 960 tris (submeshes: 960) lp=(0.000, 0.044, 0.000) boundsLocal=(0.076, 0.042, 0.076)
+      Button_Glow_Ring: 512 tris (submeshes: 512) lp=(0.000, 0.042, 0.000) boundsLocal=(0.109, 0.005, 0.109)
+      Button_Label_Plate: 12 tris (submeshes: 12) lp=(0.000, 0.022, 0.052) boundsLocal=(0.055, 0.016, 0.006)
+ExoMascotBobblehead.fbx TOTAL = 1840 tris
+      Bobble_Arm_L: 60 tris (submeshes: 60) lp=(0.030, 0.042, 0.000) boundsLocal=(0.023, 0.035, 0.014)
+      Bobble_Arm_R: 60 tris (submeshes: 60) lp=(-0.030, 0.042, 0.000) boundsLocal=(0.023, 0.035, 0.014)
+      Bobble_Chest_Reactor: 60 tris (submeshes: 60) lp=(0.000, 0.052, 0.021) boundsLocal=(0.020, 0.020, 0.006)
+      Bobble_Head_Pivot: 520 tris (submeshes: 300+12+120+88) lp=(0.000, 0.088, 0.000) boundsLocal=(0.097, 0.068, 0.074)
+      Bobble_Neck_Spring: 60 tris (submeshes: 60) lp=(0.000, 0.084, 0.000) boundsLocal=(0.018, 0.018, 0.018)
+      Bobble_Pedestal: 380 tris (submeshes: 380) lp=(0.000, 0.009, 0.000) boundsLocal=(0.090, 0.018, 0.090)
+      Bobble_Pedestal_Ring: 512 tris (submeshes: 512) lp=(0.000, 0.012, 0.000) boundsLocal=(0.096, 0.004, 0.096)
+      Bobble_Torso: 188 tris (submeshes: 188) lp=(0.000, 0.048, 0.000) boundsLocal=(0.052, 0.056, 0.040)
+EnvironmentControlLever.fbx TOTAL = 1768 tris
+      Lever_Chassis: 188 tris (submeshes: 188) lp=(0.000, 0.025, 0.000) boundsLocal=(0.160, 0.050, 0.120)
+      Lever_Handle_Pivot: 1388 tris (submeshes: 92+720+576) lp=(0.000, 0.035, 0.000) boundsLocal=(0.051, 0.147, 0.051)
+      Lever_Indicator_Day: 60 tris (submeshes: 60) lp=(0.042, 0.051, -0.035) boundsLocal=(0.012, 0.006, 0.012)
+      Lever_Indicator_Night: 60 tris (submeshes: 60) lp=(-0.042, 0.051, -0.035) boundsLocal=(0.012, 0.006, 0.012)
+      Lever_Indicator_Sunset: 60 tris (submeshes: 60) lp=(0.000, 0.051, -0.035) boundsLocal=(0.012, 0.006, 0.012)
+      Lever_Slot_Guide: 12 tris (submeshes: 12) lp=(0.000, 0.048, 0.000) boundsLocal=(0.110, 0.010, 0.024)
+
+=== Alavanca - nota (somente registro) ===
+Assets/Scripts/Interactive/Task09/AtmosphereLeverInteractable.cs:393: Material mat = Application.isPlaying ? ledRenderer.material : ledRenderer.sharedMaterial;
+
+=== h) CAPTURAS 'antes' (offscreen) ===
+Espaco livre na frente do botao (forward (-1.000, 0.000, 0.000)) a y=1,5: 8.00 m
+Camera dos fogos: 2 m (ou 85% do espaco livre) na frente do botao (ou direcao mais livre) (-1.000, 0.000, 0.000); alvo = ponto medio botao-apex (8.387, 1.699, -2.281)
+   TASK-09_Before_Fireworks_t02.png: camera pos=(6.978, 1.500, -2.025) lookAt=(8.387, 1.699, -2.281) fov=70
+      t=0.2s: particulas vivas ascent=15 burst=0 (burst simulado a 0.0s)
+   TASK-09_Before_Fireworks_t05.png: camera pos=(6.978, 1.500, -2.025) lookAt=(8.387, 1.699, -2.281) fov=70
+      t=0.5s: particulas vivas ascent=32 burst=0 (burst simulado a 0.0s)
+   TASK-09_Before_Fireworks_t09.png: camera pos=(6.978, 1.500, -2.025) lookAt=(8.387, 1.699, -2.281) fov=70
+      t=0.9s: particulas vivas ascent=3 burst=0 (burst simulado a 0.3s)
+   TASK-09_Before_Fireworks_t14.png: camera pos=(6.978, 1.500, -2.025) lookAt=(8.387, 1.699, -2.281) fov=70
+      t=1.4s: particulas vivas ascent=0 burst=0 (burst simulado a 0.8s)
+TASK-09_Before_Bobble.png: forward do transform achatado; forward=(-0.574, 0.000, -0.819)
+   TASK-09_Before_Bobble.png: camera pos=(0.402, 1.170, 4.665) lookAt=(0.747, 1.000, 5.157) fov=45
+TASK-09_Lever_Before.png: forward do transform achatado; forward=(-1.000, 0.000, 0.000)
+   TASK-09_Lever_Before.png: camera pos=(8.374, 1.201, -1.529) lookAt=(8.974, 1.041, -1.529) fov=45

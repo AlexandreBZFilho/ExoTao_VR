@@ -1,0 +1,31 @@
+=== TASK-09 [D] Rework — 2026-11-25 22:27:13 ===
+1) Import: texturas (alpha, clamp) e FBX novos reimportados.
+2) Materiais de partícula: Particles/Standard Unlit aditivo (spark + trail), instancing on.
+Purga ANTES: 0 na origem, 0 duplicatas.
+Instâncias antigas: botão=1, bobblehead=1.
+Referências externas às instâncias antigas: 0.
+Room_Fireworks_Launcher e órfãos apagados: 0.
+3) Prefab FireworksLaunchButton salvo (2 shows, 12 ParticleSystems, refs nulas = 0).
+4) Prefab ExoMascotBobblehead salvo (antenas=2, braços=2, visor idx=1, colisor da cabeça no pivô, refs nulas = 0).
+Aterrado botão em counter_2_b (y 0.949, ajuste 0.0 mm).
+Bobblehead no counter_1: (1.134, 0.934, 4.906) (tampo 0.934), folga estimada 0.344 m, virado para o XR Origin (4.500, -0.026, 2.310).
+Aterrado bobblehead em Ac (y 0.934, ajuste 0.0 mm).
+Referências externas religadas: 0/0.
+Purga DEPOIS: 0 na origem, 0 duplicatas.
+Alavanca intacta na cena: SIM
+Cena salva.
+Folga FireworksLaunchButton: 0.255 m de 'Building/tv' (apoio counter_2_b, gap 0.0 mm).
+Folga ExoMascotBobblehead: 0.313 m de 'Building/laptop_variant (1)' (apoio counter_1, gap 0.0 mm).
+Folga EnvironmentControlLever: 0.198 m de 'Building/deco_variant_3' (apoio counter_2_b, gap 2.0 mm).
+Par FireworksLaunchButton <-> ExoMascotBobblehead: pivôs 10.468 m, folga 10.272 m.
+Par FireworksLaunchButton <-> EnvironmentControlLever: pivôs 0.496 m, folga 0.351 m.
+Par ExoMascotBobblehead <-> EnvironmentControlLever: pivôs 10.143 m, folga 9.944 m.
+Ápice (edição): alto em (9.155, 2.203, -1.848), 1.17 m acima do bico, livre 3.08 m.
+hasOverlap=False, maior gap de apoio=2.0 mm. JSON: TASK-09_SpatialAudit.json
+   captura TASK-09_Lever_Unchanged.png
+   Alavanca antes x depois (só a região da alavanca, (x:754, y:300, width:411, height:458)): diferença média 0.219 níveis/canal, máx 620, pixels mudados (>12) 1362 de 188238.
+   captura TASK-09_Layout_Counter2b.png
+   captura TASK-09_Layout_Counter2b_Top.png
+   captura TASK-09_Layout_Bobble.png
+   captura TASK-09_Layout_Bobble_Close.png
+   captura TASK-09_Layout_Bobble_Side.png

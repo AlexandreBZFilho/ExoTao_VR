@@ -1,0 +1,25 @@
+{
+  "taskId": "TASK-09",
+  "generatedAt": "2026-11-25T22:27:19",
+  "scene": "Assets/Scenes/Menu_Principal.unity",
+  "instanceCounts": { "FireworksButtonInteractable": 1, "BobbleheadSpringToy": 1, "AtmosphereLeverInteractable": 1, "Room_Fireworks_Launcher": 0 },
+  "objectsAtOriginZero": [],
+  "isOriginClean": true,
+  "duplicateObjectsFound": [],
+  "purgeAfter": { "originCleaned": 0, "duplicatesCleaned": 0 },
+  "items": [
+    { "name": "FireworksLaunchButton", "position": [8.978, 0.949, -2.025], "rotationY": 270.0, "support": "counter_2_b", "groundGapMeters": 0.0000, "nearestNeighbor": "Building/tv", "clearanceMeters": 0.255 },
+    { "name": "ExoMascotBobblehead", "position": [1.134, 0.934, 4.906], "rotationY": 127.6, "support": "counter_1", "groundGapMeters": 0.0000, "nearestNeighbor": "Building/laptop_variant (1)", "clearanceMeters": 0.313 },
+    { "name": "EnvironmentControlLever", "position": [8.974, 0.951, -1.529], "rotationY": 270.0, "support": "counter_2_b", "groundGapMeters": 0.0020, "nearestNeighbor": "Building/deco_variant_3", "clearanceMeters": 0.198 }
+  ],
+  "pairwiseClearances": [
+    { "a": "FireworksLaunchButton", "b": "ExoMascotBobblehead", "pivotDistanceMeters": 10.468, "aabbGapMeters": 10.272 },
+    { "a": "FireworksLaunchButton", "b": "EnvironmentControlLever", "pivotDistanceMeters": 0.496, "aabbGapMeters": 0.351 },
+    { "a": "ExoMascotBobblehead", "b": "EnvironmentControlLever", "pivotDistanceMeters": 10.143, "aabbGapMeters": 9.944 }
+  ],
+  "hasOverlap": false,
+  "maxGroundGapMeters": 0.0020,
+  "leverUnchangedInScene": true,
+  "fireworksSimulation": { "mode": "alto", "launch": [8.978, 1.029, -2.025], "apexWorld": [9.155, 2.203, -1.848], "apexAboveButton": 1.174, "clearDistanceMeters": 3.080, "maxParticlesBudget": 250, "note": "simulação do disparo em Play Mode em TASK-09_PlayModeTest.txt" },
+  "bobbleSimulation": { "note": "pico e decaimento medidos em Play Mode em TASK-09_PlayModeTest.txt" }
+}
