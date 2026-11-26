@@ -1,0 +1,52 @@
+=== Testes em Play Mode da TASK-07 — Pistola de Balões (2026-11-25 17:47:53) ===
+Play Mode real (Awake/Start, física, eventos do XRI). A 'mão de teste' segura a pistola via XRInteractionManager.
+Activate (botão lateral do Vive) é disparado pela interface IXRActivateInteractable, como o XRI faz.
+
+## 0. Estado inicial
+[PASS] 0a) Exatamente 1 pistola na cena: 1
+[PASS] 0b) Pool criado no Start com 8 + 1 reserva: instâncias 9, livres 9, máx no ar 8
+      FloatingBalloon na cena (incluindo inativos): 12
+[PASS] 0c) 3 balões de demonstração presentes: Demo_Balloon_Red, Demo_Balloon_Cyan, Demo_Balloon_Yellow
+## 1. Pegar a pistola (gatilho = Select)
+[PASS] 1a) Pistola segurada: isSelected=True
+[PASS] 1b) Cano aponta para a frente da mão (dot > 0,95): dot=0.985, cano acima do apontar em 10.0°
+[PASS] 1c) Bico à frente da mão: bico no espaço da mão (0.00, 0.11, 0.15)
+## 2. Inflar 1,5 s e soltar
+[PASS] 2a) Balão enchendo no bico: pai Muzzle_Socket
+[PASS] 2b) Collider do balão desligado durante a inflação (laser não estoura na mão): 
+[PASS] 2c) Balão solto e livre: livre=True
+[PASS] 2d) Saiu na direção do cano: andou 0.50 m ao longo do cano (deslocamento (-0.01, 0.12, -0.49))
+[PASS] 2e) Altura do balão entre 0,35 e 0,45 m: 0.441 m (escala 1.46)
+[PASS] 2f) Cordinha proporcional: 0.50 m
+## 3. Segurar o botão além do máximo
+[PASS] 3a) Soltou sozinho ao encher (não estoura na mão): livre=True, inflando=False
+[PASS] 3b) Novo balão só depois de soltar e apertar de novo: 
+[PASS] 4) Clique de 1 quadro não gera balão vazio: balões no ar: 2
+## 5. Pool: inflar 9 balões
+[PASS] 5a) No máximo 8 balões no ar: 8 no ar, 3 reciclados (estouro suave do mais antigo)
+[PASS] 5b) O mais antigo estourou suave para abrir espaço: recicla 3
+[PASS] 5c) Zero Instantiate/Destroy por inflada: FloatingBalloon na cena: início 12, agora 12
+## 6. Tapinha com a mão
+[PASS] 6a) Tapinha empurrou o balão: toques 1, vel (0.02, 0.19, -0.31) -> (0.07, 0.60, -0.18)
+[PASS] 6b) Tapinha NÃO estourou: livre=True, motivo=
+## 7. Gatilho no balão (laser ou mão)
+[PASS] 7a) Gatilho estoura: motivo=select
+[PASS] 7b) Balão estourado voltou ao pool: ativo=False
+## 8. Colisões
+[PASS] 8a) Batida suave (1,4 m/s) só quica: livre=True, vel atual (0.00, 0.06, 0.00)
+[PASS] 8b) Impacto forte (6 m/s) estoura: motivo=impact
+## 9. Teto
+[PASS] 9a) Nenhum balão passa do teto: topo mais alto 2.80 m, limite 2.80 m, 6 balões
+[PASS] 9b) Balões perto do teto seguem livres (não travam): 6/6 livres
+## 10. Vida útil
+[PASS] 10a) Começa a murchar depois da vida útil: motivo=lifetime
+[PASS] 10b) Murchou e voltou ao pool: ativo=False
+## 11. Balões de demonstração (amarrados)
+[PASS] 11a) Demos ficam perto do lugar: maior deslocamento 0.023 m em ~30 s
+[PASS] 11b) Demo estoura com o gatilho: motivo=select
+[PASS] 11c) Demo renasce no lugar: livre=True, pos (5.37, 1.41, 7.63)
+## 12. Soltar a pistola
+[PASS] 12a) Pistola solta fica dinâmica (não flutua): kinematic=False, gravidade=True
+[PASS] 12b) Continua no Menu_Principal (nenhum LoadScene): Assets/Scenes/Menu_Principal.unity
+
+--- RESULTADO: 33 passaram, 0 falharam ---

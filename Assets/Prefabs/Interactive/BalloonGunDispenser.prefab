@@ -1204,6 +1204,37 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &4920319000113567551
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7908960537288861524}
+  m_Layer: 0
+  m_Name: Grip_Attach
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7908960537288861524
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4920319000113567551}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.08715574, y: 0, z: 0, w: 0.9961947}
+  m_LocalPosition: {x: -9.313226e-10, y: -0.045, z: -0.015000001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9106221158287631819}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5854268285998119531
 GameObject:
   m_ObjectHideFlags: 0
@@ -1228,7 +1259,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5854268285998119531}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1784,10 +1815,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9106221158287631819}
-  - component: {fileID: 617672547879907397}
   - component: {fileID: 7198035606829097397}
   - component: {fileID: 8858467497490888705}
   - component: {fileID: 9012640741404256222}
+  - component: {fileID: 2969571467546266444}
+  - component: {fileID: 8529805311980710661}
   m_Layer: 0
   m_Name: BalloonGunDispenser
   m_TagString: Untagged
@@ -1809,29 +1841,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4691713862725086412}
+  - {fileID: 7908960537288861524}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &617672547879907397
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7677916017547564346}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.09, y: 0.16, z: 0.24}
-  m_Center: {x: 0.01, y: 0.01, z: 0.04}
 --- !u!54 &7198035606829097397
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1858,7 +1870,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
 --- !u!82 &8858467497490888705
 AudioSource:
   m_ObjectHideFlags: 0
@@ -2058,7 +2070,7 @@ MonoBehaviour:
   m_OnDeactivate:
     m_PersistentCalls:
       m_Calls: []
-  m_AttachTransform: {fileID: 0}
+  m_AttachTransform: {fileID: 7908960537288861524}
   m_SecondaryAttachTransform: {fileID: 0}
   m_UseDynamicAttach: 0
   m_MatchAttachPosition: 1
@@ -2115,8 +2127,11 @@ MonoBehaviour:
   respawnMaxDistance: 5
   returnGlideDuration: 0.85
   customHomeAnchor: {fileID: 0}
+  alwaysDynamicAfterRelease: 1
   playAudioHapticFeedback: 1
   muzzleSocket: {fileID: 864729066545159694}
+  gaugeNeedle: {fileID: 7719790787297639409}
+  gaugeSweepDegrees: 210
   balloonPrefab: {fileID: 6600098756914608294, guid: f6ca7d1f5e6df55438bbf434d2d784b9, type: 3}
   balloonMaterials:
   - {fileID: 2100000, guid: 822483042c9c63b408e16e099b564ddf, type: 2}
@@ -2126,13 +2141,62 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 689946d365f49d04ca1f578ee36385ab, type: 2}
   - {fileID: 2100000, guid: 2f99ccd228abca94181b9dcd023afcc0, type: 2}
   - {fileID: 2100000, guid: 88376004fa62dd5498c5e66158d7dab2, type: 2}
-  minBalloonScale: 0.05
-  maxBalloonScale: 0.3
-  inflateDuration: 1.5
+  maxLiveBalloons: 8
+  minScale: 0.15
+  maxScale: 1.36
+  minReleaseScale: 0.7
+  sizeVariation: 0.08
+  inflateDuration: 1.6
+  cancelBelowProgress: 0.06
   launchVelocity: 0.85
+  launchUpBias: 0.2
   inflateStretchAudioClip: {fileID: 8300000, guid: a79bddfeebab03942aa7865d208d557c, type: 3}
   releaseWhooshAudioClip: {fileID: 8300000, guid: 043995308e523e24ebd1efb50bdeae91, type: 3}
   gunAudioSource: {fileID: 8858467497490888705}
+  inflateVolume: 0.45
+  whooshVolume: 0.5
+--- !u!65 &2969571467546266444
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7677916017547564346}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.028500004, y: 0.105312645, z: 0.060369983}
+  m_Center: {x: -9.313226e-10, y: -0.045, z: -0.015000001}
+--- !u!65 &8529805311980710661
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7677916017547564346}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.07700001, y: 0.061119273, z: 0.20700002}
+  m_Center: {x: 0.013500003, y: 0.044559635, z: 0.050500005}
 --- !u!1 &7982420896934012316
 GameObject:
   m_ObjectHideFlags: 0
@@ -2329,7 +2393,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8644441417522066107}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: -0, y: -1, z: -0, w: -0.00000004371139}
   m_LocalPosition: {x: -0, y: 0.04, z: -0.155}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

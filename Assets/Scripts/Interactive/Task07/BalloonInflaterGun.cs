@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using VRRehab.Core;
@@ -7,340 +6,302 @@ using VRRehab.Ergonomics;
 namespace VRRehab.Interactive.Task07
 {
     /// <summary>
-    /// Pistola/Dispenser Ergonômico de Balões Antigravidade (estilo The Lab / Valve).
-    /// Herda de ErgonomicGrabInteractable garantindo Force Grab assistido e Auto-Respawn.
-    /// Segure a pistola com o GATILHO (select) e aperte o botão LATERAL/grip (OnActivated) para inflar um balão colorido no bico (Muzzle_Socket)
-    /// com som de borracha esticando e haptics progressivos.
-    /// Ao soltar o botão lateral (OnDeactivated), desprende o balão no ar com física antigravidade.
+    /// Pistola de Balões Antigravidade (TASK-07, estilo The Lab).
+    /// Convenção do prefab: o +Z local da raiz é a direção do cano (o Muzzle_Socket aponta para +Z) e o attachTransform
+    /// (Grip_Attach) fica na empunhadura, com +Z também para a frente. Assim o XRI segura a pistola com o cano para a frente.
+    /// Controle HTC Vive: GATILHO (Select) segura a pistola; botão LATERAL/grip (Activate) infla. Soltar o Activate solta o balão.
+    /// O tamanho final depende do tempo segurando; ao chegar no máximo o balão solta sozinho (nunca estoura na mão).
+    /// Balões vêm de um <see cref="BalloonPool"/> de 8 (+1 reserva), criado uma vez no Start.
+    /// Ao soltar a pistola ela cai com física normal (alwaysDynamicAfterRelease da base ErgonomicGrabInteractable).
     /// </summary>
     [DisallowMultipleComponent]
     [SelectionBase]
     public class BalloonInflaterGun : ErgonomicGrabInteractable
     {
-        [Header("Pistola & Bico de Hélio")]
-        [Tooltip("Transform do bico frontal da pistola onde o balão é ancorado.")]
+        [Header("Pistola & Bico")]
+        [Tooltip("Bico onde o balão nasce. Seu +Z (forward) é a direção do cano.")]
         [SerializeField] private Transform muzzleSocket;
-
-        [Tooltip("Prefab do InflatableBalloon a ser instanciado.")]
+        [Tooltip("Ponteiro do manômetro (opcional): gira conforme o balão enche.")]
+        [SerializeField] private Transform gaugeNeedle;
+        [SerializeField] private float gaugeSweepDegrees = 210f;
         [SerializeField] private GameObject balloonPrefab;
-
-        [Tooltip("Paleta de materiais coloridos brilhantes para os balões.")]
         [SerializeField] private Material[] balloonMaterials;
 
-        [Header("Parâmetros de Inflação")]
-        [Tooltip("Escala inicial mínima do balão ao brotar no bico (metros).")]
-        [SerializeField] private float minBalloonScale = 0.05f;
+        [Header("Pool")]
+        [Tooltip("Máximo de balões soltos ao mesmo tempo (o 9º faz o mais antigo estourar suave).")]
+        [SerializeField] private int maxLiveBalloons = 8;
 
-        [Tooltip("Escala máxima recomendada do balão inflado (metros).")]
-        [SerializeField] private float maxBalloonScale = 0.30f;
+        [Header("Inflação (escala real do modelo: 1.0 = 0,30 m de altura)")]
+        [SerializeField] private float minScale = 0.15f;
+        [SerializeField] private float maxScale = 1.36f;
+        [Tooltip("Se soltar antes, o balão ainda cresce até este tamanho no ar (balão nunca sai murcho).")]
+        [SerializeField] private float minReleaseScale = 0.7f;
+        [Tooltip("Variação aleatória do tamanho máximo (±).")]
+        [Range(0f, 0.2f)] [SerializeField] private float sizeVariation = 0.08f;
+        [Tooltip("Segundos de min até max.")]
+        [SerializeField] private float inflateDuration = 1.6f;
+        [Tooltip("Soltar antes deste progresso cancela (evita balões vazios por clique acidental).")]
+        [SerializeField] private float cancelBelowProgress = 0.06f;
 
-        [Tooltip("Tempo em segundos para inflar de min até max escala.")]
-        [SerializeField] private float inflateDuration = 1.5f;
+        [Header("Lançamento")]
+        [SerializeField] private float launchVelocity = 0.9f;
+        [SerializeField] private float launchUpBias = 0.2f;
 
-        [Tooltip("Velocidade inicial de lançamento ao soltar o botão lateral (m/s).")]
-        [SerializeField] private float launchVelocity = 0.85f;
-
-        [Header("Áudios e Efeitos")]
+        [Header("Áudio")]
         [SerializeField] private AudioClip inflateStretchAudioClip;
         [SerializeField] private AudioClip releaseWhooshAudioClip;
         [SerializeField] private AudioSource gunAudioSource;
+        [Range(0f, 1f)] [SerializeField] private float inflateVolume = 0.45f;
+        [Range(0f, 1f)] [SerializeField] private float whooshVolume = 0.5f;
 
-        private GameObject currentBalloonObj;
-        private FloatingBalloon currentFloatingBalloon;
-        private Coroutine inflateCoroutine;
-        private float currentInflationProgress = 0f;
-        private bool isInflating = false;
+        private BalloonPool pool;
+        private FloatingBalloon current;
+        private IXRInteractor inflatingInteractor;
+        private float progress;
+        private float currentMaxScale;
+        private bool isInflating;
+        private bool waitForActivateRelease;
+        private float nextHapticTime;
+        private float jitterSeed;
+        private Collider[] gunColliders;
+        private Rigidbody gunRb;
+        private float discreteAt = -1f;
+
+        // Manômetro (gira em torno de uma ponta do ponteiro, no plano do mostrador)
+        private Vector3 needleRestPos;
+        private Quaternion needleRestRot;
+        private Vector3 needlePivotParent;
+        private Vector3 needleAxisParent;
+        private bool needleReady;
 
         public bool IsInflating => isInflating;
-        public GameObject CurrentBalloon => currentBalloonObj;
+        public float InflationProgress => progress;
+        public FloatingBalloon CurrentBalloon => current;
         public Transform MuzzleSocket => muzzleSocket;
+        public BalloonPool Pool => pool;
+        public float MaxScale => maxScale;
 
         protected override void Awake()
         {
             base.Awake();
-
             if (muzzleSocket == null)
             {
-                Transform found = transform.Find("Muzzle_Socket");
+                Transform found = FindDeep(transform, "Muzzle_Socket");
                 muzzleSocket = found != null ? found : transform;
             }
-
-            if (gunAudioSource == null)
+            if (gaugeNeedle == null) gaugeNeedle = FindDeep(transform, "Pressure_Gauge_Needle");
+            if (gunAudioSource == null) gunAudioSource = GetComponent<AudioSource>();
+            if (gunAudioSource != null)
             {
-                gunAudioSource = GetComponent<AudioSource>();
-                if (gunAudioSource == null)
-                {
-                    gunAudioSource = gameObject.AddComponent<AudioSource>();
-                    gunAudioSource.spatialBlend = 1.0f;
-                    gunAudioSource.playOnAwake = false;
-                    gunAudioSource.rolloffMode = AudioRolloffMode.Linear;
-                    gunAudioSource.minDistance = 0.3f;
-                    gunAudioSource.maxDistance = 10.0f;
-                }
+                gunAudioSource.playOnAwake = false;
+                gunAudioSource.spatialBlend = 1f;
+            }
+            gunColliders = GetComponentsInChildren<Collider>(true);
+            gunRb = GetComponent<Rigidbody>();
+            jitterSeed = Random.Range(0f, 100f);
+            SetupNeedle();
+        }
+
+        private void Start()
+        {
+            if (balloonPrefab != null && pool == null)
+            {
+                pool = new BalloonPool(balloonPrefab, maxLiveBalloons, "BalloonPool_Runtime (TASK-07)");
+                pool.Root.position = transform.position + Vector3.up * 0.5f;
             }
         }
 
-        #region XRI Trigger Activation (Inflar e Soltar)
+        #region XRI: Activate infla, Deactivate solta
         protected override void OnActivated(ActivateEventArgs args)
         {
             base.OnActivated(args);
-
-            if (!isInflating && currentBalloonObj == null)
-            {
-                StartInflation(args.interactorObject as IXRInteractor);
-            }
+            if (!isInflating) StartInflation(args.interactorObject);
         }
 
         protected override void OnDeactivated(DeactivateEventArgs args)
         {
             base.OnDeactivated(args);
+            waitForActivateRelease = false;
+            if (isInflating) ReleaseBalloon();
+        }
 
-            if (isInflating || currentBalloonObj != null)
-            {
-                ReleaseBalloon(args.interactorObject as IXRInteractor);
-            }
+        protected override void OnSelectEntered(SelectEnterEventArgs args)
+        {
+            base.OnSelectEntered(args);
+            // Na mão: detecção contínua (não atravessa o tampo se for jogada); volta a Discrete 3 s depois de soltar
+            if (gunRb != null) gunRb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+            discreteAt = -1f;
         }
 
         protected override void OnSelectExited(SelectExitEventArgs args)
         {
             base.OnSelectExited(args);
-
-            // Se o paciente soltar a pistola enquanto inflava, libera o balão
-            if (isInflating || currentBalloonObj != null)
-            {
-                ReleaseBalloon(args.interactorObject as IXRInteractor);
-            }
+            discreteAt = Time.time + 3f;
+            waitForActivateRelease = false;
+            if (isInflating) ReleaseBalloon(); // soltou a pistola no meio da inflação: o balão sai, não fica preso
         }
         #endregion
 
-        /// <summary>
-        /// Inicia o processo de inflar balão no bico.
-        /// </summary>
-        public void StartInflation(IXRInteractor interactor)
+        /// <summary>Começa a encher um balão no bico. Público para automação de testes.</summary>
+        public bool StartInflation(IXRInteractor interactor)
         {
-            if (balloonPrefab == null || muzzleSocket == null) return;
+            if (isInflating || waitForActivateRelease || pool == null || muzzleSocket == null) return false;
+            FloatingBalloon b = pool.Acquire();
+            if (b == null) return false;
 
+            Material mat = null;
+            Color burst = new Color(1f, 0.3f, 0.4f);
+            if (balloonMaterials != null && balloonMaterials.Length > 0)
+            {
+                mat = balloonMaterials[Random.Range(0, balloonMaterials.Length)];
+                if (mat != null && mat.HasProperty("_BaseColor")) burst = mat.GetColor("_BaseColor");
+                else if (mat != null && mat.HasProperty("_Color")) burst = mat.color;
+            }
+
+            current = b;
+            inflatingInteractor = interactor;
             isInflating = true;
-            currentInflationProgress = 0f;
+            progress = 0f;
+            currentMaxScale = maxScale * (1f + Random.Range(-sizeVariation, sizeVariation));
+            b.BeginInflation(muzzleSocket, minScale, mat, burst);
 
-            // 1. Instancia o balão filho do MuzzleSocket
-            currentBalloonObj = Instantiate(balloonPrefab, muzzleSocket);
-            currentBalloonObj.transform.localPosition = Vector3.zero;
-            // Alinha o balão para crescer para frente a partir do bico (+Z)
-            currentBalloonObj.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-            currentBalloonObj.transform.localScale = Vector3.one * minBalloonScale;
-
-            currentFloatingBalloon = currentBalloonObj.GetComponent<FloatingBalloon>();
-
-            // 2. Trava física e colisores durante a inflação no bico
-            Rigidbody balloonRb = currentBalloonObj.GetComponent<Rigidbody>();
-            if (balloonRb != null) balloonRb.isKinematic = true;
-
-            Collider balloonCol = currentBalloonObj.GetComponent<Collider>();
-            if (balloonCol != null) balloonCol.enabled = false;
-
-            LineRenderer lr = currentBalloonObj.GetComponent<LineRenderer>();
-            if (lr != null) lr.enabled = false;
-
-            // 3. Aplica material colorido aleatório
-            ApplyRandomColor(currentBalloonObj);
-
-            // 4. Inicia áudio de estiramento de borracha em loop
             if (gunAudioSource != null && inflateStretchAudioClip != null)
             {
                 gunAudioSource.clip = inflateStretchAudioClip;
                 gunAudioSource.loop = true;
                 gunAudioSource.pitch = 0.85f;
+                gunAudioSource.volume = inflateVolume;
                 gunAudioSource.Play();
             }
-
-            // 5. Inicia corrotina de expansão
-            if (inflateCoroutine != null) StopCoroutine(inflateCoroutine);
-            inflateCoroutine = StartCoroutine(InflateRoutine(interactor));
+            nextHapticTime = 0f;
+            return true;
         }
 
-        private IEnumerator InflateRoutine(IXRInteractor interactor)
+        private void Update()
         {
-            float elapsed = 0f;
-
-            while (isInflating && currentBalloonObj != null)
+            if (discreteAt > 0f && Time.time >= discreteAt && !isSelected)
             {
-                elapsed += Time.deltaTime;
-                currentInflationProgress = Mathf.Clamp01(elapsed / inflateDuration);
+                discreteAt = -1f;
+                if (gunRb != null) gunRb.collisionDetectionMode = CollisionDetectionMode.Discrete;
+            }
+            if (!isInflating || current == null) return;
 
-                // Curva suave de crescimento com leve pulso elástico
-                float currentScale = Mathf.Lerp(minBalloonScale, maxBalloonScale, currentInflationProgress);
-                currentBalloonObj.transform.localScale = Vector3.one * currentScale;
+            progress = Mathf.Clamp01(progress + Time.deltaTime / Mathf.Max(0.1f, inflateDuration));
+            float eased = 1f - (1f - progress) * (1f - progress); // enche rápido no começo, devagar no fim
+            float s = Mathf.Lerp(minScale, currentMaxScale, eased);
 
-                // Modula o pitch do áudio conforme o balão fica mais tensionado
-                if (gunAudioSource != null && gunAudioSource.isPlaying)
-                {
-                    gunAudioSource.pitch = Mathf.Lerp(0.85f, 1.35f, currentInflationProgress);
-                }
+            // Pulso elástico (squash/stretch) e tremor leve perto do máximo
+            float t = Time.time;
+            float stretch = 1f + Mathf.Sin(t * 13f) * 0.045f * (1f - progress * 0.5f);
+            Vector3 jitter = Vector3.zero;
+            if (progress > 0.85f)
+            {
+                float a = (progress - 0.85f) / 0.15f * 0.0025f * s;
+                jitter = new Vector3(Mathf.PerlinNoise(jitterSeed, t * 30f) - 0.5f, 0f, Mathf.PerlinNoise(t * 30f, jitterSeed) - 0.5f) * (2f * a);
+            }
+            current.SetInflationShape(s, stretch, jitter);
+            UpdateNeedle(progress);
 
-                // Hápticos progressivos no controle do paciente
-                if (interactor != null && VRFeedbackManager.Instance != null && Time.frameCount % 8 == 0)
-                {
-                    float hapticAmp = Mathf.Lerp(0.15f, 0.55f, currentInflationProgress);
-                    VRFeedbackManager.Instance.TriggerHaptic(interactor, hapticAmp, 0.05f);
-                }
+            if (gunAudioSource != null && gunAudioSource.isPlaying)
+                gunAudioSource.pitch = Mathf.Lerp(0.85f, 1.3f, progress);
 
-                yield return null;
+            if (inflatingInteractor != null && VRFeedbackManager.Instance != null && t >= nextHapticTime)
+            {
+                VRFeedbackManager.Instance.TriggerHaptic(inflatingInteractor, Mathf.Lerp(0.12f, 0.5f, progress), 0.05f);
+                nextHapticTime = t + 0.09f;
+            }
+
+            if (progress >= 1f)
+            {
+                ReleaseBalloon();               // cheio: solta sozinho, nunca estoura na mão
+                waitForActivateRelease = true;  // o próximo exige soltar e apertar o botão de novo
             }
         }
 
-        /// <summary>
-        /// Solta o balão no ar com velocidade inicial e física antigravidade ativada.
-        /// </summary>
-        public void ReleaseBalloon(IXRInteractor interactor)
+        /// <summary>Solta o balão do bico na direção do cano. Público para automação de testes.</summary>
+        public void ReleaseBalloon()
         {
-            if (!isInflating && currentBalloonObj == null) return;
-
+            if (!isInflating) return;
             isInflating = false;
-
-            if (inflateCoroutine != null)
-            {
-                StopCoroutine(inflateCoroutine);
-                inflateCoroutine = null;
-            }
-
-            // Para o som de estiramento
             if (gunAudioSource != null && gunAudioSource.isPlaying)
             {
                 gunAudioSource.Stop();
                 gunAudioSource.loop = false;
-                gunAudioSource.pitch = 1.0f;
+                gunAudioSource.pitch = 1f;
             }
+            UpdateNeedle(0f);
 
-            if (currentBalloonObj != null)
+            FloatingBalloon b = current;
+            current = null;
+            IXRInteractor interactor = inflatingInteractor;
+            inflatingInteractor = null;
+            if (b == null) return;
+
+            if (progress < cancelBelowProgress)
             {
-                // Se mal começou a inflar (< 0.08s), destrói para evitar micro-balões vazios
-                if (currentInflationProgress < 0.08f)
-                {
-                    Destroy(currentBalloonObj);
-                    currentBalloonObj = null;
-                    currentFloatingBalloon = null;
-                    return;
-                }
-
-                // 1. Desvincula da ponta do bico para o espaço do mundo e orienta na vertical
-                currentBalloonObj.transform.SetParent(null);
-                currentBalloonObj.transform.rotation = Quaternion.identity;
-
-                // 2. Reativa colisores e cordinha
-                Collider balloonCol = currentBalloonObj.GetComponent<Collider>();
-                if (balloonCol != null) balloonCol.enabled = true;
-
-                LineRenderer lr = currentBalloonObj.GetComponent<LineRenderer>();
-                if (lr != null) lr.enabled = true;
-
-                // 3. Calcula vetor de lançamento: direção do bico + leve componente para cima
-                Vector3 launchDir = (muzzleSocket != null ? muzzleSocket.forward : transform.forward);
-                Vector3 launchVel = (launchDir + Vector3.up * 0.25f).normalized * launchVelocity;
-
-                // 4. Lança o balão
-                if (currentFloatingBalloon != null)
-                {
-                    currentFloatingBalloon.Launch(launchVel);
-                }
-                else
-                {
-                    Rigidbody rb = currentBalloonObj.GetComponent<Rigidbody>();
-                    if (rb != null)
-                    {
-                        rb.isKinematic = false;
-                        rb.linearVelocity = launchVel;
-                    }
-                }
-
-                // 5. Áudio de desprendimento (whoosh de ar pressurizado)
-                if (gunAudioSource != null && releaseWhooshAudioClip != null)
-                {
-                    gunAudioSource.PlayOneShot(releaseWhooshAudioClip, 1.0f);
-                }
-
-                // 6. Pulso háptico de soltura
-                if (interactor != null && VRFeedbackManager.Instance != null)
-                {
-                    VRFeedbackManager.Instance.TriggerHaptic(interactor, 0.65f, 0.08f);
-                }
-
-                currentBalloonObj = null;
-                currentFloatingBalloon = null;
+                b.CancelSilently();
+                return;
             }
+
+            Vector3 dir = muzzleSocket.forward;
+            Vector3 vel = (dir + Vector3.up * launchUpBias).normalized * launchVelocity;
+            Transform hand = interactor != null ? interactor.transform : null;
+            b.Launch(vel, Mathf.Max(minReleaseScale, b.CurrentScale), gunColliders, hand);
+
+            if (gunAudioSource != null && releaseWhooshAudioClip != null)
+                gunAudioSource.PlayOneShot(releaseWhooshAudioClip, whooshVolume);
+            if (interactor != null && VRFeedbackManager.Instance != null)
+                VRFeedbackManager.Instance.TriggerHaptic(interactor, 0.55f, 0.08f);
         }
 
-        private void ApplyRandomColor(GameObject balloon)
+        protected override void OnDestroy()
         {
-            if (balloonMaterials == null || balloonMaterials.Length == 0) return;
-
-            int idx = Random.Range(0, balloonMaterials.Length);
-            Material mat = balloonMaterials[idx];
-
-            FloatingBalloon fb = balloon.GetComponent<FloatingBalloon>();
-            if (fb != null)
-            {
-                Color burstColor = mat != null && mat.HasProperty("_Color") ? mat.color : Color.cyan;
-                fb.ApplyColorMaterial(mat, burstColor);
-            }
-            else
-            {
-                MeshRenderer mr = balloon.GetComponentInChildren<MeshRenderer>();
-                if (mr != null && mat != null) mr.material = mat;
-            }
+            base.OnDestroy();
+            if (pool != null && pool.Root != null) Destroy(pool.Root.gameObject); // o pool não fica órfão na cena
         }
 
-        /// <summary>
-        /// Método estático/utilitário para gerar balão em repouso/flutuação (utilizado para demonstração e Visual QA).
-        /// </summary>
-        public GameObject SpawnStaticBalloon(Vector3 worldPos, Quaternion worldRot, float scale, Material mat, Color color)
+        #region Manômetro
+        private void SetupNeedle()
         {
-            if (balloonPrefab == null) return null;
+            needleReady = false;
+            if (gaugeNeedle == null) return;
+            MeshFilter mf = gaugeNeedle.GetComponent<MeshFilter>();
+            if (mf == null || mf.sharedMesh == null) return;
 
-            GameObject b = Instantiate(balloonPrefab, worldPos, worldRot);
-            b.name = "Demo_FloatingBalloon_" + mat.name.Replace("M_Balloon_", "");
-            b.transform.localScale = Vector3.one * scale;
+            // Eixo mais fino do ponteiro = normal do mostrador; eixo mais longo = comprimento do ponteiro
+            Bounds mb = mf.sharedMesh.bounds;
+            Vector3 size = Vector3.Scale(mb.size, gaugeNeedle.localScale);
+            int thin = size.x <= size.y && size.x <= size.z ? 0 : (size.y <= size.z ? 1 : 2);
+            int longest = size.x >= size.y && size.x >= size.z ? 0 : (size.y >= size.z ? 1 : 2);
+            Vector3 thinAxis = Vector3.zero; thinAxis[thin] = 1f;
+            Vector3 longAxis = Vector3.zero; longAxis[longest] = mb.extents[longest];
 
-            FloatingBalloon fb = b.GetComponent<FloatingBalloon>();
-            if (fb != null)
-            {
-                fb.ApplyColorMaterial(mat, color);
-            }
-
-            return b;
+            needleRestPos = gaugeNeedle.localPosition;
+            needleRestRot = gaugeNeedle.localRotation;
+            needleAxisParent = needleRestRot * thinAxis;
+            Vector3 centerParent = needleRestPos + needleRestRot * Vector3.Scale(mb.center, gaugeNeedle.localScale);
+            needlePivotParent = centerParent - needleRestRot * Vector3.Scale(longAxis, gaugeNeedle.localScale);
+            needleReady = true;
         }
 
-        /// <summary>
-        /// Força o disparo de um balão no bico (para automação e testes).
-        /// </summary>
-        public GameObject ForceInflateOnMuzzle(float scale, Material mat)
+        private void UpdateNeedle(float p)
         {
-            if (balloonPrefab == null || muzzleSocket == null) return null;
+            if (!needleReady) return;
+            Quaternion q = Quaternion.AngleAxis(-p * gaugeSweepDegrees, needleAxisParent);
+            gaugeNeedle.localRotation = q * needleRestRot;
+            gaugeNeedle.localPosition = needlePivotParent + q * (needleRestPos - needlePivotParent);
+        }
+        #endregion
 
-            GameObject b = Instantiate(balloonPrefab, muzzleSocket);
-            b.name = "InflatingBalloon_Preview";
-            b.transform.localPosition = Vector3.zero;
-            b.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-            b.transform.localScale = Vector3.one * scale;
-
-            Rigidbody rb = b.GetComponent<Rigidbody>();
-            if (rb != null) rb.isKinematic = true;
-
-            Collider col = b.GetComponent<Collider>();
-            if (col != null) col.enabled = false;
-
-            LineRenderer lr = b.GetComponent<LineRenderer>();
-            if (lr != null) lr.enabled = false;
-
-            FloatingBalloon fb = b.GetComponent<FloatingBalloon>();
-            if (fb != null && mat != null)
+        private static Transform FindDeep(Transform root, string name)
+        {
+            if (root.name == name) return root;
+            for (int i = 0; i < root.childCount; i++)
             {
-                Color c = mat.HasProperty("_Color") ? mat.color : Color.red;
-                fb.ApplyColorMaterial(mat, c);
+                Transform r = FindDeep(root.GetChild(i), name);
+                if (r != null) return r;
             }
-
-            currentBalloonObj = b;
-            return b;
+            return null;
         }
     }
 }

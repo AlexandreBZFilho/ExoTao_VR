@@ -6,25 +6,48 @@ import random
 
 SAMPLE_RATE = 44100
 
-def write_wav(filename, samples):
+def lowpass(samples, cutoff_hz):
+    """Filtro passa-baixa de 1 polo (tira o agudo estridente)."""
+    if not samples:
+        return samples
+    dt = 1.0 / SAMPLE_RATE
+    rc = 1.0 / (2.0 * math.pi * cutoff_hz)
+    a = dt / (rc + dt)
+    out = [0.0] * len(samples)
+    y = 0.0
+    for i, x in enumerate(samples):
+        y += a * (x - y)
+        out[i] = y
+    return out
+
+def fade_edges(samples, fade_in_s=0.004, fade_out_s=0.03):
+    n = len(samples)
+    fi = max(1, int(SAMPLE_RATE * fade_in_s))
+    fo = max(1, int(SAMPLE_RATE * fade_out_s))
+    for i in range(min(fi, n)):
+        samples[i] *= i / fi
+    for i in range(min(fo, n)):
+        samples[n - 1 - i] *= i / fo
+    return samples
+
+def write_wav(filename, samples, peak_dbfs=-8.0):
+    """Grava WAV 16-bit mono normalizado para um PICO ALVO em dBFS (regra do projeto: pico <= -6 dBFS)."""
     with wave.open(filename, 'w') as wav_file:
         wav_file.setnchannels(1)  # Mono
         wav_file.setsampwidth(2)  # 16-bit
         wav_file.setframerate(SAMPLE_RATE)
-        
-        # Normalize
         max_val = max(abs(s) for s in samples) if samples else 1.0
         if max_val == 0:
             max_val = 1.0
-        scale = 32767.0 * 0.94 / max_val
-        
+        target = 10.0 ** (peak_dbfs / 20.0)
+        scale = 32767.0 * target / max_val
         packed_frames = bytearray()
         for s in samples:
             val = int(s * scale)
             val = max(-32768, min(32767, val))
             packed_frames.extend(struct.pack('<h', val))
         wav_file.writeframes(packed_frames)
-    print(f"Generated {filename} ({len(samples)/SAMPLE_RATE:.2f}s)")
+    print(f"Generated {filename} ({len(samples)/SAMPLE_RATE:.2f}s, pico {peak_dbfs:.1f} dBFS)")
 
 def synthesize_inflate_stretch():
     """
@@ -69,10 +92,10 @@ def synthesize_inflate_stretch():
                 phase_squeak += 2.0 * math.pi * freq_burst / SAMPLE_RATE
                 squeak += math.sin(phase_squeak) * burst_env * 0.6
         
-        sample = (hiss * 0.40 + stretch_tone * 0.35 + squeak * 0.45) * env
+        sample = (hiss * 0.28 + stretch_tone * 0.38 + squeak * 0.22) * env
         output[i] = sample
         
-    return output
+    return lowpass(output, 3500.0)
 
 def synthesize_release_whoosh():
     """
@@ -111,60 +134,36 @@ def synthesize_release_whoosh():
 
     return output
 
-def synthesize_pop_loud():
+def synthesize_pop_soft():
     """
-    Synthesize an energetic, realistic, satisfying balloon pop!
-    Instant supersonic pressure impulse (<2ms), followed by high-frequency rubber shred crack,
-    and resonant room air expansion thud.
+    Estouro de balão CONFORTÁVEL para reabilitação (TASK-07.B, 2026-11-25):
+    sem o pico supersônico da versão antiga, estalo de borracha filtrado (low-pass 3,2 kHz),
+    "puf" grave curto e cauda mínima. 0,28 s, pico -8 dBFS.
     """
-    duration = 0.50
+    duration = 0.28
     total_samples = int(SAMPLE_RATE * duration)
     output = [0.0] * total_samples
-    
     random.seed(777)
-    
     for i in range(total_samples):
         t = i / SAMPLE_RATE
-        
-        # 1. Initial Supersonic Shock Impulse (0.0 to 0.003s)
-        shock = 0.0
-        if t < 0.003:
-            # Rapid positive spike then sharp negative recoil
-            phase_shock = t / 0.003
-            shock = math.sin(phase_shock * math.pi) * 1.5
-            if phase_shock > 0.5:
-                shock = -1.2 * math.sin((phase_shock - 0.5) * 2.0 * math.pi)
-        
-        # 2. High-Frequency Rubber Snapping Crack (burst of noise & high harmonics)
-        crack_env = math.exp(-t * 45.0)
-        crack_noise = (random.random() * 2.0 - 1.0) * crack_env * 0.95
-        crack_tone = math.sin(2.0 * math.pi * 2200.0 * t) * crack_env * 0.4
-        
-        # 3. Low-Frequency Pressure Expansion Thud (~110 Hz decaying)
-        thud_env = math.exp(-t * 14.0)
-        thud_freq = 135.0 * math.exp(-t * 8.0) + 65.0
-        thud = math.sin(2.0 * math.pi * thud_freq * t) * thud_env * 0.8
-        
-        # 4. Room Reverb Tail (diffuse decaying noise)
-        tail_env = math.exp(-t * 7.0) * 0.15
-        tail_noise = (random.random() * 2.0 - 1.0) * tail_env
-        
-        sample = shock * 0.7 + crack_noise * 0.45 + crack_tone * 0.25 + thud * 0.45 + tail_noise * 0.2
-        output[i] = sample
-        
-    return output
+        attack = min(1.0, t / 0.0015)
+        crack_env = math.exp(-t * 60.0)
+        crack = (random.random() * 2.0 - 1.0) * crack_env * 0.55
+        thud_env = math.exp(-t * 18.0)
+        thud_freq = 120.0 * math.exp(-t * 9.0) + 70.0
+        thud = math.sin(2.0 * math.pi * thud_freq * t) * thud_env * 0.75
+        tail = (random.random() * 2.0 - 1.0) * math.exp(-t * 14.0) * 0.06
+        output[i] = (crack + thud + tail) * attack
+    return lowpass(output, 3200.0)
 
 def main():
     target_dir = os.path.dirname(os.path.abspath(__file__))
-    
     f1 = os.path.join(target_dir, "balloon_inflate_stretch.wav")
     f2 = os.path.join(target_dir, "balloon_release_whoosh.wav")
-    f3 = os.path.join(target_dir, "balloon_pop_loud.wav")
-    
-    write_wav(f1, synthesize_inflate_stretch())
-    write_wav(f2, synthesize_release_whoosh())
-    write_wav(f3, synthesize_pop_loud())
-    
+    f3 = os.path.join(target_dir, "balloon_pop_soft.wav")
+    write_wav(f1, fade_edges(synthesize_inflate_stretch(), 0.02, 0.05), peak_dbfs=-10.0)
+    write_wav(f2, fade_edges(lowpass(synthesize_release_whoosh(), 3500.0)), peak_dbfs=-9.0)
+    write_wav(f3, fade_edges(synthesize_pop_soft(), 0.0015, 0.04), peak_dbfs=-8.0)
     print("All Task07 procedural audio files successfully generated!")
 
 if __name__ == "__main__":

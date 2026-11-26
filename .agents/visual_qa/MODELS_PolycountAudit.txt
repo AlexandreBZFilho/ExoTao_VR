@@ -1,9 +1,8 @@
-=== Auditoria de polígonos dos modelos gerados (2026-11-16 13:57) ===
+=== Auditoria de polígonos dos modelos gerados (2026-11-25 17:35) ===
 Orçamento VR do plano: itens de mão <= 600 tris, itens médios/estáticos <= 1800 tris.
-Modelos: 32 | acima do orçamento: 3 | triângulos totais: 29842
+Modelos: 32 | acima do orçamento: 2 | triângulos totais: 30222
 
 ACIMA DO ORÇAMENTO:
-    1740 tris (limite 1100, mão (bola com costuras em geometria))  Assets/Models/Generated/Task07/BalloonGunDispenser.fbx
     1840 tris (limite 1800, médio)  Assets/Models/Generated/Task09/ExoMascotBobblehead.fbx
     1828 tris (limite 1800, médio)  Assets/Models/Generated/Task09/FireworksLaunchButton.fbx
 
@@ -14,8 +13,8 @@ Todos (por pasta):
   ok    180 tris  [mão]  Assets/Models/Generated/Task06/CassetteDeckSlot.fbx
   ok    104 tris  [mão]  Assets/Models/Generated/Task06/CassetteOrganizerRack.fbx
   ok    376 tris  [mão]  Assets/Models/Generated/Task06/RetroCassetteTape.fbx
-  !!   1740 tris  [mão (bola com costuras em geometria)]  Assets/Models/Generated/Task07/BalloonGunDispenser.fbx
-  ok    560 tris  [mão (bola com costuras em geometria)]  Assets/Models/Generated/Task07/InflatableBalloon.fbx
+  ok   1740 tris  [médio]  Assets/Models/Generated/Task07/BalloonGunDispenser.fbx
+  ok    940 tris  [médio]  Assets/Models/Generated/Task07/InflatableBalloon.fbx
   ok   1788 tris  [médio]  Assets/Models/Generated/Task08/ArcadeBasketballHoop.fbx
   ok   1408 tris  [médio]  Assets/Models/Generated/Task08/ArcadeSpawnButton.fbx
   ok   1040 tris  [mão (bola com costuras em geometria)]  Assets/Models/Generated/Task08/MiniBasketball.fbx

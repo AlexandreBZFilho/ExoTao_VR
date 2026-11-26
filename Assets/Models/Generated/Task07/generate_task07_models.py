@@ -241,23 +241,30 @@ def build_inflatable_balloon(export_path):
 
     bm = bmesh.new()
 
-    profile = [
-        (0.000, 0.008),  # Rolled collar lip
-        (0.004, 0.005),  # Knot pinch point
-        (0.009, 0.009),  # Knot bead
-        (0.015, 0.006),  # Neck pinch
-        (0.035, 0.014),  # Neck start
-        (0.060, 0.032),  # Expanding conical flare
-        (0.100, 0.068),  # Lower belly
-        (0.150, 0.105),  # Mid expansion
-        (0.200, 0.120),  # Maximum width (diameter 0.24m)
-        (0.245, 0.110),  # Upper curve
-        (0.280, 0.075),  # Dome start
-        (0.296, 0.035),  # Near apex
-        (0.300, 0.000),  # Top apex tip
-    ]
+    # Perfil v4 (TASK-07.B, 2026-11-25): domo/ventre ELIPSOIDAL de verdade (balão de festa redondo, nada de cone),
+    # pescoço em curva de Hermite com tangente contínua e nó com colarinho enrolado. Altura nominal 0,30 m.
+    def _hermite(p0, p1, m0, m1, t):
+        t2, t3 = t * t, t * t * t
+        h00, h10, h01, h11 = 2*t3 - 3*t2 + 1, t3 - 2*t2 + t, -2*t3 + 3*t2, t3 - t2
+        return tuple(h00 * p0[i] + h10 * m0[i] + h01 * p1[i] + h11 * m1[i] for i in range(2))
 
-    segments = 20  # VR: era 24 + Subsurf (2.5k tris); perfil já é suave com sombreamento smooth
+    zc, rh, rv = 0.175, 0.120, 0.125          # centro e semi-eixos (horizontal 0,12 -> 0,24 de diâmetro)
+    theta_end = math.radians(122.0)
+    profile_top = []                           # do ápice (excluído) até a transição para o pescoço
+    for deg in (11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 122):
+        th = math.radians(deg)
+        profile_top.append((zc + rv * math.cos(th), rh * math.sin(th)))
+    # Pescoço: da transição (tangente da elipse) até o início do pescoço (tangente vertical)
+    p0 = (zc + rv * math.cos(theta_end), rh * math.sin(theta_end))
+    m0 = (-rv * math.sin(theta_end) * 0.9, rh * math.cos(theta_end) * 0.9)   # d(z,r)/dθ escalada
+    p1 = (0.026, 0.0115)
+    m1 = (-0.06, 0.0)
+    neck = [_hermite(p0, p1, m0, m1, t) for t in (0.25, 0.5, 0.72, 0.88, 1.0)]
+    knot = [(0.017, 0.0072), (0.011, 0.0050), (0.007, 0.0100), (0.003, 0.0120), (0.000, 0.0090)]
+    # Ordem de baixo para cima, terminando no ápice (r = 0)
+    profile = list(reversed(knot)) + list(reversed(neck)) + list(reversed(profile_top)) + [(zc + rv, 0.0)]
+
+    segments = 20  # 20 x 18 anéis ~ 720 tris (objeto médio VR); sombreamento smooth
     ring_verts = []
 
     for z_pos, radius in profile[:-1]:
@@ -296,6 +303,9 @@ def build_inflatable_balloon(export_path):
     for face in bm.faces:
         face.smooth = True
 
+    # Garante normais para fora em todas as faces (zero partes invisíveis com backface culling)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+
     bm.to_mesh(mesh)
     bm.free()
     mesh.update()
@@ -305,10 +315,10 @@ def build_inflatable_balloon(export_path):
     # (Subsurf removido: quadruplicava os triângulos de um item que pode ter 8 cópias simultâneas)
 
     # Tied knot bead detail at base
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.008, segments=8, ring_count=6, location=(0.0, 0.0, 0.006))
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.009, segments=10, ring_count=6, location=(0.0, 0.0, 0.010))
     knot_obj = bpy.context.active_object
     knot_obj.name = "Knot_Bead"
-    knot_obj.scale = (1.2, 1.0, 0.7)
+    knot_obj.scale = (1.25, 1.1, 0.8)
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     knot_obj.data.materials.append(mat_knot)
     knot_obj.parent = root
@@ -337,6 +347,10 @@ if __name__ == '__main__':
     out_dir = r"D:\Alunos\Alexandre\Projeto IC\Assets\Models\Generated\Task07"
     os.makedirs(out_dir, exist_ok=True)
 
-    build_balloon_gun(os.path.join(out_dir, "BalloonGunDispenser.fbx"))
-    build_inflatable_balloon(os.path.join(out_dir, "InflatableBalloon.fbx"))
+    import sys
+    args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+    if not args or "gun" in args:
+        build_balloon_gun(os.path.join(out_dir, "BalloonGunDispenser.fbx"))
+    if not args or "balloon" in args:
+        build_inflatable_balloon(os.path.join(out_dir, "InflatableBalloon.fbx"))
     print("All Task07 3D FBX models regenerated successfully!")

@@ -1,0 +1,133 @@
+{
+    "taskId": "TASK-07",
+    "scene": "Assets/Scenes/Menu_Principal.unity",
+    "timestamp": "2026-11-25T17:46:22",
+    "furniture": "counter_3_a (1)",
+    "gunPosition": {
+        "x": 5.047330379486084,
+        "y": 0.9750372767448425,
+        "z": 7.718191146850586
+    },
+    "gunEuler": {
+        "x": 0.0,
+        "y": 180.0,
+        "z": 90.0
+    },
+    "gunBarrelDirection": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": -1.000000238418579
+    },
+    "counterTopY": 0.9490371942520142,
+    "ceilingY": 2.8499999046325685,
+    "groundGapMeters": 0.001000046730041504,
+    "colliderBelowTopMeters": 0.0,
+    "hasOverlap": false,
+    "minClearanceMeters": 0.16035029292106629,
+    "pairwiseClearances": [
+        {
+            "a": "BalloonGunDispenser_Instance",
+            "b": "Building/table_lamp (1)",
+            "clearanceMeters": 0.16035029292106629
+        },
+        {
+            "a": "BalloonGunDispenser_Instance",
+            "b": "Building/pc_mouse_pad",
+            "clearanceMeters": 0.16792774200439454
+        },
+        {
+            "a": "BalloonGunDispenser_Instance",
+            "b": "Building/pc_monitor",
+            "clearanceMeters": 0.1835494041442871
+        },
+        {
+            "a": "BalloonGunDispenser_Instance",
+            "b": "Building/pc_mouse",
+            "clearanceMeters": 0.1933431625366211
+        },
+        {
+            "a": "BalloonGunDispenser_Instance",
+            "b": "Building/table_lamp (1)/Top",
+            "clearanceMeters": 0.2100595086812973
+        },
+        {
+            "a": "BalloonGunDispenser_Instance",
+            "b": "Building/pc_keyboard (2)",
+            "clearanceMeters": 0.3289244771003723
+        },
+        {
+            "a": "BalloonGunDispenser_Instance",
+            "b": "Building/chair_1 (5)",
+            "clearanceMeters": 0.3510926365852356
+        },
+        {
+            "a": "BalloonGunDispenser_Instance",
+            "b": "Building/chair_1 (3)",
+            "clearanceMeters": 0.5238640308380127
+        },
+        {
+            "a": "Demo_Balloon_Red",
+            "b": "BalloonGunDispenser_Instance",
+            "clearanceMeters": 0.3988475203514099
+        },
+        {
+            "a": "Demo_Balloon_Cyan",
+            "b": "BalloonGunDispenser_Instance",
+            "clearanceMeters": 0.42899665236473086
+        },
+        {
+            "a": "Demo_Balloon_Yellow",
+            "b": "BalloonGunDispenser_Instance",
+            "clearanceMeters": 0.6467764377593994
+        }
+    ],
+    "demoBalloons": [
+        {
+            "name": "Demo_Balloon_Red",
+            "position": {
+                "x": 5.374675750732422,
+                "y": 1.4140372276306153,
+                "z": 7.647691249847412
+            },
+            "scale": 1.25,
+            "topY": 1.7890372276306153,
+            "belowCeiling": true,
+            "overlapsScene": false
+        },
+        {
+            "name": "Demo_Balloon_Cyan",
+            "position": {
+                "x": 4.694675445556641,
+                "y": 1.4480371475219727,
+                "z": 7.647691249847412
+            },
+            "scale": 1.350000023841858,
+            "topY": 1.8530371189117432,
+            "belowCeiling": true,
+            "overlapsScene": false
+        },
+        {
+            "name": "Demo_Balloon_Yellow",
+            "position": {
+                "x": 5.784675598144531,
+                "y": 1.431037187576294,
+                "z": 7.517691135406494
+            },
+            "scale": 1.2999999523162842,
+            "topY": 1.8210372924804688,
+            "belowCeiling": true,
+            "overlapsScene": false
+        }
+    ],
+    "objectsAtOriginZero": [],
+    "duplicateObjectsFound": [],
+    "gunCount": 1,
+    "demoBalloonCount": 3,
+    "floatingBalloonComponentsInScene": 3,
+    "gunDotMuzzleVsAttach": 0.9848077297210693,
+    "muzzleAheadOfGripMeters": 0.17000000178813935,
+    "purgeBeforeOrigin": 0,
+    "purgeBeforeDuplicates": 0,
+    "purgeAfterOrigin": 0,
+    "purgeAfterDuplicates": 0
+}

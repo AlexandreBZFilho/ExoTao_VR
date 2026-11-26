@@ -1,0 +1,38 @@
+=== TASK-07 Builder (2026-11-25 17:46:10) ===
+0) Teto (sem collider, por malha) em y = 2.850 m
+1) Materiais: 7 balões (smoothness 0.93, metallic 0, emissão 14% da cor, instancing), partícula e PhysicsMaterial quicante (0.5).
+2) Prefab do balão atualizado (mesmo GUID): SphereCollider r=0,115 quicante, Discrete, cordinha 0,34 m x escala, teto 2.80 m, estouro suave.
+3) Prefab da pistola: Visual_Model girado 180° em Y, Muzzle_Socket com forward = +Z, Grip_Attach na empunhadura (pitch 10°).
+   Muzzle (espaço da raiz) (0.00, 0.04, 0.16) | Grip_Attach (0.00, -0.05, -0.02) | dot(cano, attach) = 0.985 | bico 0.170 m à frente da pegada -> OK
+   Colliders: empunhadura (0.00, -0.05, -0.02) (0.03, 0.11, 0.06); corpo (0.01, 0.04, 0.05) (0.08, 0.06, 0.21) | 1740 triângulos
+4) Expurgo ANTES: origem 0, duplicatas 0
+   Bancada fixada pelo usuário: 'counter_3_a (1)' (folga < 0.25 m aceita)
+   Superfícies avaliadas: 1 (2 preferidas + móveis da sala com tampo entre 0,6 e 1,2 m)
+   bancada 'counter_3_a (1)': tampo y=0.949, frente para (0.00, 0.00, -1.00), melhor folga 0.160 m em (5.05, 0.95, 7.72) (vizinho mais perto: table_lamp (1)) | AABB (4.67, 0.90, 7.06)..(5.67, 0.95, 7.83) | maior folga possível 0.160 m em (5.05, 0.95, 7.72) (table_lamp (1))
+      obstáculo Building/chair_1 (5) AABB (4.24, 0.00, 6.54)..(4.82, 1.34, 7.24)
+      obstáculo Building/chair_1 (3) AABB (5.63, 0.00, 6.59)..(6.40, 1.34, 7.42)
+      obstáculo Building/pc_monitor AABB (4.34, 0.95, 7.42)..(4.76, 1.41, 7.75)
+      obstáculo Building/pc_keyboard (2) AABB (4.29, 0.95, 7.15)..(4.71, 0.98, 7.33)
+      obstáculo Building/table_lamp (1) AABB (5.28, 0.95, 7.35)..(5.47, 1.20, 7.54)
+      obstáculo Building/pc_mouse_pad AABB (4.79, 0.95, 7.08)..(5.08, 0.97, 7.40)
+      obstáculo Building/pc_mouse AABB (4.86, 0.96, 7.21)..(4.97, 1.01, 7.37)
+      obstáculo Building/table_lamp (1)/Top AABB (5.30, 1.14, 7.30)..(5.53, 1.32, 7.52)
+      obstáculo Building/laptop_variant AABB (5.91, 0.95, 7.23)..(6.40, 0.98, 7.58)
+      obstáculo Building/laptop_variant/Laptop Screen AABB (5.91, 0.98, 7.54)..(6.38, 1.29, 7.59)
+   Pistola em (5.05, 0.98, 7.72) rot (0.00, 180.00, 90.00) | cano para (0.00, 0.00, -1.00) | tampo y=0.949 | gap da malha 0.0010 m (collider 0.0000 m abaixo do tampo) | folga mínima 0.160 m
+   Demo_Balloon_Red: (5.37, 1.41, 7.65) escala 1.25 topo 1.79 m 
+   Demo_Balloon_Cyan: (4.69, 1.45, 7.65) escala 1.35 topo 1.85 m 
+   Demo_Balloon_Yellow: (5.78, 1.43, 7.52) escala 1.30 topo 1.82 m 
+   Expurgo DEPOIS: origem 0, duplicatas 0
+   Auditoria: pistolas 1, FloatingBalloon na cena 3, (0,0,0) 0, duplicatas removidas 0, hasOverlap False
+   Vizinhos mais próximos da pistola:
+      0.160 m  BalloonGunDispenser_Instance <-> Building/table_lamp (1)
+      0.168 m  BalloonGunDispenser_Instance <-> Building/pc_mouse_pad
+      0.184 m  BalloonGunDispenser_Instance <-> Building/pc_monitor
+      0.193 m  BalloonGunDispenser_Instance <-> Building/pc_mouse
+      0.210 m  BalloonGunDispenser_Instance <-> Building/table_lamp (1)/Top
+      0.329 m  BalloonGunDispenser_Instance <-> Building/pc_keyboard (2)
+      0.351 m  BalloonGunDispenser_Instance <-> Building/chair_1 (5)
+      0.524 m  BalloonGunDispenser_Instance <-> Building/chair_1 (3)
+5) Capturas offscreen 1920x1080: TASK-07_View1_Front.png, TASK-07_View2_Side_Grounding.png, TASK-07_View3_Closeup.png, TASK-07_Balloons_Floating_Room.png, TASK-07_Gun_In_Hand.png, TASK-07_Gun_In_Hand_Top.png, TASK-07_Balloon_Inflating.png, TASK-07_Balloon_Size_Compare.png
+   Comparação: vermelho pequeno = tamanho antigo (escala 0,30 -> 0,09 m); grande = novo (1,38 -> 0,41 m); régua branca = 0,30 m (marcas a cada 5 cm).

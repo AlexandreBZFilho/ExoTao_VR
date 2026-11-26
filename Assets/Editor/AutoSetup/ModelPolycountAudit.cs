@@ -55,10 +55,10 @@ namespace VRRehab.EditorTools
                 string kind; int budget;
                 if (SceneryKeywords.Any(k => lower.Contains(k))) { kind = "cenário"; budget = 6000; }
                 else if (lower.StartsWith("trophy_")) { kind = "troféu"; budget = 800; }               // TASK-16: < 800 cada
-                else if (lower.Contains("hoop") || lower.Contains("gun") || lower.Contains("cluster")) { kind = "médio"; budget = 1800; }
+                else if (lower.Contains("hoop") || lower.Contains("gun") || lower.Contains("cluster") || lower.Contains("inflatableballoon")) { kind = "médio"; budget = 1800; }
                 else if (SmallKeywords.Any(k => lower.Contains(k))) { kind = "mão"; budget = 600; }
                 else { kind = "médio"; budget = 1800; }
-                if (lower.Contains("basketball") && !lower.Contains("hoop")) { kind = "mão (bola com costuras em geometria)"; budget = 1100; }
+                if (lower.Contains("basketball") && !lower.Contains("hoop") && !lower.Contains("balloon")) { kind = "mão (bola com costuras em geometria)"; budget = 1100; }
                 rows.Add((path, Path.GetFileName(path), tris, budget, kind));
             }
 

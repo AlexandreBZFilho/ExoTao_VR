@@ -166,7 +166,7 @@ Para garantir que todas as 16 implementações rodem com leveza extrema em VR se
 | **TASK-04** | Drone Pet | Reatividade Afetiva (Carinho/Poke, Expressões LED e Dança Otimizada com o Rádio) | `[x]` | `[x]` | `[x]` | `[x]` | `[x]` | `COMPLETED` |
 | **TASK-05** | Drone Pet | Celebração de Metas Clínicas (Pirueta, Confetes VR-Safe, Fanfarra e Frases) | `[x]` | `[x]` | `[x]` | `[x]` | `[x]` | `COMPLETED` |
 | **TASK-06** | Menu Hub | Rádio Deck com 4 Fitas Cassete Magnéticas (`XRSocketInteractor`) + Eject Físico (Mesa 1) | `[x]` | `[x]` | `[x]` | `[x]` | `[x]` | `COMPLETED` |
-| **TASK-07** | Menu Hub | Pistola/Dispenser de Balões Antigravidade (*The Lab*) + Física Leve (Mesa Auxiliar) | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `PENDING` |
+| **TASK-07** | Menu Hub | Pistola/Dispenser de Balões Antigravidade (*The Lab*) + Física Leve (Mesa Auxiliar) | `[x]` | `[x]` | `[x]` | `[x]` | `[x]` | `COMPLETED*` |
 | **TASK-08** | Menu Hub | Mini Basquete Arcade com Botão Spawner, Aro Duplo Sensor e Placar 3D | `[x]` | `[-]` | `[x]` | `[x]` | `[x]` | `COMPLETED*` |
 | **TASK-09** | Menu Hub | Distribuição dos Fidgets nas Mesas/Estantes Existentes da Sala (Alavanca, Fogos, Bobblehead) | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `PENDING` |
 | **TASK-10** | Menu Hub | Esfera Diorama 3D Puramente Decorativa (REMOÇÃO TOTAL de Teleporte por Proximidade; Navegação via Canvas) | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `[ ]` | `PENDING` |
@@ -190,6 +190,7 @@ Para garantir que todas as 16 implementações rodem com leveza extrema em VR se
 >     * Polycount (`ModelPolycountAudit`, `.agents/visual_qa/MODELS_PolycountAudit.txt`): 7 modelos regerados no Blender com menos segmentos (mesma forma, comparação em `MODELS_LowPoly_Antes_Depois.png`): bola 8736->1040, tabela 4700->1788, balão 2568->560, cogumelos brotados 3392->1524, diamante 1208->552, coroa 1796->772, maçã dourada 892->460. Total 46,4k -> 29,8k tris. Ficaram 2% acima: Bobblehead (1840) e Botão de Fogos (1828).
 >     * TerrainData: a floresta agora usa `Assets/Terrains/Floresta_e_Rio/Floresta_Terrain_Centro.asset` (cópia com o capim limpo nos cogumelos); o `New Terrain.asset` da Polytope voltou ao original.
 >     * Falta só o playtest no óculos.
+> * **TASK-07 (2026-11-25):** `[A]`..`[D]` feitos e `[E]` = FAIL **só no layout**: nenhum móvel da sala tem 0,25 m livre (11 superfícies avaliadas; melhor = `counter_1`, 0,21 m do laptop). Pistola corrigida (cano +Z, `Grip_Attach`, dot 0,985), balão 0,38-0,44 m com pool de 8+1, estouro/tapinha/quique/teto/vida útil, áudio <= -8 dBFS, Play Mode 33/33 (`.agents/visual_qa/TASK-07_PlayModeTest.txt`). Ressalvas do `[E]` corrigidas (RE-RUN [C]). **Decisão do usuário (2026-11-25): manter a pistola na mesa anterior `counter_3_a (1)`** (folga 0,16 m da luminária aceita; `ForcedCounter` no builder). Play Mode 33/33 refeito nessa posição. `COMPLETED*` = falta só o playtest no óculos.
 
 ---
 
